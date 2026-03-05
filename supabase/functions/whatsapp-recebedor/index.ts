@@ -180,7 +180,14 @@ serve(async (req) => {
     }
 
     // === IA (OpenAI GPT) ===
-    const systemPrompt = `Você é o cérebro de um assistente virtual para pessoas com TDAH. O usuário enviará uma mensagem desestruturada ou uma ideia solta. Sua função é extrair a intenção e retornar estritamente um JSON com este formato: { "tipo": "ideia" ou "tarefa", "titulo": "resumo direto ao ponto", "data_hora_agendada": "formato timestamp ISO ou null se não houver data/hora mencionada", "status": "pendente" }. Se o usuário disser que concluiu algo, retorne o status como "concluida". IMPORTANTE: O fuso horário do usuário é America/Sao_Paulo (UTC-3). Quando o usuário mencionar horários, considere que são no fuso de Brasília e converta para ISO 8601 com o offset -03:00. Hoje é ${new Date().toLocaleDateString('pt-BR', { timeZone: 'America/Sao_Paulo' })}.`;
+    // Calcular data/hora atual em São Paulo (UTC-3) para o prompt
+    const nowUtc = new Date();
+    const spOffset = -3 * 60; // UTC-3 em minutos
+    const spTime = new Date(nowUtc.getTime() + spOffset * 60 * 1000);
+    const spDate = spTime.toISOString().split("T")[0]; // YYYY-MM-DD
+    const spHour = spTime.toISOString().split("T")[1].substring(0, 5); // HH:MM
+    
+    const systemPrompt = `Você é o cérebro de um assistente virtual para pessoas com TDAH. O usuário enviará uma mensagem desestruturada ou uma ideia solta. Sua função é extrair a intenção e retornar estritamente um JSON com este formato: { "tipo": "ideia" ou "tarefa", "titulo": "resumo direto ao ponto", "data_hora_agendada": "formato timestamp ISO ou null se não houver data/hora mencionada", "status": "pendente" }. Se o usuário disser que concluiu algo, retorne o status como "concluida". REGRAS DE FUSO HORÁRIO (OBRIGATÓRIO): 1) O fuso horário do usuário é SEMPRE America/Sao_Paulo (UTC-3). 2) A data de HOJE em São Paulo é ${spDate} e agora são ${spHour} (horário de Brasília). 3) Todos os horários mencionados pelo usuário já estão em horário de Brasília. 4) O campo data_hora_agendada DEVE usar o offset -03:00. Exemplo: se o usuário diz "amanhã às 9h", e hoje é ${spDate}, retorne a data de amanhã com "T09:00:00-03:00". NUNCA use UTC (Z ou +00:00).`;
 
     const openaiResponse = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
