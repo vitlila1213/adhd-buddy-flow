@@ -19,7 +19,11 @@ const LoginPage = () => {
     const { error } = await signInWithOtp(email);
     setLoading(false);
     if (error) {
-      toast.error("Erro ao enviar o link mágico. Tente novamente.");
+      if (error.message?.includes("security purposes") || error.message?.includes("rate")) {
+        toast.error("Aguarde alguns segundos antes de tentar novamente.");
+      } else {
+        toast.error("Erro ao enviar o link mágico. Tente novamente.");
+      }
     } else {
       setSent(true);
     }
