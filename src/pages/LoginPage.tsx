@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -6,26 +6,39 @@ import { Brain, Mail, Sparkles } from "lucide-react";
 import { motion } from "framer-motion";
 import { toast } from "sonner";
 
+const COOLDOWN_SECONDS = 60;
+
 const LoginPage = () => {
   const [email, setEmail] = useState("");
   const [sent, setSent] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [cooldown, setCooldown] = useState(0);
   const { signInWithOtp } = useAuth();
+
+  useEffect(() => {
+    if (cooldown <= 0) return;
+    const timer = setInterval(() => setCooldown((c) => c - 1), 1000);
+    return () => clearInterval(timer);
+  }, [cooldown]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!email.includes("@")) return;
+    if (!email.includes("@") || cooldown > 0) return;
     setLoading(true);
     const { error } = await signInWithOtp(email);
     setLoading(false);
     if (error) {
       if (error.message?.includes("security purposes") || error.message?.includes("rate")) {
-        toast.error("Aguarde alguns segundos antes de tentar novamente.");
+        const match = error.message.match(/after (\d+) seconds/);
+        const seconds = match ? parseInt(match[1]) : COOLDOWN_SECONDS;
+        setCooldown(seconds);
+        toast.error(`Aguarde ${seconds} segundos antes de tentar novamente.`);
       } else {
         toast.error("Erro ao enviar o link mágico. Tente novamente.");
       }
     } else {
       setSent(true);
+      setCooldown(COOLDOWN_SECONDS);
     }
   };
 
@@ -74,13 +87,15 @@ const LoginPage = () => {
             </div>
             <Button
               type="submit"
-              disabled={!email.includes("@") || loading}
+              disabled={!email.includes("@") || loading || cooldown > 0}
               className="h-13 w-full rounded-2xl text-base font-semibold shadow-lg shadow-primary/20 transition-all duration-200 hover:shadow-xl hover:shadow-primary/30"
             >
               {loading ? (
                 <span className="flex items-center gap-2">
                   <Sparkles className="h-4 w-4 animate-spin" /> Enviando...
                 </span>
+              ) : cooldown > 0 ? (
+                `Aguarde ${cooldown}s`
               ) : (
                 "Acessar meu Cérebro"
               )}
@@ -106,8 +121,9 @@ const LoginPage = () => {
               variant="ghost"
               className="mt-4 text-sm text-primary"
               onClick={() => setSent(false)}
+              disabled={cooldown > 0}
             >
-              Usar outro e-mail
+              {cooldown > 0 ? `Reenviar em ${cooldown}s` : "Usar outro e-mail"}
             </Button>
           </motion.div>
         )}
