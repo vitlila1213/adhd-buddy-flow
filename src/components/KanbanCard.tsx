@@ -76,5 +76,4 @@ const KanbanCard = ({ item, index }: KanbanCardProps) => {
     </Draggable>
   );
 };
-
 export default KanbanCard;

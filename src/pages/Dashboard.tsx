@@ -1,7 +1,8 @@
 import { useState } from "react";
-import { usePhoneAuth } from "@/contexts/PhoneAuthContext";
+import { useAuth } from "@/contexts/AuthContext";
 import KanbanBoard from "@/components/KanbanBoard";
 import MetricasDoDia from "@/components/MetricasDoDia";
+import WhatsAppOnboardingModal from "@/components/WhatsAppOnboardingModal";
 import { Brain, LogOut, Lightbulb, CheckCircle2, ListTodo, BarChart3 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -15,11 +16,13 @@ const tabs = [
 ];
 
 const Dashboard = () => {
-  const { phone, logout } = usePhoneAuth();
+  const { profile, logout } = useAuth();
   const [activeTab, setActiveTab] = useState<Tab>("tarefas");
 
   return (
     <div className="flex min-h-screen flex-col bg-background">
+      <WhatsAppOnboardingModal />
+
       {/* Glassmorphism Header */}
       <header className="glass fixed left-0 right-0 top-0 z-50">
         <div className="mx-auto flex max-w-2xl items-center justify-between px-5 py-3">
@@ -31,12 +34,13 @@ const Dashboard = () => {
               <h1 className="font-heading text-base font-bold tracking-tight text-foreground">
                 Cérebro de Bolso
               </h1>
-              <p className="text-[11px] text-muted-foreground">{phone}</p>
+              <p className="text-[11px] text-muted-foreground">{profile?.email}</p>
             </div>
           </div>
           <button
             onClick={logout}
             className="flex h-9 w-9 items-center justify-center rounded-xl text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+            title="Sair"
           >
             <LogOut className="h-4 w-4" />
           </button>

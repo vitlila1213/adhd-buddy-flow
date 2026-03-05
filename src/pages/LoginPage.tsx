@@ -1,18 +1,27 @@
 import { useState } from "react";
-import { usePhoneAuth } from "@/contexts/PhoneAuthContext";
+import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Brain } from "lucide-react";
+import { Brain, Mail, Sparkles } from "lucide-react";
 import { motion } from "framer-motion";
+import { toast } from "sonner";
 
 const LoginPage = () => {
-  const [phoneInput, setPhoneInput] = useState("");
-  const { login } = usePhoneAuth();
+  const [email, setEmail] = useState("");
+  const [sent, setSent] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const { signInWithOtp } = useAuth();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (phoneInput.replace(/\D/g, "").length >= 10) {
-      login(phoneInput);
+    if (!email.includes("@")) return;
+    setLoading(true);
+    const { error } = await signInWithOtp(email);
+    setLoading(false);
+    if (error) {
+      toast.error("Erro ao enviar o link mágico. Tente novamente.");
+    } else {
+      setSent(true);
     }
   };
 
@@ -41,31 +50,66 @@ const LoginPage = () => {
           </p>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label htmlFor="phone" className="mb-2 block text-sm font-medium text-foreground">
-              Seu número de telefone
-            </label>
-            <Input
-              id="phone"
-              type="tel"
-              placeholder="(31) 99999-9999"
-              value={phoneInput}
-              onChange={(e) => setPhoneInput(e.target.value)}
-              className="h-13 rounded-2xl border-border/60 bg-card text-base shadow-sm placeholder:text-muted-foreground/50 focus-visible:ring-primary"
-            />
-          </div>
-          <Button
-            type="submit"
-            className="h-13 w-full rounded-2xl text-base font-semibold shadow-lg shadow-primary/20 transition-all duration-200 hover:shadow-xl hover:shadow-primary/30"
-            disabled={phoneInput.replace(/\D/g, "").length < 10}
+        {!sent ? (
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div>
+              <label htmlFor="email" className="mb-2 block text-sm font-medium text-foreground">
+                Seu e-mail
+              </label>
+              <div className="relative">
+                <Mail className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="voce@email.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="h-13 rounded-2xl border-border/60 bg-card pl-10 text-base shadow-sm placeholder:text-muted-foreground/50 focus-visible:ring-primary"
+                />
+              </div>
+            </div>
+            <Button
+              type="submit"
+              disabled={!email.includes("@") || loading}
+              className="h-13 w-full rounded-2xl text-base font-semibold shadow-lg shadow-primary/20 transition-all duration-200 hover:shadow-xl hover:shadow-primary/30"
+            >
+              {loading ? (
+                <span className="flex items-center gap-2">
+                  <Sparkles className="h-4 w-4 animate-spin" /> Enviando...
+                </span>
+              ) : (
+                "Acessar meu Cérebro"
+              )}
+            </Button>
+          </form>
+        ) : (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="rounded-2xl border border-border/60 bg-card p-6 text-center shadow-sm"
           >
-            Entrar no Painel
-          </Button>
-        </form>
+            <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-status-done-bg">
+              <Mail className="h-6 w-6 text-status-done-text" />
+            </div>
+            <h2 className="mb-2 font-heading text-lg font-bold text-foreground">
+              Link mágico enviado! ✨
+            </h2>
+            <p className="text-sm text-muted-foreground">
+              Enviamos um link para <strong className="text-foreground">{email}</strong>.
+              Clique nele para entrar (verifique o spam).
+            </p>
+            <Button
+              variant="ghost"
+              className="mt-4 text-sm text-primary"
+              onClick={() => setSent(false)}
+            >
+              Usar outro e-mail
+            </Button>
+          </motion.div>
+        )}
 
         <p className="mt-8 text-center text-xs text-muted-foreground/70">
-          Use o mesmo número conectado ao WhatsApp
+          Sem senha. Um clique e você está dentro.
         </p>
       </motion.div>
     </div>

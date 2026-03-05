@@ -29,6 +29,8 @@ serve(async (req) => {
     const minuteStart = new Date(now.getFullYear(), now.getMonth(), now.getDate(), now.getHours(), now.getMinutes(), 0);
     const minuteEnd = new Date(minuteStart.getTime() + 60000);
 
+    console.log("Checking reminders between", minuteStart.toISOString(), "and", minuteEnd.toISOString());
+
     const { data: tasks, error } = await supabase
       .from("itens_cerebro")
       .select("*")
@@ -38,19 +40,21 @@ serve(async (req) => {
 
     if (error) throw error;
 
+    console.log("Found", tasks?.length || 0, "reminders to send");
+
     let sent = 0;
     for (const task of tasks || []) {
       const message = `⏰ Lembrete: "${task.titulo}"${task.descricao ? `\n${task.descricao}` : ""}`;
 
-      await fetch(`${UAZAPI_URL}/send-message`, {
+      await fetch(`${UAZAPI_URL}/send/text`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${UAZAPI_TOKEN}`,
+          "token": UAZAPI_TOKEN,
         },
         body: JSON.stringify({
-          phone: task.user_phone,
-          message,
+          number: task.user_phone,
+          text: message,
         }),
       });
       sent++;

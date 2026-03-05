@@ -24,6 +24,7 @@ export type Database = {
           tipo: string
           titulo: string
           updated_at: string
+          user_id: string | null
           user_phone: string
         }
         Insert: {
@@ -35,6 +36,7 @@ export type Database = {
           tipo: string
           titulo: string
           updated_at?: string
+          user_id?: string | null
           user_phone: string
         }
         Update: {
@@ -46,7 +48,43 @@ export type Database = {
           tipo?: string
           titulo?: string
           updated_at?: string
+          user_id?: string | null
           user_phone?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "itens_cerebro_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          created_at: string
+          email: string | null
+          id: string
+          subscription_status: string
+          updated_at: string
+          whatsapp_number: string | null
+        }
+        Insert: {
+          created_at?: string
+          email?: string | null
+          id: string
+          subscription_status?: string
+          updated_at?: string
+          whatsapp_number?: string | null
+        }
+        Update: {
+          created_at?: string
+          email?: string | null
+          id?: string
+          subscription_status?: string
+          updated_at?: string
+          whatsapp_number?: string | null
         }
         Relationships: []
       }

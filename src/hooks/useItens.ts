@@ -1,27 +1,27 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { usePhoneAuth } from "@/contexts/PhoneAuthContext";
+import { useAuth } from "@/contexts/AuthContext";
 import type { Tables } from "@/integrations/supabase/types";
 
 export type ItemCerebro = Tables<"itens_cerebro">;
 
 export const useItens = () => {
-  const { phone } = usePhoneAuth();
+  const { user } = useAuth();
   const queryClient = useQueryClient();
 
   const query = useQuery({
-    queryKey: ["itens_cerebro", phone],
+    queryKey: ["itens_cerebro", user?.id],
     queryFn: async () => {
-      if (!phone) return [];
+      if (!user) return [];
       const { data, error } = await supabase
         .from("itens_cerebro")
         .select("*")
-        .eq("user_phone", phone)
+        .eq("user_id", user.id)
         .order("created_at", { ascending: false });
       if (error) throw error;
       return data as ItemCerebro[];
     },
-    enabled: !!phone,
+    enabled: !!user,
   });
 
   const updateStatus = useMutation({
