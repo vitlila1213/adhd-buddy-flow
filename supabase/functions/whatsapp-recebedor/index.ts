@@ -17,8 +17,18 @@ serve(async (req) => {
     console.log(JSON.stringify(body, null, 2));
 
     // Extrair telefone e texto do payload UAZAPI
-    const phone = body?.phone || body?.from || body?.sender || body?.number;
-    const text = body?.text || body?.message || body?.body || body?.textMessage?.text;
+    // UAZAPI envia: body.chat.phone e body.message.text (ou body.message.content)
+    const phone = body?.chat?.phone || body?.phone || body?.from || body?.sender || body?.number;
+    const text = body?.message?.text || body?.message?.content || body?.text || body?.textMessage?.text;
+
+    // Ignorar mensagens enviadas pela API (evitar loop)
+    if (body?.message?.wasSentByApi === true || body?.message?.fromMe === true) {
+      console.log("Mensagem enviada pela API ou fromMe, ignorando.");
+      return new Response(JSON.stringify({ ignored: true }), {
+        status: 200,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
 
     console.log("Phone extraído:", phone);
     console.log("Texto extraído:", text);
