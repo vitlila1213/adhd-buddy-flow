@@ -6,9 +6,11 @@ import { Loader2 } from "lucide-react";
 
 interface KanbanBoardProps {
   activeTab?: "ideias" | "tarefas" | "concluidas";
+  limitReached?: boolean;
+  onUpgrade?: () => void;
 }
 
-const KanbanBoard = ({ activeTab }: KanbanBoardProps) => {
+const KanbanBoard = ({ activeTab, limitReached, onUpgrade }: KanbanBoardProps) => {
   const { data: items, isLoading, updateStatus, updateTipo } = useItens();
 
   const columns = useMemo(() => {
