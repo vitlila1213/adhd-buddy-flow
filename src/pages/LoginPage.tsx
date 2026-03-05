@@ -1,44 +1,38 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Brain, Mail, Sparkles } from "lucide-react";
+import { Brain, Mail, Lock, Sparkles } from "lucide-react";
 import { motion } from "framer-motion";
 import { toast } from "sonner";
 
-const COOLDOWN_SECONDS = 60;
-
 const LoginPage = () => {
   const [email, setEmail] = useState("");
-  const [sent, setSent] = useState(false);
+  const [password, setPassword] = useState("");
+  const [isSignUp, setIsSignUp] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [cooldown, setCooldown] = useState(0);
-  const { signInWithOtp } = useAuth();
-
-  useEffect(() => {
-    if (cooldown <= 0) return;
-    const timer = setInterval(() => setCooldown((c) => c - 1), 1000);
-    return () => clearInterval(timer);
-  }, [cooldown]);
+  const { signIn, signUp } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!email.includes("@") || cooldown > 0) return;
+    if (!email.includes("@") || password.length < 6) return;
     setLoading(true);
-    const { error } = await signInWithOtp(email);
-    setLoading(false);
-    if (error) {
-      if (error.message?.includes("security purposes") || error.message?.includes("rate")) {
-        const match = error.message.match(/after (\d+) seconds/);
-        const seconds = match ? parseInt(match[1]) : COOLDOWN_SECONDS;
-        setCooldown(seconds);
-        toast.error(`Aguarde ${seconds} segundos antes de tentar novamente.`);
+
+    if (isSignUp) {
+      const { error } = await signUp(email, password);
+      setLoading(false);
+      if (error) {
+        toast.error(error.message || "Erro ao criar conta. Tente novamente.");
       } else {
-        toast.error("Erro ao enviar o link mágico. Tente novamente.");
+        toast.success("Conta criada com sucesso! Faça login.");
+        setIsSignUp(false);
       }
     } else {
-      setSent(true);
-      setCooldown(COOLDOWN_SECONDS);
+      const { error } = await signIn(email, password);
+      setLoading(false);
+      if (error) {
+        toast.error("Email ou senha incorretos.");
+      }
     }
   };
 
@@ -67,69 +61,65 @@ const LoginPage = () => {
           </p>
         </div>
 
-        {!sent ? (
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <label htmlFor="email" className="mb-2 block text-sm font-medium text-foreground">
-                Seu e-mail
-              </label>
-              <div className="relative">
-                <Mail className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="voce@email.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="h-13 rounded-2xl border-border/60 bg-card pl-10 text-base shadow-sm placeholder:text-muted-foreground/50 focus-visible:ring-primary"
-                />
-              </div>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <label htmlFor="email" className="mb-2 block text-sm font-medium text-foreground">
+              Seu e-mail
+            </label>
+            <div className="relative">
+              <Mail className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                id="email"
+                type="email"
+                placeholder="voce@email.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="h-13 rounded-2xl border-border/60 bg-card pl-10 text-base shadow-sm placeholder:text-muted-foreground/50 focus-visible:ring-primary"
+              />
             </div>
-            <Button
-              type="submit"
-              disabled={!email.includes("@") || loading || cooldown > 0}
-              className="h-13 w-full rounded-2xl text-base font-semibold shadow-lg shadow-primary/20 transition-all duration-200 hover:shadow-xl hover:shadow-primary/30"
-            >
-              {loading ? (
-                <span className="flex items-center gap-2">
-                  <Sparkles className="h-4 w-4 animate-spin" /> Enviando...
-                </span>
-              ) : cooldown > 0 ? (
-                `Aguarde ${cooldown}s`
-              ) : (
-                "Acessar meu Cérebro"
-              )}
-            </Button>
-          </form>
-        ) : (
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className="rounded-2xl border border-border/60 bg-card p-6 text-center shadow-sm"
+          </div>
+          <div>
+            <label htmlFor="password" className="mb-2 block text-sm font-medium text-foreground">
+              Senha
+            </label>
+            <div className="relative">
+              <Lock className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                id="password"
+                type="password"
+                placeholder="Mínimo 6 caracteres"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="h-13 rounded-2xl border-border/60 bg-card pl-10 text-base shadow-sm placeholder:text-muted-foreground/50 focus-visible:ring-primary"
+              />
+            </div>
+          </div>
+          <Button
+            type="submit"
+            disabled={!email.includes("@") || password.length < 6 || loading}
+            className="h-13 w-full rounded-2xl text-base font-semibold shadow-lg shadow-primary/20 transition-all duration-200 hover:shadow-xl hover:shadow-primary/30"
           >
-            <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-status-done-bg">
-              <Mail className="h-6 w-6 text-status-done-text" />
-            </div>
-            <h2 className="mb-2 font-heading text-lg font-bold text-foreground">
-              Link mágico enviado! ✨
-            </h2>
-            <p className="text-sm text-muted-foreground">
-              Enviamos um link para <strong className="text-foreground">{email}</strong>.
-              Clique nele para entrar (verifique o spam).
-            </p>
-            <Button
-              variant="ghost"
-              className="mt-4 text-sm text-primary"
-              onClick={() => setSent(false)}
-              disabled={cooldown > 0}
-            >
-              {cooldown > 0 ? `Reenviar em ${cooldown}s` : "Usar outro e-mail"}
-            </Button>
-          </motion.div>
-        )}
+            {loading ? (
+              <span className="flex items-center gap-2">
+                <Sparkles className="h-4 w-4 animate-spin" /> {isSignUp ? "Criando..." : "Entrando..."}
+              </span>
+            ) : isSignUp ? (
+              "Criar minha conta"
+            ) : (
+              "Acessar meu Cérebro"
+            )}
+          </Button>
+        </form>
 
-        <p className="mt-8 text-center text-xs text-muted-foreground/70">
-          Sem senha. Um clique e você está dentro.
+        <p className="mt-6 text-center text-sm text-muted-foreground">
+          {isSignUp ? "Já tem conta?" : "Ainda não tem conta?"}{" "}
+          <button
+            type="button"
+            onClick={() => setIsSignUp(!isSignUp)}
+            className="font-semibold text-primary hover:underline"
+          >
+            {isSignUp ? "Fazer login" : "Criar conta"}
+          </button>
         </p>
       </motion.div>
     </div>
