@@ -51,10 +51,11 @@ export default {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
-        kanban: {
-          idea: "hsl(var(--kanban-idea))",
-          task: "hsl(var(--kanban-task))",
-          done: "hsl(var(--kanban-done))",
+        status: {
+          "pending-bg": "hsl(var(--status-pending-bg))",
+          "pending-text": "hsl(var(--status-pending-text))",
+          "done-bg": "hsl(var(--status-done-bg))",
+          "done-text": "hsl(var(--status-done-text))",
         },
         sidebar: {
           DEFAULT: "hsl(var(--sidebar-background))",
@@ -68,6 +69,8 @@ export default {
         },
       },
       borderRadius: {
+        "2xl": "1rem",
+        "3xl": "1.25rem",
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
