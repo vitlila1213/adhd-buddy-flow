@@ -1,0 +1,69 @@
+import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
+};
+
+serve(async (req) => {
+  if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
+
+  try {
+    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+    const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    const supabase = createClient(supabaseUrl, supabaseKey);
+
+    const UAZAPI_URL = Deno.env.get("UAZAPI_URL");
+    const UAZAPI_TOKEN = Deno.env.get("UAZAPI_TOKEN");
+
+    if (!UAZAPI_URL || !UAZAPI_TOKEN) {
+      return new Response(JSON.stringify({ error: "UAZAPI not configured" }), {
+        status: 500,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // Find tasks scheduled for the current minute
+    const now = new Date();
+    const minuteStart = new Date(now.getFullYear(), now.getMonth(), now.getDate(), now.getHours(), now.getMinutes(), 0);
+    const minuteEnd = new Date(minuteStart.getTime() + 60000);
+
+    const { data: tasks, error } = await supabase
+      .from("itens_cerebro")
+      .select("*")
+      .eq("status", "pendente")
+      .gte("data_hora_agendada", minuteStart.toISOString())
+      .lt("data_hora_agendada", minuteEnd.toISOString());
+
+    if (error) throw error;
+
+    let sent = 0;
+    for (const task of tasks || []) {
+      const message = `⏰ Lembrete: "${task.titulo}"${task.descricao ? `\n${task.descricao}` : ""}`;
+
+      await fetch(`${UAZAPI_URL}/send-message`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${UAZAPI_TOKEN}`,
+        },
+        body: JSON.stringify({
+          phone: task.user_phone,
+          message,
+        }),
+      });
+      sent++;
+    }
+
+    return new Response(JSON.stringify({ success: true, reminders_sent: sent }), {
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  } catch (e) {
+    console.error("whatsapp-lembrete error:", e);
+    return new Response(JSON.stringify({ error: e instanceof Error ? e.message : "Unknown error" }), {
+      status: 500,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  }
+});
