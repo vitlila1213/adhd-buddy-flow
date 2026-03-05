@@ -1,12 +1,12 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
-import { Send, Loader2, CheckCircle2, XCircle, ArrowLeft, Zap } from "lucide-react";
+import { Send, Loader2, CheckCircle2, XCircle, ArrowLeft, Zap, CreditCard } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Link } from "react-router-dom";
 
@@ -15,144 +15,87 @@ interface LogEntry {
   timestamp: string;
   type: "request" | "response";
   status: "success" | "error";
-  payload: string;
-  responseData: string;
+  content: string;
 }
 
-const SAMPLE_PAYLOADS = [
-  {
-    label: "Texto simples",
-    payload: {
-      chat: { phone: "" },
-      message: { text: "", messageType: "text", fromMe: false, wasSentByApi: false },
-    },
-  },
-  {
-    label: "Tarefa com horário",
-    payload: {
-      chat: { phone: "" },
-      message: { text: "Me lembra de tomar remédio amanhã às 9h", messageType: "text", fromMe: false, wasSentByApi: false },
-    },
-  },
-  {
-    label: "Ideia solta",
-    payload: {
-      chat: { phone: "" },
-      message: { text: "Tive uma ideia: criar um app que organiza pensamentos de quem tem TDAH", messageType: "text", fromMe: false, wasSentByApi: false },
-    },
-  },
-  {
-    label: "Concluir tarefa",
-    payload: {
-      chat: { phone: "" },
-      message: { text: "Já fiz a reunião com o cliente", messageType: "text", fromMe: false, wasSentByApi: false },
-    },
-  },
-];
-
 const WebhookTest = () => {
-  const [phone, setPhone] = useState("5511934396102");
-  const [message, setMessage] = useState("");
+  const [email, setEmail] = useState("");
+  const [platform, setPlatform] = useState("hotmart");
+  const [event, setEvent] = useState("PURCHASE_APPROVED");
   const [loading, setLoading] = useState(false);
   const [logs, setLogs] = useState<LogEntry[]>([]);
   const [logCounter, setLogCounter] = useState(0);
 
-  const sendWebhook = async (text: string) => {
-    if (!phone || !text) return;
+  const addLog = (type: "request" | "response", status: "success" | "error", content: string) => {
+    setLogCounter((prev) => {
+      const newId = prev + 1;
+      setLogs((logs) => [
+        {
+          id: newId,
+          timestamp: new Date().toLocaleTimeString("pt-BR"),
+          type,
+          status,
+          content,
+        },
+        ...logs,
+      ]);
+      return newId;
+    });
+  };
 
+  const buildPayload = () => {
+    if (platform === "hotmart") {
+      return {
+        event,
+        data: {
+          buyer: { email, name: "Usuário Teste" },
+          purchase: { status: event === "PURCHASE_APPROVED" ? "approved" : "cancelled" },
+        },
+      };
+    }
+    if (platform === "kiwify") {
+      return {
+        order_status: event === "PURCHASE_APPROVED" ? "paid" : "refunded",
+        Customer: { email, full_name: "Usuário Teste" },
+      };
+    }
+    return { email, event, platform: "manual", name: "Usuário Teste" };
+  };
+
+  const sendWebhook = async () => {
+    if (!email) return;
     setLoading(true);
-    const payload = {
-      chat: { phone },
-      message: { text, messageType: "text", fromMe: false, wasSentByApi: false },
-    };
 
-    const newId = logCounter + 1;
-    setLogCounter(newId);
-
-    const requestLog: LogEntry = {
-      id: newId,
-      timestamp: new Date().toLocaleTimeString("pt-BR"),
-      type: "request",
-      status: "success",
-      payload: JSON.stringify(payload, null, 2),
-      responseData: "",
-    };
-
-    setLogs((prev) => [requestLog, ...prev]);
+    const payload = buildPayload();
+    addLog("request", "success", JSON.stringify(payload, null, 2));
 
     try {
-      const { data, error } = await supabase.functions.invoke("whatsapp-recebedor", {
-        body: payload,
-      });
-
-      const responseLog: LogEntry = {
-        id: newId + 0.5,
-        timestamp: new Date().toLocaleTimeString("pt-BR"),
-        type: "response",
-        status: error ? "error" : "success",
-        payload: "",
-        responseData: JSON.stringify(error || data, null, 2),
-      };
-
-      setLogs((prev) => [responseLog, ...prev]);
+      const { data, error } = await supabase.functions.invoke("webhook-pagamento", { body: payload });
+      addLog("response", error ? "error" : "success", JSON.stringify(error || data, null, 2));
     } catch (err: any) {
-      const errorLog: LogEntry = {
-        id: newId + 0.5,
-        timestamp: new Date().toLocaleTimeString("pt-BR"),
-        type: "response",
-        status: "error",
-        payload: "",
-        responseData: err.message || "Erro desconhecido",
-      };
-      setLogs((prev) => [errorLog, ...prev]);
+      addLog("response", "error", err.message || "Erro desconhecido");
     } finally {
       setLoading(false);
     }
   };
 
-  const testLembrete = async () => {
-    setLoading(true);
-    const newId = logCounter + 1;
-    setLogCounter(newId);
-
-    const requestLog: LogEntry = {
-      id: newId,
-      timestamp: new Date().toLocaleTimeString("pt-BR"),
-      type: "request",
-      status: "success",
-      payload: "Invocando whatsapp-lembrete...",
-      responseData: "",
-    };
-    setLogs((prev) => [requestLog, ...prev]);
-
-    try {
-      const { data, error } = await supabase.functions.invoke("whatsapp-lembrete", {
-        body: {},
-      });
-
-      const responseLog: LogEntry = {
-        id: newId + 0.5,
-        timestamp: new Date().toLocaleTimeString("pt-BR"),
-        type: "response",
-        status: error ? "error" : "success",
-        payload: "",
-        responseData: JSON.stringify(error || data, null, 2),
-      };
-      setLogs((prev) => [responseLog, ...prev]);
-    } catch (err: any) {
-      const errorLog: LogEntry = {
-        id: newId + 0.5,
-        timestamp: new Date().toLocaleTimeString("pt-BR"),
-        type: "response",
-        status: "error",
-        payload: "",
-        responseData: err.message || "Erro desconhecido",
-      };
-      setLogs((prev) => [errorLog, ...prev]);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const events = platform === "hotmart"
+    ? [
+        { value: "PURCHASE_APPROVED", label: "✅ Compra Aprovada" },
+        { value: "PURCHASE_CANCELED", label: "❌ Compra Cancelada" },
+        { value: "PURCHASE_REFUNDED", label: "💸 Reembolso" },
+        { value: "SUBSCRIPTION_CANCELLATION", label: "🚫 Cancelamento Assinatura" },
+      ]
+    : platform === "kiwify"
+    ? [
+        { value: "PURCHASE_APPROVED", label: "✅ Pago" },
+        { value: "PURCHASE_CANCELED", label: "❌ Cancelado" },
+        { value: "PURCHASE_REFUNDED", label: "💸 Reembolsado" },
+      ]
+    : [
+        { value: "purchase_approved", label: "✅ Ativar" },
+        { value: "purchase_canceled", label: "❌ Desativar" },
+      ];
 
   return (
     <div className="min-h-screen bg-background">
@@ -165,76 +108,91 @@ const WebhookTest = () => {
             </Button>
           </Link>
           <div>
-            <h1 className="text-lg font-semibold text-foreground">Teste de Webhook</h1>
-            <p className="text-xs text-muted-foreground">Simule mensagens do WhatsApp</p>
+            <h1 className="text-lg font-semibold text-foreground flex items-center gap-2">
+              <CreditCard className="h-5 w-5 text-primary" />
+              Teste de Pagamento
+            </h1>
+            <p className="text-xs text-muted-foreground">Simule webhooks de Hotmart / Kiwify</p>
           </div>
         </div>
       </header>
 
       <div className="mx-auto max-w-2xl space-y-4 px-4 py-6">
-        {/* Phone */}
-        <Card className="rounded-2xl border-border/50 p-4 shadow-sm">
-          <Label className="text-xs font-medium text-muted-foreground">Número do WhatsApp</Label>
-          <Input
-            value={phone}
-            onChange={(e) => setPhone(e.target.value)}
-            placeholder="5511999999999"
-            className="mt-1.5 rounded-xl"
-          />
+        {/* Config */}
+        <Card className="rounded-2xl border-border/50 p-4 shadow-sm space-y-4">
+          <div>
+            <Label className="text-xs font-medium text-muted-foreground">E-mail do comprador</Label>
+            <Input
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="usuario@email.com"
+              type="email"
+              className="mt-1.5 rounded-xl"
+            />
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <Label className="text-xs font-medium text-muted-foreground">Plataforma</Label>
+              <Select value={platform} onValueChange={setPlatform}>
+                <SelectTrigger className="mt-1.5 rounded-xl">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="hotmart">Hotmart</SelectItem>
+                  <SelectItem value="kiwify">Kiwify</SelectItem>
+                  <SelectItem value="manual">Manual</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label className="text-xs font-medium text-muted-foreground">Evento</Label>
+              <Select value={event} onValueChange={setEvent}>
+                <SelectTrigger className="mt-1.5 rounded-xl">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {events.map((e) => (
+                    <SelectItem key={e.value} value={e.value}>{e.label}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          <Button
+            onClick={sendWebhook}
+            disabled={loading || !email}
+            className="w-full rounded-xl"
+          >
+            {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Send className="mr-2 h-4 w-4" />}
+            Simular Webhook de Pagamento
+          </Button>
         </Card>
 
-        {/* Quick payloads */}
+        {/* URL do Webhook */}
         <Card className="rounded-2xl border-border/50 p-4 shadow-sm">
-          <Label className="text-xs font-medium text-muted-foreground">Payloads rápidos</Label>
-          <div className="mt-2 flex flex-wrap gap-2">
-            {SAMPLE_PAYLOADS.map((sample) => (
-              <Button
-                key={sample.label}
-                variant="outline"
-                size="sm"
-                className="rounded-xl text-xs"
-                onClick={() => {
-                  const p = { ...sample.payload };
-                  p.chat.phone = phone;
-                  p.message.text = p.message.text || message || "Teste genérico";
-                  sendWebhook(p.message.text);
-                }}
-                disabled={loading}
-              >
-                <Zap className="mr-1 h-3 w-3" />
-                {sample.label}
-              </Button>
-            ))}
-          </div>
-        </Card>
-
-        {/* Custom message */}
-        <Card className="rounded-2xl border-border/50 p-4 shadow-sm">
-          <Label className="text-xs font-medium text-muted-foreground">Mensagem personalizada</Label>
-          <Textarea
-            value={message}
-            onChange={(e) => setMessage(e.target.value)}
-            placeholder="Digite uma mensagem para simular..."
-            className="mt-1.5 min-h-[80px] rounded-xl"
-          />
-          <div className="mt-3 flex gap-2">
+          <Label className="text-xs font-medium text-muted-foreground">URL do Webhook (configure na Hotmart/Kiwify)</Label>
+          <div className="mt-1.5 flex items-center gap-2">
+            <code className="flex-1 rounded-xl bg-muted/50 px-3 py-2 text-xs text-foreground/80 break-all">
+              {`https://${import.meta.env.VITE_SUPABASE_PROJECT_ID}.supabase.co/functions/v1/webhook-pagamento`}
+            </code>
             <Button
-              onClick={() => sendWebhook(message)}
-              disabled={loading || !message}
-              className="flex-1 rounded-xl"
+              variant="outline"
+              size="sm"
+              className="rounded-xl shrink-0"
+              onClick={() => {
+                navigator.clipboard.writeText(
+                  `https://${import.meta.env.VITE_SUPABASE_PROJECT_ID}.supabase.co/functions/v1/webhook-pagamento`
+                );
+              }}
             >
-              {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Send className="mr-2 h-4 w-4" />}
-              Enviar Webhook
-            </Button>
-            <Button
-              onClick={testLembrete}
-              disabled={loading}
-              variant="secondary"
-              className="rounded-xl"
-            >
-              ⏰ Testar Lembrete
+              Copiar
             </Button>
           </div>
+          <p className="mt-2 text-[11px] text-muted-foreground">
+            Cole esta URL nas configurações de webhook da sua plataforma de pagamento.
+          </p>
         </Card>
 
         {/* Logs */}
@@ -252,7 +210,7 @@ const WebhookTest = () => {
             <AnimatePresence>
               {logs.length === 0 && (
                 <p className="py-8 text-center text-sm text-muted-foreground">
-                  Nenhum log ainda. Envie um webhook para começar.
+                  Nenhum log ainda. Simule um pagamento para começar.
                 </p>
               )}
               {logs.map((log) => (
@@ -278,7 +236,7 @@ const WebhookTest = () => {
                     <span className="text-[10px] text-muted-foreground">{log.timestamp}</span>
                   </div>
                   <pre className="max-h-[150px] overflow-auto whitespace-pre-wrap text-[11px] text-foreground/80">
-                    {log.payload || log.responseData}
+                    {log.content}
                   </pre>
                 </motion.div>
               ))}
