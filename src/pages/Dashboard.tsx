@@ -2,68 +2,118 @@ import { useState } from "react";
 import { usePhoneAuth } from "@/contexts/PhoneAuthContext";
 import KanbanBoard from "@/components/KanbanBoard";
 import MetricasDoDia from "@/components/MetricasDoDia";
-import { Brain, LogOut, LayoutGrid, BarChart3 } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Brain, LogOut, Lightbulb, CheckCircle2, ListTodo, BarChart3 } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 
-type Tab = "kanban" | "metricas";
+type Tab = "ideias" | "tarefas" | "concluidas" | "metricas";
+
+const tabs = [
+  { id: "ideias" as Tab, label: "Ideias", icon: Lightbulb, emoji: "💡" },
+  { id: "tarefas" as Tab, label: "Tarefas", icon: ListTodo, emoji: "📋" },
+  { id: "concluidas" as Tab, label: "Feitas", icon: CheckCircle2, emoji: "✅" },
+  { id: "metricas" as Tab, label: "Métricas", icon: BarChart3, emoji: "📊" },
+];
 
 const Dashboard = () => {
   const { phone, logout } = usePhoneAuth();
-  const [activeTab, setActiveTab] = useState<Tab>("kanban");
+  const [activeTab, setActiveTab] = useState<Tab>("tarefas");
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="border-b border-border bg-card/80 backdrop-blur-sm">
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3 sm:px-6">
+    <div className="flex min-h-screen flex-col bg-background">
+      {/* Glassmorphism Header */}
+      <header className="glass fixed left-0 right-0 top-0 z-50">
+        <div className="mx-auto flex max-w-2xl items-center justify-between px-5 py-3">
           <div className="flex items-center gap-3">
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary">
+            <div className="flex h-9 w-9 items-center justify-center rounded-2xl bg-primary shadow-lg shadow-primary/25">
               <Brain className="h-5 w-5 text-primary-foreground" />
             </div>
             <div>
-              <h1 className="font-heading text-base font-bold text-foreground">Cérebro de Bolso</h1>
-              <p className="text-xs text-muted-foreground">{phone}</p>
+              <h1 className="font-heading text-base font-bold tracking-tight text-foreground">
+                Cérebro de Bolso
+              </h1>
+              <p className="text-[11px] text-muted-foreground">{phone}</p>
             </div>
           </div>
-          <Button variant="ghost" size="sm" onClick={logout} className="gap-2 text-muted-foreground">
+          <button
+            onClick={logout}
+            className="flex h-9 w-9 items-center justify-center rounded-xl text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+          >
             <LogOut className="h-4 w-4" />
-            Sair
-          </Button>
+          </button>
         </div>
       </header>
 
-      {/* Tabs */}
-      <div className="mx-auto max-w-6xl px-4 pt-4 sm:px-6">
-        <div className="mb-6 flex gap-1 rounded-lg bg-muted p-1">
-          <button
-            onClick={() => setActiveTab("kanban")}
-            className={`flex flex-1 items-center justify-center gap-2 rounded-md px-3 py-2 text-sm font-medium transition-colors ${
-              activeTab === "kanban"
-                ? "bg-card text-foreground shadow-sm"
-                : "text-muted-foreground hover:text-foreground"
-            }`}
-          >
-            <LayoutGrid className="h-4 w-4" />
-            Kanban
-          </button>
-          <button
-            onClick={() => setActiveTab("metricas")}
-            className={`flex flex-1 items-center justify-center gap-2 rounded-md px-3 py-2 text-sm font-medium transition-colors ${
-              activeTab === "metricas"
-                ? "bg-card text-foreground shadow-sm"
-                : "text-muted-foreground hover:text-foreground"
-            }`}
-          >
-            <BarChart3 className="h-4 w-4" />
-            Métricas do Dia
-          </button>
-        </div>
+      {/* Content */}
+      <main className="flex-1 px-4 pb-24 pt-[72px] sm:px-6">
+        <div className="mx-auto max-w-2xl lg:max-w-6xl">
+          {/* Desktop tabs */}
+          <div className="mb-5 hidden pt-4 sm:block">
+            <div className="flex gap-1 rounded-2xl bg-muted/60 p-1.5">
+              {tabs.map((tab) => (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id)}
+                  className={`flex flex-1 items-center justify-center gap-2 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-200 ${
+                    activeTab === tab.id
+                      ? "bg-card text-foreground shadow-sm"
+                      : "text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  <tab.icon className="h-4 w-4" />
+                  {tab.label}
+                </button>
+              ))}
+            </div>
+          </div>
 
-        {/* Content */}
-        <div className="animate-fade-in">
-          {activeTab === "kanban" ? <KanbanBoard /> : <MetricasDoDia />}
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={activeTab}
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -8 }}
+              transition={{ duration: 0.25, ease: "easeOut" }}
+              className="sm:pt-0 pt-4"
+            >
+              {activeTab === "metricas" ? (
+                <MetricasDoDia />
+              ) : (
+                <KanbanBoard activeTab={activeTab} />
+              )}
+            </motion.div>
+          </AnimatePresence>
         </div>
-      </div>
+      </main>
+
+      {/* Bottom Navigation - Mobile only */}
+      <nav className="glass fixed bottom-0 left-0 right-0 z-50 sm:hidden safe-bottom">
+        <div className="flex items-center justify-around px-2 py-1">
+          {tabs.map((tab) => {
+            const isActive = activeTab === tab.id;
+            return (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={`flex flex-1 flex-col items-center gap-0.5 rounded-xl py-2 transition-colors ${
+                  isActive ? "text-primary" : "text-muted-foreground"
+                }`}
+              >
+                <tab.icon className={`h-5 w-5 ${isActive ? "stroke-[2.5]" : ""}`} />
+                <span className={`text-[10px] font-medium ${isActive ? "font-semibold" : ""}`}>
+                  {tab.label}
+                </span>
+                {isActive && (
+                  <motion.div
+                    layoutId="bottomNav"
+                    className="mt-0.5 h-1 w-5 rounded-full bg-primary"
+                    transition={{ type: "spring", stiffness: 400, damping: 30 }}
+                  />
+                )}
+              </button>
+            );
+          })}
+        </div>
+      </nav>
     </div>
   );
 };

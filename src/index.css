@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -6,84 +6,86 @@
 
 @layer base {
   :root {
-    --background: 40 33% 97%;
-    --foreground: 220 20% 20%;
+    --background: 220 14% 96%;
+    --foreground: 215 25% 12%;
 
     --card: 0 0% 100%;
-    --card-foreground: 220 20% 20%;
+    --card-foreground: 215 25% 12%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 220 20% 20%;
+    --popover-foreground: 215 25% 12%;
 
-    --primary: 152 35% 45%;
+    --primary: 239 84% 67%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 40 30% 93%;
-    --secondary-foreground: 220 20% 25%;
+    --secondary: 220 13% 95%;
+    --secondary-foreground: 215 20% 30%;
 
-    --muted: 40 20% 94%;
-    --muted-foreground: 220 10% 50%;
+    --muted: 220 14% 94%;
+    --muted-foreground: 215 13% 50%;
 
-    --accent: 35 80% 55%;
+    --accent: 239 84% 67%;
     --accent-foreground: 0 0% 100%;
 
-    --destructive: 0 65% 55%;
+    --destructive: 0 72% 51%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 40 20% 90%;
-    --input: 40 20% 88%;
-    --ring: 152 35% 45%;
+    --border: 220 13% 91%;
+    --input: 220 13% 91%;
+    --ring: 239 84% 67%;
 
-    --radius: 0.75rem;
+    --radius: 1rem;
 
-    --kanban-idea: 210 60% 95%;
-    --kanban-task: 152 40% 94%;
-    --kanban-done: 40 40% 94%;
+    --status-pending-bg: 45 93% 94%;
+    --status-pending-text: 38 92% 40%;
+    --status-done-bg: 152 60% 93%;
+    --status-done-text: 152 55% 30%;
 
     --sidebar-background: 0 0% 98%;
     --sidebar-foreground: 240 5.3% 26.1%;
-    --sidebar-primary: 240 5.9% 10%;
-    --sidebar-primary-foreground: 0 0% 98%;
+    --sidebar-primary: 239 84% 67%;
+    --sidebar-primary-foreground: 0 0% 100%;
     --sidebar-accent: 240 4.8% 95.9%;
     --sidebar-accent-foreground: 240 5.9% 10%;
     --sidebar-border: 220 13% 91%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --sidebar-ring: 239 84% 67%;
 
     --font-heading: 'Plus Jakarta Sans', sans-serif;
-    --font-body: 'Plus Jakarta Sans', sans-serif;
+    --font-body: 'Inter', sans-serif;
   }
 
   .dark {
-    --background: 220 20% 10%;
-    --foreground: 40 20% 92%;
-    --card: 220 18% 14%;
-    --card-foreground: 40 20% 92%;
-    --popover: 220 18% 14%;
-    --popover-foreground: 40 20% 92%;
-    --primary: 152 35% 50%;
+    --background: 220 20% 7%;
+    --foreground: 220 14% 92%;
+    --card: 220 18% 11%;
+    --card-foreground: 220 14% 92%;
+    --popover: 220 18% 11%;
+    --popover-foreground: 220 14% 92%;
+    --primary: 239 84% 67%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 220 15% 18%;
-    --secondary-foreground: 40 20% 90%;
-    --muted: 220 15% 20%;
-    --muted-foreground: 220 10% 60%;
-    --accent: 35 80% 55%;
+    --secondary: 220 15% 15%;
+    --secondary-foreground: 220 14% 85%;
+    --muted: 220 15% 16%;
+    --muted-foreground: 220 10% 55%;
+    --accent: 239 84% 67%;
     --accent-foreground: 0 0% 100%;
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 0 0% 100%;
-    --border: 220 15% 22%;
-    --input: 220 15% 22%;
-    --ring: 152 35% 50%;
-    --kanban-idea: 210 30% 18%;
-    --kanban-task: 152 20% 16%;
-    --kanban-done: 40 20% 16%;
-    --sidebar-background: 240 5.9% 10%;
+    --border: 220 15% 18%;
+    --input: 220 15% 18%;
+    --ring: 239 84% 67%;
+    --status-pending-bg: 45 50% 15%;
+    --status-pending-text: 45 80% 70%;
+    --status-done-bg: 152 30% 14%;
+    --status-done-text: 152 50% 65%;
+    --sidebar-background: 220 20% 7%;
     --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
+    --sidebar-primary: 239 84% 67%;
     --sidebar-primary-foreground: 0 0% 100%;
     --sidebar-accent: 240 3.7% 15.9%;
     --sidebar-accent-foreground: 240 4.8% 95.9%;
     --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --sidebar-ring: 239 84% 67%;
   }
 }
 
@@ -92,10 +94,28 @@
     @apply border-border;
   }
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground antialiased;
     font-family: var(--font-body);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
   h1, h2, h3, h4, h5, h6 {
     font-family: var(--font-heading);
+  }
+}
+
+@layer utilities {
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+  .glass {
+    @apply bg-card/70 backdrop-blur-xl border-b border-border/50;
+  }
+  .safe-bottom {
+    padding-bottom: env(safe-area-inset-bottom, 0px);
   }
 }

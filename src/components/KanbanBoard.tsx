@@ -4,7 +4,11 @@ import { useItens } from "@/hooks/useItens";
 import { useMemo } from "react";
 import { Loader2 } from "lucide-react";
 
-const KanbanBoard = () => {
+interface KanbanBoardProps {
+  activeTab?: "ideias" | "tarefas" | "concluidas";
+}
+
+const KanbanBoard = ({ activeTab }: KanbanBoardProps) => {
   const { data: items, isLoading, updateStatus, updateTipo } = useItens();
 
   const columns = useMemo(() => {
@@ -41,7 +45,21 @@ const KanbanBoard = () => {
 
   return (
     <DragDropContext onDragEnd={handleDragEnd}>
-      <div className="flex gap-4 overflow-x-auto pb-4">
+      {/* Mobile: show only active tab column */}
+      <div className="block sm:hidden">
+        {activeTab === "ideias" && (
+          <KanbanColumn id="ideias" title="Ideias Soltas" emoji="💡" items={columns.ideias} />
+        )}
+        {activeTab === "tarefas" && (
+          <KanbanColumn id="tarefas" title="Tarefas do Dia" emoji="📋" items={columns.tarefas} />
+        )}
+        {activeTab === "concluidas" && (
+          <KanbanColumn id="concluidas" title="Concluídas" emoji="✅" items={columns.concluidas} />
+        )}
+      </div>
+
+      {/* Desktop: horizontal kanban */}
+      <div className="hidden gap-4 sm:flex">
         <KanbanColumn id="ideias" title="Ideias Soltas" emoji="💡" items={columns.ideias} />
         <KanbanColumn id="tarefas" title="Tarefas do Dia" emoji="📋" items={columns.tarefas} />
         <KanbanColumn id="concluidas" title="Concluídas" emoji="✅" items={columns.concluidas} />

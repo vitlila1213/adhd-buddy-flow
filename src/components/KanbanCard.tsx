@@ -17,37 +17,60 @@ const KanbanCard = ({ item, index }: KanbanCardProps) => {
           ref={provided.innerRef}
           {...provided.draggableProps}
           {...provided.dragHandleProps}
-          className={`rounded-lg border border-border bg-card p-3.5 shadow-sm transition-shadow ${
-            snapshot.isDragging ? "shadow-md ring-2 ring-primary/20" : ""
+          className={`rounded-2xl border border-border/60 bg-card p-4 shadow-sm transition-all duration-300 ${
+            snapshot.isDragging
+              ? "shadow-xl ring-2 ring-primary/20 scale-[1.02]"
+              : "hover:-translate-y-0.5 hover:shadow-md active:scale-[0.98]"
           }`}
         >
-          <div className="mb-1.5 flex items-start gap-2">
+          <div className="mb-2 flex items-start gap-2.5">
             {item.tipo === "ideia" ? (
-              <Lightbulb className="mt-0.5 h-4 w-4 shrink-0 text-accent" />
+              <div className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-xl bg-status-pending-bg">
+                <Lightbulb className="h-3.5 w-3.5 text-status-pending-text" />
+              </div>
             ) : item.status === "concluida" ? (
-              <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+              <div className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-xl bg-status-done-bg">
+                <CheckCircle2 className="h-3.5 w-3.5 text-status-done-text" />
+              </div>
             ) : (
-              <Clock className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" />
+              <div className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-xl bg-muted">
+                <Clock className="h-3.5 w-3.5 text-muted-foreground" />
+              </div>
             )}
-            <h4 className="text-sm font-semibold leading-snug text-card-foreground">
-              {item.titulo}
-            </h4>
+            <div className="flex-1 min-w-0">
+              <h4 className={`text-sm font-semibold leading-snug text-card-foreground ${
+                item.status === "concluida" ? "line-through opacity-60" : ""
+              }`}>
+                {item.titulo}
+              </h4>
+            </div>
           </div>
 
           {item.descricao && (
-            <p className="mb-2 pl-6 text-xs leading-relaxed text-muted-foreground line-clamp-2">
+            <p className="mb-2.5 pl-[38px] text-xs leading-relaxed text-muted-foreground line-clamp-2">
               {item.descricao}
             </p>
           )}
 
-          {item.data_hora_agendada && (
-            <div className="pl-6">
-              <span className="inline-flex items-center gap-1 rounded-md bg-secondary px-2 py-0.5 text-[11px] font-medium text-secondary-foreground">
+          <div className="flex items-center gap-2 pl-[38px]">
+            {/* Status badge */}
+            {item.status === "concluida" ? (
+              <span className="inline-flex items-center rounded-lg bg-status-done-bg px-2 py-0.5 text-[11px] font-semibold text-status-done-text">
+                Concluída
+              </span>
+            ) : (
+              <span className="inline-flex items-center rounded-lg bg-status-pending-bg px-2 py-0.5 text-[11px] font-semibold text-status-pending-text">
+                Pendente
+              </span>
+            )}
+
+            {item.data_hora_agendada && (
+              <span className="inline-flex items-center gap-1 rounded-lg bg-muted px-2 py-0.5 text-[11px] font-medium text-muted-foreground">
                 <Clock className="h-3 w-3" />
                 {format(new Date(item.data_hora_agendada), "dd MMM, HH:mm", { locale: ptBR })}
               </span>
-            </div>
-          )}
+            )}
+          </div>
         </div>
       )}
     </Draggable>
