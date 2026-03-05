@@ -3,6 +3,9 @@ import { useAuth } from "@/contexts/AuthContext";
 import KanbanBoard from "@/components/KanbanBoard";
 import MetricasDoDia from "@/components/MetricasDoDia";
 import WhatsAppOnboardingModal from "@/components/WhatsAppOnboardingModal";
+import FreemiumBar from "@/components/FreemiumBar";
+import UpgradeModal from "@/components/UpgradeModal";
+import { useFreemiumStatus } from "@/components/FreemiumBar";
 import { Brain, LogOut, Lightbulb, CheckCircle2, ListTodo, BarChart3 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -18,10 +21,13 @@ const tabs = [
 const Dashboard = () => {
   const { profile, logout } = useAuth();
   const [activeTab, setActiveTab] = useState<Tab>("tarefas");
+  const [showUpgrade, setShowUpgrade] = useState(false);
+  const { limitReached } = useFreemiumStatus();
 
   return (
     <div className="flex min-h-screen flex-col bg-background">
       <WhatsAppOnboardingModal />
+      <UpgradeModal open={showUpgrade} onOpenChange={setShowUpgrade} />
 
       {/* Glassmorphism Header */}
       <header className="glass fixed left-0 right-0 top-0 z-50">
@@ -37,13 +43,16 @@ const Dashboard = () => {
               <p className="text-[11px] text-muted-foreground">{profile?.email}</p>
             </div>
           </div>
-          <button
-            onClick={logout}
-            className="flex h-9 w-9 items-center justify-center rounded-xl text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-            title="Sair"
-          >
-            <LogOut className="h-4 w-4" />
-          </button>
+          <div className="flex items-center gap-2">
+            <FreemiumBar />
+            <button
+              onClick={logout}
+              className="flex h-9 w-9 items-center justify-center rounded-xl text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+              title="Sair"
+            >
+              <LogOut className="h-4 w-4" />
+            </button>
+          </div>
         </div>
       </header>
 
@@ -82,7 +91,7 @@ const Dashboard = () => {
               {activeTab === "metricas" ? (
                 <MetricasDoDia />
               ) : (
-                <KanbanBoard activeTab={activeTab} />
+                <KanbanBoard activeTab={activeTab} limitReached={limitReached} onUpgrade={() => setShowUpgrade(true)} />
               )}
             </motion.div>
           </AnimatePresence>

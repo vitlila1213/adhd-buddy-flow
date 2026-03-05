@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import Index from "./pages/Index";
+import VendasPage from "./pages/VendasPage";
 import WebhookTest from "./pages/WebhookTest";
 import NotFound from "./pages/NotFound";
 
@@ -19,6 +20,7 @@ const App = () => (
         <BrowserRouter>
           <Routes>
             <Route path="/" element={<Index />} />
+            <Route path="/vendas" element={<VendasPage />} />
             <Route path="/webhook-test" element={<WebhookTest />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
