@@ -82,7 +82,7 @@ serve(async (req) => {
 
       // O resultado pode conter base64 do arquivo ou uma URL direta
       let audioBase64 = downloadResult?.base64 || downloadResult?.data || downloadResult?.file;
-      let audioUrl = downloadResult?.url || downloadResult?.URL || downloadResult?.mediaUrl;
+      let audioUrl = downloadResult?.fileURL || downloadResult?.url || downloadResult?.URL || downloadResult?.mediaUrl;
 
       let audioBlob: Blob | null = null;
 
