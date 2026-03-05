@@ -12,26 +12,41 @@ serve(async (req) => {
   try {
     const body = await req.json();
     
-    // Extract phone and message from UAZAPI webhook format
-    const phone = body?.phone || body?.from || body?.sender;
-    const text = body?.text || body?.message || body?.body;
+    // Log completo do payload para debug do formato UAZAPI
+    console.log("=== PAYLOAD RECEBIDO DA UAZAPI ===");
+    console.log(JSON.stringify(body, null, 2));
+
+    // Extrair telefone e texto do payload UAZAPI
+    const phone = body?.phone || body?.from || body?.sender || body?.number;
+    const text = body?.text || body?.message || body?.body || body?.textMessage?.text;
+
+    console.log("Phone extraído:", phone);
+    console.log("Texto extraído:", text);
 
     if (!phone || !text) {
+      console.error("Campos ausentes - phone:", phone, "text:", text);
       return new Response(JSON.stringify({ error: "Missing phone or text" }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
-    // Call OpenAI to categorize
+    // Limpar número de telefone (apenas dígitos)
+    const userPhone = phone.replace(/\D/g, "");
+
+    // === PASSO 2: Processamento com IA (OpenAI) ===
     const OPENAI_API_KEY = Deno.env.get("OPENAI_API_KEY");
     if (!OPENAI_API_KEY) {
+      console.error("OPENAI_API_KEY não configurada");
       return new Response(JSON.stringify({ error: "OPENAI_API_KEY not configured" }), {
         status: 500,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
+    const systemPrompt = `Você é o cérebro de um assistente virtual para pessoas com TDAH. O usuário enviará uma mensagem desestruturada ou uma ideia solta. Sua função é extrair a intenção e retornar estritamente um JSON com este formato: { "tipo": "ideia" ou "tarefa", "titulo": "resumo direto ao ponto", "data_hora_agendada": "formato timestamp ISO ou null se não houver data/hora mencionada", "status": "pendente" }. Se o usuário disser que concluiu algo, retorne o status como "concluida".`;
+
+    console.log("Chamando OpenAI...");
     const openaiResponse = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
       headers: {
@@ -41,10 +56,7 @@ serve(async (req) => {
       body: JSON.stringify({
         model: "gpt-4o-mini",
         messages: [
-          {
-            role: "system",
-            content: `Você é um assistente de TDAH. O usuário enviará um texto. Você deve categorizar em JSON estrito: { "tipo": "ideia" ou "tarefa", "titulo": "resumo curto", "descricao": "descrição completa ou null", "data_hora_agendada": "formato ISO ou null se não houver data", "status": "pendente" }. Se o usuário disser que concluiu algo, retorne: { "acao": "concluir", "titulo_busca": "termo para buscar a tarefa" }. Responda APENAS com o JSON, sem markdown.`,
-          },
+          { role: "system", content: systemPrompt },
           { role: "user", content: text },
         ],
         temperature: 0.3,
@@ -52,70 +64,71 @@ serve(async (req) => {
     });
 
     const aiData = await openaiResponse.json();
-    const parsed = JSON.parse(aiData.choices[0].message.content);
+    console.log("Resposta OpenAI:", JSON.stringify(aiData, null, 2));
 
+    const aiContent = aiData.choices?.[0]?.message?.content;
+    if (!aiContent) {
+      console.error("Resposta vazia da OpenAI");
+      throw new Error("Empty response from OpenAI");
+    }
+
+    // Limpar possíveis markdown code blocks da resposta
+    const cleanedContent = aiContent.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim();
+    const parsed = JSON.parse(cleanedContent);
+    console.log("JSON parseado da IA:", JSON.stringify(parsed, null, 2));
+
+    // === PASSO 3: Salvar no Banco (Supabase) ===
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    let confirmMessage = "✅ Anotei no seu painel!";
+    const { data: insertData, error: insertError } = await supabase.from("itens_cerebro").insert({
+      user_phone: userPhone,
+      tipo: parsed.tipo,
+      titulo: parsed.titulo,
+      descricao: parsed.descricao || null,
+      data_hora_agendada: parsed.data_hora_agendada || null,
+      status: parsed.status || "pendente",
+    }).select();
 
-    if (parsed.acao === "concluir") {
-      // Find and update matching task
-      const { data: tasks } = await supabase
-        .from("itens_cerebro")
-        .select("*")
-        .eq("user_phone", phone.replace(/\D/g, ""))
-        .eq("status", "pendente")
-        .ilike("titulo", `%${parsed.titulo_busca}%`)
-        .limit(1);
-
-      if (tasks && tasks.length > 0) {
-        await supabase
-          .from("itens_cerebro")
-          .update({ status: "concluida" })
-          .eq("id", tasks[0].id);
-        confirmMessage = `✅ Tarefa "${tasks[0].titulo}" marcada como concluída!`;
-      } else {
-        confirmMessage = "🤔 Não encontrei essa tarefa no seu painel.";
-      }
-    } else {
-      // Insert new item
-      const { error } = await supabase.from("itens_cerebro").insert({
-        user_phone: phone.replace(/\D/g, ""),
-        tipo: parsed.tipo,
-        titulo: parsed.titulo,
-        descricao: parsed.descricao || null,
-        data_hora_agendada: parsed.data_hora_agendada || null,
-        status: parsed.status || "pendente",
-      });
-
-      if (error) throw error;
-
-      confirmMessage = parsed.tipo === "ideia"
-        ? `💡 Ideia "${parsed.titulo}" salva no seu painel!`
-        : `📋 Tarefa "${parsed.titulo}" criada no seu painel!`;
+    if (insertError) {
+      console.error("Erro ao inserir no banco:", insertError);
+      throw insertError;
     }
 
-    // Send confirmation via UAZAPI
+    console.log("Item inserido com sucesso:", JSON.stringify(insertData, null, 2));
+
+    // === PASSO 4: Aviso de Sucesso via UAZAPI ===
     const UAZAPI_URL = Deno.env.get("UAZAPI_URL");
+    const UAZAPI_INSTANCE = Deno.env.get("UAZAPI_INSTANCE");
     const UAZAPI_TOKEN = Deno.env.get("UAZAPI_TOKEN");
 
-    if (UAZAPI_URL && UAZAPI_TOKEN) {
-      await fetch(`${UAZAPI_URL}/send-message`, {
+    if (UAZAPI_URL && UAZAPI_INSTANCE && UAZAPI_TOKEN) {
+      const sendUrl = `${UAZAPI_URL}/message/sendText/${UAZAPI_INSTANCE}`;
+      console.log("Enviando confirmação via UAZAPI para:", userPhone, "URL:", sendUrl);
+
+      const uazapiResponse = await fetch(sendUrl, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${UAZAPI_TOKEN}`,
+          "token": UAZAPI_TOKEN,
         },
         body: JSON.stringify({
-          phone: phone,
-          message: confirmMessage,
+          number: userPhone,
+          textMessage: {
+            text: "✅ Anotado no seu Cérebro de Bolso!",
+          },
         }),
       });
+
+      const uazapiResult = await uazapiResponse.text();
+      console.log("Resposta UAZAPI:", uazapiResult);
+    } else {
+      console.warn("UAZAPI não configurada completamente. URL:", UAZAPI_URL, "INSTANCE:", UAZAPI_INSTANCE, "TOKEN:", !!UAZAPI_TOKEN);
     }
 
-    return new Response(JSON.stringify({ success: true, message: confirmMessage }), {
+    return new Response(JSON.stringify({ success: true }), {
+      status: 200,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (e) {
