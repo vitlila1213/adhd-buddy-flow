@@ -33,16 +33,38 @@ serve(async (req) => {
     const statusLower = status.toLowerCase();
 
     if (["approved", "paid"].includes(statusLower)) {
-      const { error } = await supabase
+      const { data: profileData, error } = await supabase
         .from("profiles")
         .update({
           subscription_status: "active",
           subscription_expires_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
         })
-        .eq("email", email);
+        .eq("email", email)
+        .select("whatsapp_number")
+        .single();
 
-      if (error) console.error("Erro ao ativar:", error);
-      else console.log("Assinatura ativada para:", email);
+      if (error) {
+        console.error("Erro ao ativar:", error);
+      } else {
+        console.log("Assinatura ativada para:", email);
+
+        // Enviar boas-vindas via WhatsApp
+        const UAZAPI_URL = Deno.env.get("UAZAPI_URL");
+        const UAZAPI_TOKEN = Deno.env.get("UAZAPI_TOKEN");
+        const phone = profileData?.whatsapp_number;
+
+        if (UAZAPI_URL && UAZAPI_TOKEN && phone) {
+          await fetch(`${UAZAPI_URL}/send/text`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json", token: UAZAPI_TOKEN },
+            body: JSON.stringify({
+              number: phone,
+              text: "🎉 Parabéns! Sua assinatura Premium do Cérebro de Bolso foi ativada!\n\n👑 Agora você tem uso ilimitado do seu segundo cérebro.\n\nMande suas ideias e tarefas sem limites. Estou pronto pra te ajudar! 🧠✨",
+            }),
+          });
+          console.log("Boas-vindas enviada para:", phone);
+        }
+      }
 
     } else if (["refunded", "chargeback", "canceled", "cancelled"].includes(statusLower)) {
       const { error } = await supabase
