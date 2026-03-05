@@ -121,13 +121,11 @@ serve(async (req) => {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "token": UAZAPI_TOKEN,
+          "apikey": UAZAPI_TOKEN,
         },
         body: JSON.stringify({
           number: userPhone,
-          textMessage: {
-            text: "✅ Anotado no seu Cérebro de Bolso!",
-          },
+          text: "✅ Anotado no seu Cérebro de Bolso!",
         }),
       });
 
