@@ -189,7 +189,7 @@ serve(async (req) => {
     }
 
     // === PASSO 2: Processamento com IA (OpenAI GPT) ===
-    const systemPrompt = `Você é o cérebro de um assistente virtual para pessoas com TDAH. O usuário enviará uma mensagem desestruturada ou uma ideia solta. Sua função é extrair a intenção e retornar estritamente um JSON com este formato: { "tipo": "ideia" ou "tarefa", "titulo": "resumo direto ao ponto", "data_hora_agendada": "formato timestamp ISO ou null se não houver data/hora mencionada", "status": "pendente" }. Se o usuário disser que concluiu algo, retorne o status como "concluida".`;
+    const systemPrompt = `Você é o cérebro de um assistente virtual para pessoas com TDAH. O usuário enviará uma mensagem desestruturada ou uma ideia solta. Sua função é extrair a intenção e retornar estritamente um JSON com este formato: { "tipo": "ideia" ou "tarefa", "titulo": "resumo direto ao ponto", "data_hora_agendada": "formato timestamp ISO ou null se não houver data/hora mencionada", "status": "pendente" }. Se o usuário disser que concluiu algo, retorne o status como "concluida". IMPORTANTE: O fuso horário do usuário é America/Sao_Paulo (UTC-3). Quando o usuário mencionar horários, considere que são no fuso de Brasília e converta para ISO 8601 com o offset -03:00. Por exemplo, se o usuário disser "amanhã às 9h", a data_hora_agendada deve ser no formato "2026-03-07T09:00:00-03:00". Hoje é ${new Date().toLocaleDateString('pt-BR', { timeZone: 'America/Sao_Paulo' })}.`;
 
     console.log("Chamando OpenAI GPT...");
     const openaiResponse = await fetch("https://api.openai.com/v1/chat/completions", {
