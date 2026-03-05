@@ -1,0 +1,50 @@
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { usePhoneAuth } from "@/contexts/PhoneAuthContext";
+import type { Tables } from "@/integrations/supabase/types";
+
+export type ItemCerebro = Tables<"itens_cerebro">;
+
+export const useItens = () => {
+  const { phone } = usePhoneAuth();
+  const queryClient = useQueryClient();
+
+  const query = useQuery({
+    queryKey: ["itens_cerebro", phone],
+    queryFn: async () => {
+      if (!phone) return [];
+      const { data, error } = await supabase
+        .from("itens_cerebro")
+        .select("*")
+        .eq("user_phone", phone)
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      return data as ItemCerebro[];
+    },
+    enabled: !!phone,
+  });
+
+  const updateStatus = useMutation({
+    mutationFn: async ({ id, status }: { id: string; status: string }) => {
+      const { error } = await supabase
+        .from("itens_cerebro")
+        .update({ status })
+        .eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["itens_cerebro"] }),
+  });
+
+  const updateTipo = useMutation({
+    mutationFn: async ({ id, tipo }: { id: string; tipo: string }) => {
+      const { error } = await supabase
+        .from("itens_cerebro")
+        .update({ tipo })
+        .eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["itens_cerebro"] }),
+  });
+
+  return { ...query, updateStatus, updateTipo };
+};
