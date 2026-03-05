@@ -18,47 +18,44 @@ serve(async (req) => {
     const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    // === Extrair dados do webhook (compatível com Hotmart e Kiwify) ===
+    // === Extrair dados (compatível com Hotmart, Kiwify e manual) ===
     let buyerEmail = "";
-    let buyerName = "";
+    let buyerPhone = "";
     let eventType = "";
     let platform = "";
 
-    // Hotmart format
     if (body?.data?.buyer?.email) {
+      // Hotmart
       buyerEmail = body.data.buyer.email;
-      buyerName = body.data.buyer.name || "";
+      buyerPhone = body.data.buyer.phone || body.phone || "";
       eventType = body?.event || "";
       platform = "hotmart";
-    }
-    // Kiwify format
-    else if (body?.Customer?.email) {
+    } else if (body?.Customer?.email) {
+      // Kiwify
       buyerEmail = body.Customer.email;
-      buyerName = body.Customer.full_name || "";
+      buyerPhone = body.Customer.mobile || body.phone || "";
       eventType = body?.order_status || "";
       platform = "kiwify";
-    }
-    // Formato de teste manual
-    else if (body?.email) {
+    } else if (body?.email) {
+      // Manual
       buyerEmail = body.email;
-      buyerName = body.name || "";
+      buyerPhone = body.phone || "";
       eventType = body.event || "purchase_approved";
       platform = body.platform || "manual";
     }
 
+    buyerPhone = buyerPhone.replace(/\D/g, "");
+
     if (!buyerEmail) {
-      console.error("Email do comprador não encontrado no payload");
       return new Response(JSON.stringify({ error: "Missing buyer email" }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
-    console.log("Plataforma:", platform);
-    console.log("Email:", buyerEmail);
-    console.log("Evento:", eventType);
+    console.log("Plataforma:", platform, "Email:", buyerEmail, "Phone:", buyerPhone, "Evento:", eventType);
 
-    // === Determinar ação baseada no evento ===
+    // === Determinar status ===
     const activationEvents = [
       "PURCHASE_APPROVED", "PURCHASE_COMPLETE", "purchase_approved", "purchase_complete",
       "paid", "approved", "completed",
@@ -68,18 +65,11 @@ serve(async (req) => {
       "purchase_canceled", "refunded", "cancelled", "expired",
     ];
 
-    let newStatus = "";
-    if (activationEvents.includes(eventType)) {
-      newStatus = "active";
-    } else if (cancellationEvents.includes(eventType)) {
-      newStatus = "inactive";
-    } else {
-      // Se não reconhecer o evento, assume ativação (para testes)
-      newStatus = "active";
-      console.log("Evento não reconhecido, assumindo ativação:", eventType);
-    }
+    let newStatus = activationEvents.includes(eventType) ? "active"
+      : cancellationEvents.includes(eventType) ? "cancelled"
+      : "active";
 
-    // === Buscar perfil pelo email ===
+    // === Buscar perfil ===
     const { data: profile, error: profileError } = await supabase
       .from("profiles")
       .select("*")
@@ -88,11 +78,9 @@ serve(async (req) => {
 
     if (profileError || !profile) {
       console.log("Perfil não encontrado para:", buyerEmail);
-      // Salvar em uma fila para processar quando o usuário se cadastrar
-      console.log("Usuário ainda não cadastrado. Status será aplicado quando fizer login.");
-      return new Response(JSON.stringify({ 
-        success: true, 
-        message: "User not registered yet. Will be activated on first login.",
+      return new Response(JSON.stringify({
+        success: true,
+        message: "User not registered yet.",
         email: buyerEmail,
         status: newStatus,
       }), {
@@ -101,10 +89,25 @@ serve(async (req) => {
       });
     }
 
-    // === Atualizar status da assinatura ===
+    // === Calcular data de expiração (30 dias a partir de agora) ===
+    const updateData: Record<string, unknown> = {
+      subscription_status: newStatus,
+    };
+
+    if (newStatus === "active") {
+      const expiresAt = new Date();
+      expiresAt.setDate(expiresAt.getDate() + 30);
+      updateData.subscription_expires_at = expiresAt.toISOString();
+    }
+
+    // Salvar telefone no perfil se fornecido e ainda não existir
+    if (buyerPhone && !profile.whatsapp_number) {
+      updateData.whatsapp_number = buyerPhone;
+    }
+
     const { error: updateError } = await supabase
       .from("profiles")
-      .update({ subscription_status: newStatus })
+      .update(updateData)
       .eq("id", profile.id);
 
     if (updateError) {
@@ -112,10 +115,11 @@ serve(async (req) => {
       throw updateError;
     }
 
-    console.log(`Perfil ${profile.id} atualizado para: ${newStatus}`);
+    console.log(`Perfil ${profile.id} atualizado: status=${newStatus}`);
 
-    // === Enviar WhatsApp de boas-vindas (se ativação e tem número) ===
-    if (newStatus === "active" && profile.whatsapp_number) {
+    // === WhatsApp de boas-vindas ===
+    const whatsappNumber = buyerPhone || profile.whatsapp_number;
+    if (newStatus === "active" && whatsappNumber) {
       const UAZAPI_URL = Deno.env.get("UAZAPI_URL");
       const UAZAPI_TOKEN = Deno.env.get("UAZAPI_TOKEN");
 
@@ -126,22 +130,20 @@ serve(async (req) => {
           `Eu vou organizar suas ideias e tarefas automaticamente. 🧠\n\n` +
           `Experimente agora! Me mande uma ideia ou tarefa.`;
 
-        const sendResponse = await fetch(`${UAZAPI_URL}/send/text`, {
+        await fetch(`${UAZAPI_URL}/send/text`, {
           method: "POST",
           headers: { "Content-Type": "application/json", "token": UAZAPI_TOKEN },
-          body: JSON.stringify({ number: profile.whatsapp_number, text: welcomeMsg }),
+          body: JSON.stringify({ number: whatsappNumber, text: welcomeMsg }),
         });
-
-        const sendResult = await sendResponse.text();
-        console.log("WhatsApp de boas-vindas enviado:", sendResult);
+        console.log("WhatsApp de boas-vindas enviado para:", whatsappNumber);
       }
     }
 
-    return new Response(JSON.stringify({ 
-      success: true, 
+    return new Response(JSON.stringify({
+      success: true,
       email: buyerEmail,
       new_status: newStatus,
-      whatsapp_sent: newStatus === "active" && !!profile.whatsapp_number,
+      whatsapp_sent: newStatus === "active" && !!whatsappNumber,
     }), {
       status: 200,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
