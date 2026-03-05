@@ -5,3 +5,6 @@ verify_jwt = false
 
 [functions.whatsapp-lembrete]
 verify_jwt = false
+
+[functions.webhook-pagamento]
+verify_jwt = false
