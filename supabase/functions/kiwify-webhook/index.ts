@@ -59,7 +59,7 @@ serve(async (req) => {
             headers: { "Content-Type": "application/json", token: UAZAPI_TOKEN },
             body: JSON.stringify({
               number: phone,
-              text: "🎉 Parabéns! Sua assinatura Premium do Cérebro de Bolso foi ativada!\n\n👑 Agora você tem uso ilimitado do seu segundo cérebro.\n\nMande suas ideias e tarefas sem limites. Estou pronto pra te ajudar! 🧠✨",
+              text: "🎉 Parabéns! Sua assinatura Premium do Cérebro de Bolso foi ativada!\n\n👑 Agora você tem uso ilimitado do seu segundo cérebro.\n\nMande suas ideias e tarefas sem limites. Estou pronto pra te ajudar! 🧠✨\n\n🔗 Acesse seu painel aqui:\nhttps://adhd-buddy-flow.lovable.app/",
             }),
           });
           console.log("Boas-vindas enviada para:", phone);
