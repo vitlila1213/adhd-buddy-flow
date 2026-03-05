@@ -114,14 +114,14 @@ serve(async (req) => {
     const UAZAPI_TOKEN = Deno.env.get("UAZAPI_TOKEN");
 
     if (UAZAPI_URL && UAZAPI_INSTANCE && UAZAPI_TOKEN) {
-      const sendUrl = `${UAZAPI_URL}/message/sendText/${UAZAPI_INSTANCE}`;
+      const sendUrl = `${UAZAPI_URL}/send/text`;
       console.log("Enviando confirmação via UAZAPI para:", userPhone, "URL:", sendUrl);
 
       const uazapiResponse = await fetch(sendUrl, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "apikey": UAZAPI_TOKEN,
+          "token": UAZAPI_TOKEN,
         },
         body: JSON.stringify({
           number: userPhone,
