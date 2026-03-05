@@ -66,6 +66,7 @@ export type Database = {
           created_at: string
           email: string | null
           id: string
+          subscription_expires_at: string | null
           subscription_status: string
           updated_at: string
           whatsapp_number: string | null
@@ -74,6 +75,7 @@ export type Database = {
           created_at?: string
           email?: string | null
           id: string
+          subscription_expires_at?: string | null
           subscription_status?: string
           updated_at?: string
           whatsapp_number?: string | null
@@ -82,6 +84,7 @@ export type Database = {
           created_at?: string
           email?: string | null
           id?: string
+          subscription_expires_at?: string | null
           subscription_status?: string
           updated_at?: string
           whatsapp_number?: string | null
@@ -93,7 +96,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      check_expired_subscriptions: { Args: never; Returns: undefined }
     }
     Enums: {
       [_ in never]: never

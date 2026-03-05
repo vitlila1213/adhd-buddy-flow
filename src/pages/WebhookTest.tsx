@@ -20,6 +20,7 @@ interface LogEntry {
 
 const WebhookTest = () => {
   const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("5511934396102");
   const [platform, setPlatform] = useState("hotmart");
   const [event, setEvent] = useState("PURCHASE_APPROVED");
   const [loading, setLoading] = useState(false);
@@ -47,8 +48,9 @@ const WebhookTest = () => {
     if (platform === "hotmart") {
       return {
         event,
+        phone,
         data: {
-          buyer: { email, name: "Usuário Teste" },
+          buyer: { email, name: "Usuário Teste", phone },
           purchase: { status: event === "PURCHASE_APPROVED" ? "approved" : "cancelled" },
         },
       };
@@ -56,10 +58,11 @@ const WebhookTest = () => {
     if (platform === "kiwify") {
       return {
         order_status: event === "PURCHASE_APPROVED" ? "paid" : "refunded",
-        Customer: { email, full_name: "Usuário Teste" },
+        phone,
+        Customer: { email, full_name: "Usuário Teste", mobile: phone },
       };
     }
-    return { email, event, platform: "manual", name: "Usuário Teste" };
+    return { email, phone, event, platform: "manual", name: "Usuário Teste" };
   };
 
   const sendWebhook = async () => {
@@ -129,6 +132,19 @@ const WebhookTest = () => {
               type="email"
               className="mt-1.5 rounded-xl"
             />
+          </div>
+
+          <div>
+            <Label className="text-xs font-medium text-muted-foreground">WhatsApp (com código do país)</Label>
+            <Input
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+              placeholder="5511999999999"
+              className="mt-1.5 rounded-xl"
+            />
+            <p className="mt-1 text-[11px] text-muted-foreground">
+              O WhatsApp será salvo no perfil e receberá a mensagem de boas-vindas.
+            </p>
           </div>
 
           <div className="grid grid-cols-2 gap-3">
