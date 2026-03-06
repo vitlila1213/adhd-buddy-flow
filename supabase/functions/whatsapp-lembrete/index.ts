@@ -6,25 +6,49 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
+async function sendWhatsApp(url: string, token: string, phone: string, text: string) {
+  await fetch(`${url}/send/text`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", token },
+    body: JSON.stringify({ number: phone, text }),
+  });
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
-    const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-    const supabase = createClient(supabaseUrl, supabaseKey);
-
     const UAZAPI_URL = Deno.env.get("UAZAPI_URL");
     const UAZAPI_TOKEN = Deno.env.get("UAZAPI_TOKEN");
 
     if (!UAZAPI_URL || !UAZAPI_TOKEN) {
       return new Response(JSON.stringify({ error: "UAZAPI not configured" }), {
-        status: 500,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
-    // Find tasks scheduled for the current minute
+    // Check if it's a direct message request (welcome, etc.)
+    let body: Record<string, unknown> | null = null;
+    try {
+      body = await req.json();
+    } catch {
+      // No body = cron call for reminders
+    }
+
+    // === Welcome / direct message ===
+    if (body?.phone && body?.message) {
+      console.log("Sending direct message to:", body.phone);
+      await sendWhatsApp(UAZAPI_URL, UAZAPI_TOKEN, body.phone as string, body.message as string);
+      return new Response(JSON.stringify({ success: true, type: "direct" }), {
+        status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // === Cron: check scheduled reminders ===
+    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+    const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    const supabase = createClient(supabaseUrl, supabaseKey);
+
     const now = new Date();
     const minuteStart = new Date(now.getFullYear(), now.getMonth(), now.getDate(), now.getHours(), now.getMinutes(), 0);
     const minuteEnd = new Date(minuteStart.getTime() + 60000);
@@ -45,18 +69,7 @@ serve(async (req) => {
     let sent = 0;
     for (const task of tasks || []) {
       const message = `⏰ Lembrete: "${task.titulo}"${task.descricao ? `\n${task.descricao}` : ""}`;
-
-      await fetch(`${UAZAPI_URL}/send/text`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "token": UAZAPI_TOKEN,
-        },
-        body: JSON.stringify({
-          number: task.user_phone,
-          text: message,
-        }),
-      });
+      await sendWhatsApp(UAZAPI_URL, UAZAPI_TOKEN, task.user_phone, message);
       sent++;
     }
 
@@ -66,8 +79,7 @@ serve(async (req) => {
   } catch (e) {
     console.error("whatsapp-lembrete error:", e);
     return new Response(JSON.stringify({ error: e instanceof Error ? e.message : "Unknown error" }), {
-      status: 500,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
+      status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   }
 });
