@@ -1,0 +1,1 @@
+ALTER TABLE public.itens_cerebro ADD COLUMN completed_at timestamp with time zone DEFAULT NULL;

@@ -16,6 +16,7 @@ export type Database = {
     Tables: {
       itens_cerebro: {
         Row: {
+          completed_at: string | null
           created_at: string
           data_hora_agendada: string | null
           descricao: string | null
@@ -28,6 +29,7 @@ export type Database = {
           user_phone: string
         }
         Insert: {
+          completed_at?: string | null
           created_at?: string
           data_hora_agendada?: string | null
           descricao?: string | null
@@ -40,6 +42,7 @@ export type Database = {
           user_phone: string
         }
         Update: {
+          completed_at?: string | null
           created_at?: string
           data_hora_agendada?: string | null
           descricao?: string | null

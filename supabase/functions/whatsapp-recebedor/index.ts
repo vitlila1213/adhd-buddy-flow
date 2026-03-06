@@ -200,7 +200,29 @@ serve(async (req) => {
     const spDate = spTime.toISOString().split("T")[0]; // YYYY-MM-DD
     const spHour = spTime.toISOString().split("T")[1].substring(0, 5); // HH:MM
     
-    const systemPrompt = `Você é o cérebro de um assistente virtual para pessoas com TDAH. O usuário enviará uma mensagem desestruturada ou uma ideia solta. Sua função é extrair a intenção e retornar estritamente um JSON com este formato: { "tipo": "ideia" ou "tarefa", "titulo": "resumo direto ao ponto", "data_hora_agendada": "formato timestamp ISO ou null se não houver data/hora mencionada", "status": "pendente" }. Se o usuário disser que concluiu algo, retorne o status como "concluida". REGRAS DE FUSO HORÁRIO (OBRIGATÓRIO): 1) O fuso horário do usuário é SEMPRE America/Sao_Paulo (UTC-3). 2) A data de HOJE em São Paulo é ${spDate} e agora são ${spHour} (horário de Brasília). 3) Todos os horários mencionados pelo usuário já estão em horário de Brasília. 4) O campo data_hora_agendada DEVE usar o offset -03:00. Exemplo: se o usuário diz "amanhã às 9h", e hoje é ${spDate}, retorne a data de amanhã com "T09:00:00-03:00". NUNCA use UTC (Z ou +00:00).`;
+    // Fetch existing pending tasks for context so AI can match completions
+    const { data: pendingTasks } = await supabase
+      .from("itens_cerebro")
+      .select("id, titulo, tipo")
+      .eq("user_id", userId)
+      .eq("status", "pendente")
+      .order("created_at", { ascending: false })
+      .limit(20);
+
+    const taskListForPrompt = (pendingTasks || []).map(t => `- ID: ${t.id} | ${t.tipo}: "${t.titulo}"`).join("\n");
+
+    const systemPrompt = `Você é o cérebro de um assistente virtual para pessoas com TDAH. O usuário enviará uma mensagem desestruturada ou uma ideia solta. Sua função é extrair a intenção e retornar estritamente um JSON.
+
+REGRA PRINCIPAL DE CONCLUSÃO: Se o usuário disser que JÁ FEZ, JÁ CONCLUIU, JÁ LIGOU, JÁ RESOLVEU algo, você DEVE procurar na lista de tarefas pendentes abaixo qual tarefa corresponde e retornar:
+{ "acao": "concluir", "task_id": "ID da tarefa encontrada", "titulo": "titulo original da tarefa" }
+
+Lista de tarefas/ideias pendentes do usuário:
+${taskListForPrompt || "(nenhuma tarefa pendente)"}
+
+Se NÃO for uma conclusão, retorne uma NOVA entrada:
+{ "acao": "criar", "tipo": "ideia" ou "tarefa", "titulo": "resumo direto ao ponto", "data_hora_agendada": "formato timestamp ISO ou null", "status": "pendente" }
+
+REGRAS DE FUSO HORÁRIO (OBRIGATÓRIO): 1) O fuso horário do usuário é SEMPRE America/Sao_Paulo (UTC-3). 2) A data de HOJE em São Paulo é ${spDate} e agora são ${spHour} (horário de Brasília). 3) Todos os horários mencionados pelo usuário já estão em horário de Brasília. 4) O campo data_hora_agendada DEVE usar o offset -03:00. Exemplo: se o usuário diz "amanhã às 9h", e hoje é ${spDate}, retorne a data de amanhã com "T09:00:00-03:00". NUNCA use UTC (Z ou +00:00).`;
 
     const openaiResponse = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
@@ -222,33 +244,50 @@ serve(async (req) => {
     const cleanedContent = aiContent.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim();
     const parsed = JSON.parse(cleanedContent);
 
-    // === Salvar no Banco ===
-    const { error: insertError } = await supabase.from("itens_cerebro").insert({
-      user_phone: userPhone,
-      user_id: userId,
-      tipo: parsed.tipo,
-      titulo: parsed.titulo,
-      descricao: parsed.descricao || null,
-      data_hora_agendada: parsed.data_hora_agendada || null,
-      status: parsed.status || "pendente",
-    });
+    // === Salvar ou Concluir ===
+    if (parsed.acao === "concluir" && parsed.task_id) {
+      // Update existing task to completed
+      const { error: updateError } = await supabase
+        .from("itens_cerebro")
+        .update({ status: "concluida", completed_at: new Date().toISOString() })
+        .eq("id", parsed.task_id)
+        .eq("user_id", userId);
 
-    if (insertError) throw insertError;
+      if (updateError) throw updateError;
 
-    // Decrementar créditos se não for premium/ilimitado
-    if (!isPremium && !isUnlimited && credits > 0) {
-      await supabase
-        .from("profiles")
-        .update({ credits: credits - 1 })
-        .eq("id", userId);
-    }
+      if (UAZAPI_URL && UAZAPI_TOKEN) {
+        await sendWhatsApp(UAZAPI_URL, UAZAPI_TOKEN, userPhone,
+          `✅ Tarefa concluída: "${parsed.titulo}"\n\nMandou bem! 🎉`
+        );
+      }
+    } else {
+      // Create new item
+      const { error: insertError } = await supabase.from("itens_cerebro").insert({
+        user_phone: userPhone,
+        user_id: userId,
+        tipo: parsed.tipo || "tarefa",
+        titulo: parsed.titulo,
+        descricao: parsed.descricao || null,
+        data_hora_agendada: parsed.data_hora_agendada || null,
+        status: parsed.status || "pendente",
+      });
 
-    // === Confirmação ===
-    if (UAZAPI_URL && UAZAPI_TOKEN) {
-      const confirmMsg = isAudio
-        ? `🎙️ Entendi seu áudio!\n✅ Anotado: "${parsed.titulo}"`
-        : "✅ Anotado no seu Cérebro de Bolso!";
-      await sendWhatsApp(UAZAPI_URL, UAZAPI_TOKEN, userPhone, confirmMsg);
+      if (insertError) throw insertError;
+
+      // Decrementar créditos se não for premium/ilimitado
+      if (!isPremium && !isUnlimited && credits > 0) {
+        await supabase
+          .from("profiles")
+          .update({ credits: credits - 1 })
+          .eq("id", userId);
+      }
+
+      if (UAZAPI_URL && UAZAPI_TOKEN) {
+        const confirmMsg = isAudio
+          ? `🎙️ Entendi seu áudio!\n✅ Anotado: "${parsed.titulo}"`
+          : `✅ Anotado no seu Cérebro de Bolso!`;
+        await sendWhatsApp(UAZAPI_URL, UAZAPI_TOKEN, userPhone, confirmMsg);
+      }
     }
 
     return new Response(JSON.stringify({ success: true }), {
