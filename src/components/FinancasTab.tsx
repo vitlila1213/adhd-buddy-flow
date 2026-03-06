@@ -21,6 +21,8 @@ const FinancasTab = () => {
     is_recorrente: false,
   });
 
+  const financaCats = (categorias || []).filter(c => c.tipo === "financa");
+
   const resumo = useMemo(() => {
     const all = financas || [];
     const now = new Date();
@@ -33,35 +35,6 @@ const FinancasTab = () => {
     return { gastos, recebido, saldo: recebido - gastos };
   }, [financas]);
 
-  const handleCreate = () => {
-    if (!form.valor || Number(form.valor) <= 0) { toast.error("Informe um valor válido"); return; }
-    create.mutate({
-      tipo: form.tipo,
-      valor: Number(form.valor),
-      descricao: form.descricao || undefined,
-      categoria_id: form.categoria_id || undefined,
-      status: form.status,
-      is_recorrente: form.is_recorrente,
-    }, {
-      onSuccess: () => {
-        setForm({ tipo: "despesa", valor: "", descricao: "", categoria_id: "", status: "pendente", is_recorrente: false });
-        setShowForm(false);
-        toast.success("Transação adicionada!");
-      },
-      onError: () => toast.error("Erro ao criar transação"),
-    });
-  };
-
-  if (isLoading) {
-    return (
-      <div className="flex h-64 items-center justify-center">
-        <Loader2 className="h-6 w-6 animate-spin text-primary" />
-      </div>
-    );
-  }
-
-  const financaCats = (categorias || []).filter(c => c.tipo === "financa");
-
   const financasFiltradas = useMemo(() => {
     const all = financas || [];
     if (filtroCategoria === "todas") return all;
@@ -71,6 +44,14 @@ const FinancasTab = () => {
 
   const pagos = financasFiltradas.filter(f => f.status === "pago");
   const pendentes = financasFiltradas.filter(f => f.status === "pendente");
+
+  if (isLoading) {
+    return (
+      <div className="flex h-64 items-center justify-center">
+        <Loader2 className="h-6 w-6 animate-spin text-primary" />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-5">
