@@ -33,7 +33,7 @@ const KanbanBoard = ({ activeTab, limitReached, onUpgrade }: KanbanBoardProps) =
       updateTipo.mutate({ id: draggableId, tipo: "tarefa" });
       updateStatus.mutate({ id: draggableId, status: "pendente" });
     } else if (destination.droppableId === "concluidas") {
-      updateStatus.mutate({ id: draggableId, status: "concluida" });
+      updateStatus.mutate({ id: draggableId, status: "concluida", completed_at: new Date().toISOString() });
     }
   };
 

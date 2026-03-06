@@ -25,10 +25,13 @@ export const useItens = () => {
   });
 
   const updateStatus = useMutation({
-    mutationFn: async ({ id, status }: { id: string; status: string }) => {
+    mutationFn: async ({ id, status, completed_at }: { id: string; status: string; completed_at?: string }) => {
+      const updateData: any = { status };
+      if (completed_at) updateData.completed_at = completed_at;
+      if (status !== "concluida") updateData.completed_at = null;
       const { error } = await supabase
         .from("itens_cerebro")
-        .update({ status })
+        .update(updateData)
         .eq("id", id);
       if (error) throw error;
     },

@@ -52,7 +52,7 @@ const KanbanCard = ({ item, index }: KanbanCardProps) => {
             </p>
           )}
 
-          <div className="flex items-center gap-2 pl-[38px]">
+          <div className="flex flex-wrap items-center gap-2 pl-[38px]">
             {/* Status badge */}
             {item.status === "concluida" ? (
               <span className="inline-flex items-center rounded-lg bg-status-done-bg px-2 py-0.5 text-[11px] font-semibold text-status-done-text">
@@ -64,7 +64,14 @@ const KanbanCard = ({ item, index }: KanbanCardProps) => {
               </span>
             )}
 
-            {item.data_hora_agendada && (
+            {item.status === "concluida" && (item as any).completed_at && (
+              <span className="inline-flex items-center gap-1 rounded-lg bg-status-done-bg px-2 py-0.5 text-[11px] font-medium text-status-done-text">
+                <CheckCircle2 className="h-3 w-3" />
+                {format(new Date((item as any).completed_at), "dd MMM, HH:mm", { locale: ptBR })}
+              </span>
+            )}
+
+            {item.data_hora_agendada && item.status !== "concluida" && (
               <span className="inline-flex items-center gap-1 rounded-lg bg-muted px-2 py-0.5 text-[11px] font-medium text-muted-foreground">
                 <Clock className="h-3 w-3" />
                 {format(new Date(item.data_hora_agendada), "dd MMM, HH:mm", { locale: ptBR })}
