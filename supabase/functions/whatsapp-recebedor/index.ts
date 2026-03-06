@@ -289,7 +289,11 @@ Retorne APENAS o JSON, sem markdown, sem backticks.`;
       if (!action.tabela || action.operacao === "nenhuma" || !action.dados) continue;
 
       if (action.operacao === "insert") {
-        const insertData = { ...action.dados, user_id: userId, user_phone: userPhone };
+        const insertData: Record<string, unknown> = { ...action.dados, user_id: userId };
+        // Only add user_phone for itens_cerebro (financas doesn't have this column)
+        if (action.tabela === "itens_cerebro") {
+          insertData.user_phone = userPhone;
+        }
         // Remove fields that shouldn't be in the insert
         delete insertData.id;
 
