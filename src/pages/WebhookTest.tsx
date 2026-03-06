@@ -9,6 +9,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Send, Loader2, CheckCircle2, XCircle, ArrowLeft, Zap, CreditCard, Gift } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Link } from "react-router-dom";
+import { toast } from "sonner";
 
 interface LogEntry {
   id: number;
