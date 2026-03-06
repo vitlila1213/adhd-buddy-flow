@@ -33,9 +33,12 @@ export const useCategorias = () => {
   const create = useMutation({
     mutationFn: async ({ nome, tipo, cor }: { nome: string; tipo: "financa" | "tarefa"; cor?: string }) => {
       if (!user) throw new Error("Not authenticated");
-      const insertData: Record<string, unknown> = { user_id: user.id, nome, tipo };
-      if (cor) insertData.cor = cor;
-      const { error } = await supabase.from("categorias").insert(insertData);
+      const { error } = await supabase.from("categorias").insert({
+        user_id: user.id,
+        nome,
+        tipo,
+        ...(cor ? { cor } : {}),
+      } as any);
       if (error) throw error;
     },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["categorias"] }),
@@ -43,7 +46,7 @@ export const useCategorias = () => {
 
   const update = useMutation({
     mutationFn: async ({ id, nome, cor }: { id: string; nome?: string; cor?: string }) => {
-      const updateData: Record<string, unknown> = {};
+      const updateData: any = {};
       if (nome !== undefined) updateData.nome = nome;
       if (cor !== undefined) updateData.cor = cor;
       const { error } = await supabase.from("categorias").update(updateData).eq("id", id);
