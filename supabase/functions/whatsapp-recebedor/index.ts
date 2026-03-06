@@ -222,7 +222,9 @@ ${taskListForPrompt || "(nenhuma tarefa pendente)"}
 Se NÃO for uma conclusão, retorne uma NOVA entrada:
 { "acao": "criar", "tipo": "ideia" ou "tarefa", "titulo": "resumo direto ao ponto", "data_hora_agendada": "formato timestamp ISO ou null", "status": "pendente" }
 
-REGRAS DE FUSO HORÁRIO (OBRIGATÓRIO): 1) O fuso horário do usuário é SEMPRE America/Sao_Paulo (UTC-3). 2) A data de HOJE em São Paulo é ${spDate} e agora são ${spHour} (horário de Brasília). 3) Todos os horários mencionados pelo usuário já estão em horário de Brasília. 4) O campo data_hora_agendada DEVE usar o offset -03:00. Exemplo: se o usuário diz "amanhã às 9h", e hoje é ${spDate}, retorne a data de amanhã com "T09:00:00-03:00". NUNCA use UTC (Z ou +00:00).`;
+REGRAS DE FUSO HORÁRIO (OBRIGATÓRIO): 1) O fuso horário do usuário é SEMPRE America/Sao_Paulo (UTC-3). 2) A data de HOJE em São Paulo é ${spDate} e agora são ${spHour} (horário de Brasília). 3) Todos os horários mencionados pelo usuário já estão em horário de Brasília. 4) O campo data_hora_agendada DEVE usar o offset -03:00. Exemplo: se o usuário diz "amanhã às 9h", e hoje é ${spDate}, retorne a data de amanhã com "T09:00:00-03:00". NUNCA use UTC (Z ou +00:00).
+
+REGRAS DE HORÁRIO AM/PM (CRÍTICO): Quando o usuário diz um horário SEM especificar "da tarde" ou "da noite", use o contexto: - "2h da manhã" ou "2h da madrugada" = 02:00 - "2h da tarde" = 14:00 - Se disser apenas "às 2h" sem contexto, use o bom senso: horários entre 1h-6h sem contexto = madrugada (01:00-06:00). Horários entre 7h-12h sem contexto = manhã (07:00-12:00). NUNCA converta automaticamente para formato PM (somando 12). Só some 12 se o usuário EXPLICITAMENTE disser "da tarde" ou "da noite".`;
 
     const openaiResponse = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
