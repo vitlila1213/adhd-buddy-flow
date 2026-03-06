@@ -14,8 +14,95 @@ export type Database = {
   }
   public: {
     Tables: {
+      categorias: {
+        Row: {
+          created_at: string
+          id: string
+          nome: string
+          tipo: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          nome: string
+          tipo?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          nome?: string
+          tipo?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "categorias_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      financas: {
+        Row: {
+          categoria_id: string | null
+          created_at: string
+          data_vencimento: string | null
+          descricao: string | null
+          id: string
+          is_recorrente: boolean
+          status: string
+          tipo: string
+          user_id: string
+          valor: number
+        }
+        Insert: {
+          categoria_id?: string | null
+          created_at?: string
+          data_vencimento?: string | null
+          descricao?: string | null
+          id?: string
+          is_recorrente?: boolean
+          status?: string
+          tipo: string
+          user_id: string
+          valor?: number
+        }
+        Update: {
+          categoria_id?: string | null
+          created_at?: string
+          data_vencimento?: string | null
+          descricao?: string | null
+          id?: string
+          is_recorrente?: boolean
+          status?: string
+          tipo?: string
+          user_id?: string
+          valor?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "financas_categoria_id_fkey"
+            columns: ["categoria_id"]
+            isOneToOne: false
+            referencedRelation: "categorias"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "financas_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       itens_cerebro: {
         Row: {
+          categoria_id: string | null
           completed_at: string | null
           created_at: string
           data_hora_agendada: string | null
@@ -29,6 +116,7 @@ export type Database = {
           user_phone: string
         }
         Insert: {
+          categoria_id?: string | null
           completed_at?: string | null
           created_at?: string
           data_hora_agendada?: string | null
@@ -42,6 +130,7 @@ export type Database = {
           user_phone: string
         }
         Update: {
+          categoria_id?: string | null
           completed_at?: string | null
           created_at?: string
           data_hora_agendada?: string | null
@@ -55,6 +144,13 @@ export type Database = {
           user_phone?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "itens_cerebro_categoria_id_fkey"
+            columns: ["categoria_id"]
+            isOneToOne: false
+            referencedRelation: "categorias"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "itens_cerebro_user_id_fkey"
             columns: ["user_id"]
