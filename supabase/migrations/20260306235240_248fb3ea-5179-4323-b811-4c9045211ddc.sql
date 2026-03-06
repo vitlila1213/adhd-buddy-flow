@@ -1,0 +1,1 @@
+ALTER TABLE public.categorias ADD COLUMN cor TEXT NOT NULL DEFAULT '#6366f1';
