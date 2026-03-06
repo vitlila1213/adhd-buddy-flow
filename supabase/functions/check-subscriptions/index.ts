@@ -36,7 +36,7 @@ serve(async (req) => {
     const expiredIds = expired.map((p) => p.id);
     const { error: updateError } = await supabase
       .from("profiles")
-      .update({ subscription_status: "cancelled" })
+      .update({ subscription_status: "cancelled", credits: 0 })
       .in("id", expiredIds);
 
     if (updateError) throw updateError;

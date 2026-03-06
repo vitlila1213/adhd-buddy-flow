@@ -1,0 +1,1 @@
+ALTER TABLE public.profiles ADD COLUMN credits integer NOT NULL DEFAULT 10;

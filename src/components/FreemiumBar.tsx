@@ -1,5 +1,4 @@
 import { useAuth } from "@/contexts/AuthContext";
-import { useItens } from "@/hooks/useItens";
 import { Progress } from "@/components/ui/progress";
 import { Crown } from "lucide-react";
 
@@ -7,17 +6,17 @@ const FREE_LIMIT = 10;
 
 export const useFreemiumStatus = () => {
   const { profile } = useAuth();
-  const { data: items } = useItens();
   const isPremium = profile?.subscription_status === "active";
-  const totalItems = items?.length ?? 0;
-  const limitReached = !isPremium && totalItems >= FREE_LIMIT;
-  return { isPremium, totalItems, limitReached, FREE_LIMIT };
+  const credits = profile?.credits ?? 0;
+  const isUnlimited = credits === -1;
+  const limitReached = !isPremium && !isUnlimited && credits <= 0;
+  return { isPremium, credits, isUnlimited, limitReached, FREE_LIMIT };
 };
 
 const FreemiumBar = () => {
-  const { isPremium, totalItems, FREE_LIMIT } = useFreemiumStatus();
+  const { isPremium, credits, isUnlimited } = useFreemiumStatus();
 
-  if (isPremium) {
+  if (isPremium || isUnlimited) {
     return (
       <div className="flex items-center gap-1.5 rounded-full bg-primary/10 px-3 py-1">
         <Crown className="h-3.5 w-3.5 text-primary" />
@@ -26,9 +25,9 @@ const FreemiumBar = () => {
     );
   }
 
-  const pct = Math.min((totalItems / FREE_LIMIT) * 100, 100);
-  const isWarning = pct >= 70;
-  const isFull = pct >= 100;
+  const pct = Math.min(((FREE_LIMIT - credits) / FREE_LIMIT) * 100, 100);
+  const isWarning = credits <= 3;
+  const isFull = credits <= 0;
 
   return (
     <div className="flex items-center gap-2">
@@ -39,7 +38,7 @@ const FreemiumBar = () => {
         />
       </div>
       <span className={`text-[10px] font-medium ${isFull ? "text-destructive" : "text-muted-foreground"}`}>
-        {totalItems}/{FREE_LIMIT}
+        {credits}/{FREE_LIMIT}
       </span>
     </div>
   );

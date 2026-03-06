@@ -56,7 +56,7 @@ serve(async (req) => {
     // === BLINDAGEM: Verificar perfil e limites ===
     const { data: profileData } = await supabase
       .from("profiles")
-      .select("id, subscription_status")
+      .select("id, subscription_status, credits")
       .eq("whatsapp_number", userPhone)
       .single();
 
@@ -75,22 +75,19 @@ serve(async (req) => {
 
     const userId = profileData.id;
     const isPremium = profileData.subscription_status === "active";
+    const credits = profileData.credits ?? 0;
+    const isUnlimited = credits === -1;
 
-    // Regra 2: Limite free
-    if (!isPremium) {
-      const { count } = await supabase
-        .from("itens_cerebro")
-        .select("id", { count: "exact", head: true })
-        .eq("user_id", userId);
-
-      if ((count ?? 0) >= FREE_LIMIT) {
-        console.log("Limite free atingido para:", userPhone);
+    // Regra 2: Limite free (check credits)
+    if (!isPremium && !isUnlimited) {
+      if (credits <= 0) {
+        console.log("Créditos esgotados para:", userPhone);
         if (UAZAPI_URL && UAZAPI_TOKEN) {
           await sendWhatsApp(UAZAPI_URL, UAZAPI_TOKEN, userPhone,
-            `⚠️ Você atingiu o limite de ${FREE_LIMIT} ideias do seu Cérebro gratuito!\n\nPara continuar esvaziando sua mente sem limites, assine o plano Premium:\n${APP_URL}/vendas`
+            `⚠️ Seus créditos gratuitos acabaram!\n\nPara continuar esvaziando sua mente sem limites, assine o plano Premium:\n${APP_URL}/vendas`
           );
         }
-        return new Response(JSON.stringify({ blocked: "limit_reached" }), {
+        return new Response(JSON.stringify({ blocked: "no_credits" }), {
           status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
@@ -221,6 +218,14 @@ serve(async (req) => {
     });
 
     if (insertError) throw insertError;
+
+    // Decrementar créditos se não for premium/ilimitado
+    if (!isPremium && !isUnlimited && credits > 0) {
+      await supabase
+        .from("profiles")
+        .update({ credits: credits - 1 })
+        .eq("id", userId);
+    }
 
     // === Confirmação ===
     if (UAZAPI_URL && UAZAPI_TOKEN) {

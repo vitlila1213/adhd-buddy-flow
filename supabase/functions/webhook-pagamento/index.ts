@@ -98,6 +98,9 @@ serve(async (req) => {
       const expiresAt = new Date();
       expiresAt.setDate(expiresAt.getDate() + 30);
       updateData.subscription_expires_at = expiresAt.toISOString();
+      updateData.credits = -1; // unlimited
+    } else if (newStatus === "cancelled") {
+      updateData.credits = 0;
     }
 
     // Salvar telefone no perfil se fornecido e ainda não existir

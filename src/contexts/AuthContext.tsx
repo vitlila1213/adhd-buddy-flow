@@ -7,6 +7,7 @@ interface Profile {
   email: string | null;
   whatsapp_number: string | null;
   subscription_status: string;
+  credits: number;
 }
 
 interface AuthContextType {
