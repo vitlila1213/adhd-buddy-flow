@@ -54,10 +54,26 @@ serve(async (req) => {
     const supabase = createClient(supabaseUrl, supabaseKey);
 
     // === BLINDAGEM: Verificar perfil e limites ===
+    // Brazilian mobile numbers: UAZAPI may send without the 9th digit (12 digits)
+    // but user may have saved with 9 (13 digits), or vice-versa. Try both formats.
+    const phoneVariants = [userPhone];
+    if (userPhone.length === 12 && userPhone.startsWith("55")) {
+      // Add variant with 9: 55XX -> 55XX9
+      const withNine = userPhone.slice(0, 4) + "9" + userPhone.slice(4);
+      phoneVariants.push(withNine);
+    } else if (userPhone.length === 13 && userPhone.startsWith("55")) {
+      // Add variant without 9
+      const withoutNine = userPhone.slice(0, 4) + userPhone.slice(5);
+      phoneVariants.push(withoutNine);
+    }
+
+    console.log("Phone variants to search:", phoneVariants);
+
     const { data: profileData } = await supabase
       .from("profiles")
       .select("id, subscription_status, credits")
-      .eq("whatsapp_number", userPhone)
+      .in("whatsapp_number", phoneVariants)
+      .limit(1)
       .single();
 
     // Regra 1: Não cadastrado
