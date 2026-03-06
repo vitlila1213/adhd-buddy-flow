@@ -241,18 +241,20 @@ Interprete a mensagem do usuário e retorne ESTRITAMENTE um JSON com:
 1. "mensagem_whatsapp": Texto conversacional e amigável que será enviado de volta ao usuário confirmando a ação ou respondendo a pergunta/relatório solicitado. Seja natural e humano.
 
 2. "db_actions": Array de ações no banco. Cada ação tem:
-   - "tabela": "financas" ou "itens_cerebro"
+   - "tabela": "financas", "itens_cerebro" ou "categorias"
    - "operacao": "insert", "update" ou "nenhuma"
    - "dados": JSON com os campos exatos
 
 REGRAS:
 - Se for RELATÓRIO (ex: "quanto gastei?", "como estão minhas finanças?"): analise os dados acima e responda na mensagem_whatsapp. db_actions = [{"tabela":"","operacao":"nenhuma","dados":{}}]
+- Se for CRIAR CATEGORIA: use tabela "categorias". Campos: nome (texto), tipo ("financa" ou "tarefa"). Exemplo: {"tabela":"categorias","operacao":"insert","dados":{"nome":"Comida","tipo":"financa"}}
 - Se for NOVA DESPESA/RECEITA: classifique na categoria correta (use o categoria_id). Se não houver categoria adequada, use null.
   Campos da tabela financas: tipo ("receita"/"despesa"), valor, descricao, categoria_id, status ("pago"/"pendente"), is_recorrente (boolean)
 - Se for NOVA TAREFA/IDEIA: classifique na categoria correta.
   Campos da tabela itens_cerebro: tipo ("tarefa"/"ideia"), titulo, descricao, data_hora_agendada (ISO com -03:00 ou null), status ("pendente"), categoria_id
 - Se for CONCLUSÃO de tarefa existente: use operacao "update" com os dados {id: "task_id", status: "concluida", completed_at: "${now.toISOString()}"}
 - Se for marcar finança como PAGA: use operacao "update" com {id: "financa_id", status: "pago"}
+- NUNCA insira categorias na tabela itens_cerebro. Categorias vão SEMPRE na tabela "categorias".
 
 REGRAS DE HORÁRIO (CRÍTICO):
 - "2h da manhã"/"2h da madrugada" = 02:00. "2h da tarde" = 14:00.
