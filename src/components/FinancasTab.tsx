@@ -61,8 +61,16 @@ const FinancasTab = () => {
   }
 
   const financaCats = (categorias || []).filter(c => c.tipo === "financa");
-  const pagos = (financas || []).filter(f => f.status === "pago");
-  const pendentes = (financas || []).filter(f => f.status === "pendente");
+
+  const financasFiltradas = useMemo(() => {
+    const all = financas || [];
+    if (filtroCategoria === "todas") return all;
+    if (filtroCategoria === "sem_categoria") return all.filter(f => !f.categoria_id);
+    return all.filter(f => f.categoria_id === filtroCategoria);
+  }, [financas, filtroCategoria]);
+
+  const pagos = financasFiltradas.filter(f => f.status === "pago");
+  const pendentes = financasFiltradas.filter(f => f.status === "pendente");
 
   return (
     <div className="space-y-5">
