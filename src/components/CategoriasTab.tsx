@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useCategorias } from "@/hooks/useCategorias";
-import { Loader2, Plus, Pencil, Trash2, Tag, DollarSign, ListTodo } from "lucide-react";
+import { Loader2, Plus, Pencil, Trash2, DollarSign, ListTodo } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
 
@@ -66,8 +66,8 @@ const CategoriasTab = () => {
             onChange={e => setTipo(e.target.value as "financa" | "tarefa")}
             className="rounded-xl border border-input bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
           >
-            <option value="tarefa">📋 Tarefa</option>
-            <option value="financa">💰 Finança</option>
+            <option value="tarefa">Tarefa</option>
+            <option value="financa">Finança</option>
           </select>
           <button
             onClick={handleCreate}
@@ -105,8 +105,8 @@ const CategoriasTab = () => {
                     exit={{ opacity: 0, x: -20 }}
                     className="flex items-center gap-3 rounded-2xl border border-border/60 bg-card p-3 shadow-sm"
                   >
-                    <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-primary/10">
-                      <Tag className="h-4 w-4 text-primary" />
+                    <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-primary/10 text-lg">
+                      {cat.tipo === "financa" ? "💰" : "📋"}
                     </div>
                     {editingId === cat.id ? (
                       <input

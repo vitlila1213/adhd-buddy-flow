@@ -6,9 +6,10 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
-import { Send, Loader2, CheckCircle2, XCircle, ArrowLeft, Zap, CreditCard } from "lucide-react";
+import { Send, Loader2, CheckCircle2, XCircle, ArrowLeft, Zap, CreditCard, Gift } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Link } from "react-router-dom";
+import { toast } from "sonner";
 
 interface LogEntry {
   id: number;
@@ -26,6 +27,8 @@ const WebhookTest = () => {
   const [loading, setLoading] = useState(false);
   const [logs, setLogs] = useState<LogEntry[]>([]);
   const [logCounter, setLogCounter] = useState(0);
+  const [trialEmail, setTrialEmail] = useState("");
+  const [trialLoading, setTrialLoading] = useState(false);
 
   const addLog = (type: "request" | "response", status: "success" | "error", content: string) => {
     setLogCounter((prev) => {
@@ -184,6 +187,56 @@ const WebhookTest = () => {
             {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Send className="mr-2 h-4 w-4" />}
             Simular Webhook de Pagamento
           </Button>
+        </Card>
+
+        {/* Trial Grátis */}
+        <Card className="rounded-2xl border-primary/30 bg-primary/5 p-4 shadow-sm space-y-3">
+          <h3 className="flex items-center gap-2 text-sm font-bold text-foreground">
+            <Gift className="h-4 w-4 text-primary" />
+            🎁 Ativar 1 Mês Grátis
+          </h3>
+          <p className="text-xs text-muted-foreground">
+            Insira o e-mail do usuário para ativar 30 dias de acesso ilimitado gratuitamente.
+          </p>
+          <div className="flex gap-2">
+            <Input
+              value={trialEmail}
+              onChange={(e) => setTrialEmail(e.target.value)}
+              placeholder="usuario@email.com"
+              type="email"
+              className="flex-1 rounded-xl"
+            />
+            <Button
+              onClick={async () => {
+                if (!trialEmail) return;
+                setTrialLoading(true);
+                try {
+                  const { data, error } = await supabase.functions.invoke("webhook-pagamento", {
+                    body: {
+                      email: trialEmail,
+                      event: "purchase_approved",
+                      platform: "manual",
+                      name: "Trial Grátis",
+                    },
+                  });
+                  if (error) throw error;
+                  addLog("response", "success", `✅ Trial ativado para ${trialEmail}\n${JSON.stringify(data, null, 2)}`);
+                  setTrialEmail("");
+                  toast.success("1 mês grátis ativado com sucesso!");
+                } catch (err: any) {
+                  addLog("response", "error", err.message || "Erro ao ativar trial");
+                  toast.error("Erro ao ativar trial");
+                } finally {
+                  setTrialLoading(false);
+                }
+              }}
+              disabled={trialLoading || !trialEmail}
+              className="rounded-xl shrink-0"
+            >
+              {trialLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Gift className="mr-2 h-4 w-4" />}
+              Ativar
+            </Button>
+          </div>
         </Card>
 
         {/* URL do Webhook */}
