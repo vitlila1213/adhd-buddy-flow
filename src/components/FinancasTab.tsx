@@ -1,7 +1,7 @@
 import { useState, useMemo } from "react";
 import { useFinancas } from "@/hooks/useFinancas";
 import { useCategorias } from "@/hooks/useCategorias";
-import { Loader2, Plus, TrendingUp, TrendingDown, Wallet, DollarSign, Repeat, Trash2 } from "lucide-react";
+import { Loader2, Plus, TrendingUp, TrendingDown, Wallet, DollarSign, Repeat, Trash2, Filter } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -11,6 +11,7 @@ const FinancasTab = () => {
   const { data: financas, isLoading, create, remove } = useFinancas();
   const { data: categorias } = useCategorias();
   const [showForm, setShowForm] = useState(false);
+  const [filtroCategoria, setFiltroCategoria] = useState<string>("todas");
   const [form, setForm] = useState({
     tipo: "despesa" as "receita" | "despesa",
     valor: "",

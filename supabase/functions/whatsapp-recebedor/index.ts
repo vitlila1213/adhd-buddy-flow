@@ -292,7 +292,7 @@ Retorne APENAS o JSON, sem markdown, sem backticks.`;
 
       if (action.operacao === "insert") {
         const insertData: Record<string, unknown> = { ...action.dados, user_id: userId };
-        // Only add user_phone for itens_cerebro (financas doesn't have this column)
+        // Only add user_phone for itens_cerebro (other tables don't have this column)
         if (action.tabela === "itens_cerebro") {
           insertData.user_phone = userPhone;
         }
