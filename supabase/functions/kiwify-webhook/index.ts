@@ -38,6 +38,7 @@ serve(async (req) => {
         .update({
           subscription_status: "active",
           subscription_expires_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+          credits: -1, // unlimited
         })
         .eq("email", email)
         .select("whatsapp_number")
@@ -69,7 +70,7 @@ serve(async (req) => {
     } else if (["refunded", "chargeback", "canceled", "cancelled"].includes(statusLower)) {
       const { error } = await supabase
         .from("profiles")
-        .update({ subscription_status: "inactive" })
+        .update({ subscription_status: "inactive", credits: 0 })
         .eq("email", email);
 
       if (error) console.error("Erro ao desativar:", error);

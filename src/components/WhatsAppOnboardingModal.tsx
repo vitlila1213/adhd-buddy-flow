@@ -11,9 +11,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { MessageSquare } from "lucide-react";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 
 const WhatsAppOnboardingModal = () => {
-  const { profile, updateProfile } = useAuth();
+  const { profile, updateProfile, refreshProfile } = useAuth();
   const [phone, setPhone] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -28,6 +29,25 @@ const WhatsAppOnboardingModal = () => {
     setLoading(true);
     try {
       await updateProfile({ whatsapp_number: cleaned });
+
+      // Send welcome message via edge function
+      try {
+        await supabase.functions.invoke("whatsapp-lembrete", {
+          body: {
+            type: "welcome",
+            phone: cleaned,
+            message: `🎉 *Bem-vindo ao Cérebro de Bolso!*\n\n` +
+              `Você ganhou *10 créditos gratuitos* para testar! 🎁\n\n` +
+              `Me envie mensagens de texto ou áudio com suas ideias e tarefas.\n\n` +
+              `Eu vou organizar tudo automaticamente no seu painel. 🧠\n\n` +
+              `Experimente agora! Me mande uma ideia ou tarefa.`,
+          },
+        });
+      } catch (e) {
+        console.log("Welcome message error (non-blocking):", e);
+      }
+
+      await refreshProfile();
       toast.success("WhatsApp salvo com sucesso!");
     } catch {
       toast.error("Erro ao salvar. Tente novamente.");
