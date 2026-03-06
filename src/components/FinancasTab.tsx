@@ -53,6 +53,25 @@ const FinancasTab = () => {
     );
   }
 
+  const handleCreate = () => {
+    if (!form.valor || Number(form.valor) <= 0) { toast.error("Informe um valor válido"); return; }
+    create.mutate({
+      tipo: form.tipo,
+      valor: Number(form.valor),
+      descricao: form.descricao || undefined,
+      categoria_id: form.categoria_id || undefined,
+      status: form.status,
+      is_recorrente: form.is_recorrente,
+    }, {
+      onSuccess: () => {
+        setForm({ tipo: "despesa", valor: "", descricao: "", categoria_id: "", status: "pendente", is_recorrente: false });
+        setShowForm(false);
+        toast.success("Transação adicionada!");
+      },
+      onError: () => toast.error("Erro ao criar transação"),
+    });
+  };
+
   return (
     <div className="space-y-5">
       {/* Summary Cards */}
