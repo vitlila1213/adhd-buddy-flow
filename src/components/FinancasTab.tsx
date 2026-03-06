@@ -1,7 +1,7 @@
 import { useState, useMemo } from "react";
 import { useFinancas } from "@/hooks/useFinancas";
 import { useCategorias } from "@/hooks/useCategorias";
-import { Loader2, Plus, TrendingUp, TrendingDown, Wallet, DollarSign, Repeat, Trash2 } from "lucide-react";
+import { Loader2, Plus, TrendingUp, TrendingDown, Wallet, DollarSign, Repeat, Trash2, Filter } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -11,6 +11,7 @@ const FinancasTab = () => {
   const { data: financas, isLoading, create, remove } = useFinancas();
   const { data: categorias } = useCategorias();
   const [showForm, setShowForm] = useState(false);
+  const [filtroCategoria, setFiltroCategoria] = useState<string>("todas");
   const [form, setForm] = useState({
     tipo: "despesa" as "receita" | "despesa",
     valor: "",
@@ -19,6 +20,8 @@ const FinancasTab = () => {
     status: "pendente" as "pago" | "pendente",
     is_recorrente: false,
   });
+
+  const financaCats = (categorias || []).filter(c => c.tipo === "financa");
 
   const resumo = useMemo(() => {
     const all = financas || [];
@@ -31,6 +34,24 @@ const FinancasTab = () => {
     const recebido = mesAtual.filter(f => f.tipo === "receita").reduce((s, f) => s + Number(f.valor), 0);
     return { gastos, recebido, saldo: recebido - gastos };
   }, [financas]);
+
+  const financasFiltradas = useMemo(() => {
+    const all = financas || [];
+    if (filtroCategoria === "todas") return all;
+    if (filtroCategoria === "sem_categoria") return all.filter(f => !f.categoria_id);
+    return all.filter(f => f.categoria_id === filtroCategoria);
+  }, [financas, filtroCategoria]);
+
+  const pagos = financasFiltradas.filter(f => f.status === "pago");
+  const pendentes = financasFiltradas.filter(f => f.status === "pendente");
+
+  if (isLoading) {
+    return (
+      <div className="flex h-64 items-center justify-center">
+        <Loader2 className="h-6 w-6 animate-spin text-primary" />
+      </div>
+    );
+  }
 
   const handleCreate = () => {
     if (!form.valor || Number(form.valor) <= 0) { toast.error("Informe um valor válido"); return; }
@@ -50,18 +71,6 @@ const FinancasTab = () => {
       onError: () => toast.error("Erro ao criar transação"),
     });
   };
-
-  if (isLoading) {
-    return (
-      <div className="flex h-64 items-center justify-center">
-        <Loader2 className="h-6 w-6 animate-spin text-primary" />
-      </div>
-    );
-  }
-
-  const financaCats = (categorias || []).filter(c => c.tipo === "financa");
-  const pagos = (financas || []).filter(f => f.status === "pago");
-  const pendentes = (financas || []).filter(f => f.status === "pendente");
 
   return (
     <div className="space-y-5">
@@ -88,6 +97,22 @@ const FinancasTab = () => {
             </p>
           </motion.div>
         ))}
+      </div>
+
+      {/* Category Filter */}
+      <div className="flex items-center gap-2">
+        <Filter className="h-4 w-4 text-muted-foreground" />
+        <select
+          value={filtroCategoria}
+          onChange={e => setFiltroCategoria(e.target.value)}
+          className="flex-1 rounded-xl border border-input bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+        >
+          <option value="todas">Todas as categorias</option>
+          <option value="sem_categoria">Sem categoria</option>
+          {financaCats.map(c => (
+            <option key={c.id} value={c.id}>{c.nome}</option>
+          ))}
+        </select>
       </div>
 
       {/* Add button */}
