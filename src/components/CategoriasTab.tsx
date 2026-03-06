@@ -4,16 +4,23 @@ import { Loader2, Plus, Pencil, Trash2, DollarSign, ListTodo } from "lucide-reac
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
 
+const PRESET_COLORS = [
+  "#ef4444", "#f97316", "#f59e0b", "#22c55e", "#14b8a6",
+  "#3b82f6", "#6366f1", "#8b5cf6", "#ec4899", "#64748b",
+];
+
 const CategoriasTab = () => {
   const { data: categorias, isLoading, create, update, remove } = useCategorias();
   const [nome, setNome] = useState("");
   const [tipo, setTipo] = useState<"financa" | "tarefa">("tarefa");
+  const [cor, setCor] = useState("#6366f1");
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editingNome, setEditingNome] = useState("");
+  const [editingCor, setEditingCor] = useState("");
 
   const handleCreate = () => {
     if (!nome.trim()) return;
-    create.mutate({ nome: nome.trim(), tipo }, {
+    create.mutate({ nome: nome.trim(), tipo, cor }, {
       onSuccess: () => { setNome(""); toast.success("Categoria criada!"); },
       onError: () => toast.error("Erro ao criar categoria"),
     });
@@ -21,7 +28,7 @@ const CategoriasTab = () => {
 
   const handleUpdate = (id: string) => {
     if (!editingNome.trim()) return;
-    update.mutate({ id, nome: editingNome.trim() }, {
+    update.mutate({ id, nome: editingNome.trim(), cor: editingCor }, {
       onSuccess: () => { setEditingId(null); toast.success("Categoria atualizada!"); },
       onError: () => toast.error("Erro ao atualizar"),
     });
@@ -31,6 +38,13 @@ const CategoriasTab = () => {
     remove.mutate(id, {
       onSuccess: () => toast.success("Categoria removida!"),
       onError: () => toast.error("Erro ao remover"),
+    });
+  };
+
+  const handleColorChange = (id: string, newCor: string) => {
+    update.mutate({ id, cor: newCor }, {
+      onSuccess: () => toast.success("Cor atualizada!"),
+      onError: () => toast.error("Erro ao atualizar cor"),
     });
   };
 
@@ -53,12 +67,12 @@ const CategoriasTab = () => {
           <Plus className="h-4 w-4 text-primary" />
           Nova Categoria
         </h3>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           <input
             value={nome}
             onChange={e => setNome(e.target.value)}
             placeholder="Nome da categoria..."
-            className="flex-1 rounded-xl border border-input bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+            className="flex-1 min-w-[140px] rounded-xl border border-input bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
             onKeyDown={e => e.key === "Enter" && handleCreate()}
           />
           <select
@@ -77,12 +91,36 @@ const CategoriasTab = () => {
             {create.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : "Criar"}
           </button>
         </div>
+        {/* Color picker */}
+        <div className="mt-3 flex items-center gap-2">
+          <span className="text-xs text-muted-foreground">Cor:</span>
+          <div className="flex gap-1.5 flex-wrap">
+            {PRESET_COLORS.map(c => (
+              <button
+                key={c}
+                onClick={() => setCor(c)}
+                className="h-6 w-6 rounded-full border-2 transition-transform hover:scale-110"
+                style={{
+                  backgroundColor: c,
+                  borderColor: cor === c ? "hsl(var(--foreground))" : "transparent",
+                }}
+              />
+            ))}
+            <input
+              type="color"
+              value={cor}
+              onChange={e => setCor(e.target.value)}
+              className="h-6 w-6 cursor-pointer rounded-full border-0 p-0"
+              title="Cor personalizada"
+            />
+          </div>
+        </div>
       </div>
 
       {/* Category sections */}
       {[
-        { title: "Categorias de Finanças", icon: <DollarSign className="h-4 w-4" />, items: financaCats, emoji: "💰" },
-        { title: "Categorias de Tarefas", icon: <ListTodo className="h-4 w-4" />, items: tarefaCats, emoji: "📋" },
+        { title: "Categorias de Finanças", icon: <DollarSign className="h-4 w-4" />, items: financaCats },
+        { title: "Categorias de Tarefas", icon: <ListTodo className="h-4 w-4" />, items: tarefaCats },
       ].map(section => (
         <div key={section.title}>
           <h3 className="mb-3 flex items-center gap-2 font-heading text-sm font-bold text-foreground">
@@ -92,7 +130,7 @@ const CategoriasTab = () => {
           </h3>
           {section.items.length === 0 ? (
             <p className="rounded-2xl border border-dashed border-border/60 p-6 text-center text-sm text-muted-foreground">
-              Nenhuma categoria ainda. Crie acima! {section.emoji}
+              Nenhuma categoria ainda. Crie acima!
             </p>
           ) : (
             <div className="space-y-2">
@@ -105,17 +143,34 @@ const CategoriasTab = () => {
                     exit={{ opacity: 0, x: -20 }}
                     className="flex items-center gap-3 rounded-2xl border border-border/60 bg-card p-3 shadow-sm"
                   >
-                    <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-primary/10 text-lg">
-                      {cat.tipo === "financa" ? "💰" : "📋"}
-                    </div>
+                    {/* Color dot */}
+                    <div
+                      className="h-8 w-8 shrink-0 rounded-xl"
+                      style={{ backgroundColor: cat.cor || "#6366f1" }}
+                    />
                     {editingId === cat.id ? (
-                      <input
-                        autoFocus
-                        value={editingNome}
-                        onChange={e => setEditingNome(e.target.value)}
-                        onKeyDown={e => { if (e.key === "Enter") handleUpdate(cat.id); if (e.key === "Escape") setEditingId(null); }}
-                        className="flex-1 rounded-lg border border-input bg-background px-2 py-1 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
-                      />
+                      <div className="flex flex-1 items-center gap-2">
+                        <input
+                          autoFocus
+                          value={editingNome}
+                          onChange={e => setEditingNome(e.target.value)}
+                          onKeyDown={e => { if (e.key === "Enter") handleUpdate(cat.id); if (e.key === "Escape") setEditingId(null); }}
+                          className="flex-1 rounded-lg border border-input bg-background px-2 py-1 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                        />
+                        <div className="flex gap-1">
+                          {PRESET_COLORS.map(c => (
+                            <button
+                              key={c}
+                              onClick={() => setEditingCor(c)}
+                              className="h-5 w-5 rounded-full border-2 transition-transform hover:scale-110"
+                              style={{
+                                backgroundColor: c,
+                                borderColor: editingCor === c ? "hsl(var(--foreground))" : "transparent",
+                              }}
+                            />
+                          ))}
+                        </div>
+                      </div>
                     ) : (
                       <span className="flex-1 text-sm font-medium text-card-foreground">{cat.nome}</span>
                     )}
@@ -125,7 +180,7 @@ const CategoriasTab = () => {
                           ✓
                         </button>
                       ) : (
-                        <button onClick={() => { setEditingId(cat.id); setEditingNome(cat.nome); }} className="rounded-lg p-1.5 text-muted-foreground hover:bg-muted hover:text-foreground">
+                        <button onClick={() => { setEditingId(cat.id); setEditingNome(cat.nome); setEditingCor(cat.cor || "#6366f1"); }} className="rounded-lg p-1.5 text-muted-foreground hover:bg-muted hover:text-foreground">
                           <Pencil className="h-3.5 w-3.5" />
                         </button>
                       )}

@@ -7,6 +7,7 @@ export interface Categoria {
   user_id: string;
   nome: string;
   tipo: "financa" | "tarefa";
+  cor: string;
   created_at: string;
 }
 
@@ -30,21 +31,22 @@ export const useCategorias = () => {
   });
 
   const create = useMutation({
-    mutationFn: async ({ nome, tipo }: { nome: string; tipo: "financa" | "tarefa" }) => {
+    mutationFn: async ({ nome, tipo, cor }: { nome: string; tipo: "financa" | "tarefa"; cor?: string }) => {
       if (!user) throw new Error("Not authenticated");
-      const { error } = await supabase.from("categorias").insert({
-        user_id: user.id,
-        nome,
-        tipo,
-      });
+      const insertData: Record<string, unknown> = { user_id: user.id, nome, tipo };
+      if (cor) insertData.cor = cor;
+      const { error } = await supabase.from("categorias").insert(insertData);
       if (error) throw error;
     },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["categorias"] }),
   });
 
   const update = useMutation({
-    mutationFn: async ({ id, nome }: { id: string; nome: string }) => {
-      const { error } = await supabase.from("categorias").update({ nome }).eq("id", id);
+    mutationFn: async ({ id, nome, cor }: { id: string; nome?: string; cor?: string }) => {
+      const updateData: Record<string, unknown> = {};
+      if (nome !== undefined) updateData.nome = nome;
+      if (cor !== undefined) updateData.cor = cor;
+      const { error } = await supabase.from("categorias").update(updateData).eq("id", id);
       if (error) throw error;
     },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["categorias"] }),
