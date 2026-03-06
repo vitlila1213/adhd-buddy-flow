@@ -2,19 +2,21 @@ import { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import KanbanBoard from "@/components/KanbanBoard";
 import MetricasDoDia from "@/components/MetricasDoDia";
+import FinancasTab from "@/components/FinancasTab";
+import CategoriasTab from "@/components/CategoriasTab";
 import WhatsAppOnboardingModal from "@/components/WhatsAppOnboardingModal";
 import FreemiumBar from "@/components/FreemiumBar";
 import UpgradeModal from "@/components/UpgradeModal";
 import { useFreemiumStatus } from "@/components/FreemiumBar";
-import { Brain, LogOut, Lightbulb, CheckCircle2, ListTodo, BarChart3 } from "lucide-react";
+import { Brain, LogOut, ListTodo, DollarSign, Settings, BarChart3 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
-type Tab = "ideias" | "tarefas" | "concluidas" | "metricas";
+type Tab = "tarefas" | "financas" | "categorias" | "metricas";
 
 const tabs = [
-  { id: "ideias" as Tab, label: "Ideias", icon: Lightbulb, emoji: "💡" },
-  { id: "tarefas" as Tab, label: "Tarefas", icon: ListTodo, emoji: "📋" },
-  { id: "concluidas" as Tab, label: "Feitas", icon: CheckCircle2, emoji: "✅" },
+  { id: "tarefas" as Tab, label: "Tarefas", icon: ListTodo, emoji: "🧠" },
+  { id: "financas" as Tab, label: "Finanças", icon: DollarSign, emoji: "💰" },
+  { id: "categorias" as Tab, label: "Categorias", icon: Settings, emoji: "⚙️" },
   { id: "metricas" as Tab, label: "Métricas", icon: BarChart3, emoji: "📊" },
 ];
 
@@ -29,7 +31,7 @@ const Dashboard = () => {
       <WhatsAppOnboardingModal />
       <UpgradeModal open={showUpgrade} onOpenChange={setShowUpgrade} />
 
-      {/* Glassmorphism Header */}
+      {/* Header */}
       <header className="glass fixed left-0 right-0 top-0 z-50">
         <div className="mx-auto flex max-w-2xl items-center justify-between px-5 py-3">
           <div className="flex items-center gap-3">
@@ -88,17 +90,18 @@ const Dashboard = () => {
               transition={{ duration: 0.25, ease: "easeOut" }}
               className="sm:pt-0 pt-4"
             >
-              {activeTab === "metricas" ? (
-                <MetricasDoDia />
-              ) : (
-                <KanbanBoard activeTab={activeTab} limitReached={limitReached} onUpgrade={() => setShowUpgrade(true)} />
+              {activeTab === "metricas" && <MetricasDoDia />}
+              {activeTab === "financas" && <FinancasTab />}
+              {activeTab === "categorias" && <CategoriasTab />}
+              {activeTab === "tarefas" && (
+                <KanbanBoard activeTab="tarefas" limitReached={limitReached} onUpgrade={() => setShowUpgrade(true)} />
               )}
             </motion.div>
           </AnimatePresence>
         </div>
       </main>
 
-      {/* Bottom Navigation - Mobile only */}
+      {/* Bottom Navigation - Mobile */}
       <nav className="glass fixed bottom-0 left-0 right-0 z-50 sm:hidden safe-bottom">
         <div className="flex items-center justify-around px-2 py-1">
           {tabs.map((tab) => {

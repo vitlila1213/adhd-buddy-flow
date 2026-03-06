@@ -6,7 +6,6 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
-const FREE_LIMIT = 10;
 const APP_URL = "https://adhd-buddy-flow.lovable.app";
 
 async function sendWhatsApp(url: string, token: string, phone: string, text: string) {
@@ -53,21 +52,13 @@ serve(async (req) => {
     const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    // === BLINDAGEM: Verificar perfil e limites ===
-    // Brazilian mobile numbers: UAZAPI may send without the 9th digit (12 digits)
-    // but user may have saved with 9 (13 digits), or vice-versa. Try both formats.
+    // === Find user profile ===
     const phoneVariants = [userPhone];
     if (userPhone.length === 12 && userPhone.startsWith("55")) {
-      // Add variant with 9: 55XX -> 55XX9
-      const withNine = userPhone.slice(0, 4) + "9" + userPhone.slice(4);
-      phoneVariants.push(withNine);
+      phoneVariants.push(userPhone.slice(0, 4) + "9" + userPhone.slice(4));
     } else if (userPhone.length === 13 && userPhone.startsWith("55")) {
-      // Add variant without 9
-      const withoutNine = userPhone.slice(0, 4) + userPhone.slice(5);
-      phoneVariants.push(withoutNine);
+      phoneVariants.push(userPhone.slice(0, 4) + userPhone.slice(5));
     }
-
-    console.log("Phone variants to search:", phoneVariants);
 
     const { data: profileData } = await supabase
       .from("profiles")
@@ -76,9 +67,7 @@ serve(async (req) => {
       .limit(1)
       .single();
 
-    // Regra 1: Não cadastrado
     if (!profileData) {
-      console.log("Perfil não encontrado para:", userPhone);
       if (UAZAPI_URL && UAZAPI_TOKEN) {
         await sendWhatsApp(UAZAPI_URL, UAZAPI_TOKEN, userPhone,
           `👋 Olá! Vi que você ainda não tem o Cérebro de Bolso.\nCrie sua conta grátis para começar:\n${APP_URL}`
@@ -94,22 +83,19 @@ serve(async (req) => {
     const credits = profileData.credits ?? 0;
     const isUnlimited = credits === -1;
 
-    // Regra 2: Limite free (check credits)
-    if (!isPremium && !isUnlimited) {
-      if (credits <= 0) {
-        console.log("Créditos esgotados para:", userPhone);
-        if (UAZAPI_URL && UAZAPI_TOKEN) {
-          await sendWhatsApp(UAZAPI_URL, UAZAPI_TOKEN, userPhone,
-            `⚠️ Seus créditos gratuitos acabaram!\n\nPara continuar esvaziando sua mente sem limites, assine o plano Premium:\n${APP_URL}/vendas`
-          );
-        }
-        return new Response(JSON.stringify({ blocked: "no_credits" }), {
-          status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
+    // Credit check
+    if (!isPremium && !isUnlimited && credits <= 0) {
+      if (UAZAPI_URL && UAZAPI_TOKEN) {
+        await sendWhatsApp(UAZAPI_URL, UAZAPI_TOKEN, userPhone,
+          `⚠️ Seus créditos gratuitos acabaram!\nAssine o Premium:\n${APP_URL}/vendas`
+        );
       }
+      return new Response(JSON.stringify({ blocked: "no_credits" }), {
+        status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
     }
 
-    // === Regra 3: Passagem livre — extrair texto ===
+    // === Extract text (audio or text) ===
     let userText = "";
     const messageType = body?.message?.messageType || body?.message?.type || "";
     const isAudio = messageType.toLowerCase().includes("audio") ||
@@ -117,7 +103,6 @@ serve(async (req) => {
                     (typeof body?.message?.content === "object" && body?.message?.content?.mimetype?.includes("audio"));
 
     if (isAudio) {
-      console.log("=== ÁUDIO DETECTADO ===");
       const messageId = body?.message?.id || body?.message?.messageid;
       if (!messageId || !UAZAPI_URL || !UAZAPI_TOKEN) {
         return new Response(JSON.stringify({ error: "Cannot download audio" }), {
@@ -192,39 +177,89 @@ serve(async (req) => {
       });
     }
 
-    // === IA (OpenAI GPT) ===
-    // Calcular data/hora atual em São Paulo (UTC-3) para o prompt
-    const nowUtc = new Date();
-    const spOffset = -3 * 60; // UTC-3 em minutos
-    const spTime = new Date(nowUtc.getTime() + spOffset * 60 * 1000);
-    const spDate = spTime.toISOString().split("T")[0]; // YYYY-MM-DD
-    const spHour = spTime.toISOString().split("T")[1].substring(0, 5); // HH:MM
-    
-    // Fetch existing pending tasks for context so AI can match completions
+    // === PASSO B: Context Injection (RAG) ===
+    // Fetch user categories
+    const { data: userCategories } = await supabase
+      .from("categorias")
+      .select("id, nome, tipo")
+      .eq("user_id", userId);
+
+    // Fetch pending tasks
     const { data: pendingTasks } = await supabase
       .from("itens_cerebro")
-      .select("id, titulo, tipo")
+      .select("id, titulo, tipo, status, categoria_id")
       .eq("user_id", userId)
       .eq("status", "pendente")
       .order("created_at", { ascending: false })
-      .limit(20);
+      .limit(30);
 
-    const taskListForPrompt = (pendingTasks || []).map(t => `- ID: ${t.id} | ${t.tipo}: "${t.titulo}"`).join("\n");
+    // Fetch current month finances
+    const now = new Date();
+    const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
+    const { data: monthFinances } = await supabase
+      .from("financas")
+      .select("id, tipo, valor, descricao, status, categoria_id, is_recorrente, created_at, data_vencimento")
+      .eq("user_id", userId)
+      .gte("created_at", monthStart)
+      .order("created_at", { ascending: false });
 
-    const systemPrompt = `Você é o cérebro de um assistente virtual para pessoas com TDAH. O usuário enviará uma mensagem desestruturada ou uma ideia solta. Sua função é extrair a intenção e retornar estritamente um JSON.
+    // Build context string
+    const catList = (userCategories || []).map(c => `- ID: ${c.id} | "${c.nome}" (${c.tipo})`).join("\n");
+    const taskList = (pendingTasks || []).map(t => `- ID: ${t.id} | ${t.tipo}: "${t.titulo}"`).join("\n");
+    const finList = (monthFinances || []).map(f => {
+      const cat = (userCategories || []).find(c => c.id === f.categoria_id);
+      return `- ${f.tipo}: R$${f.valor} "${f.descricao || "sem desc"}" [${f.status}] ${cat ? `(${cat.nome})` : ""} ${f.is_recorrente ? "(recorrente)" : ""}`;
+    }).join("\n");
 
-REGRA PRINCIPAL DE CONCLUSÃO: Se o usuário disser que JÁ FEZ, JÁ CONCLUIU, JÁ LIGOU, JÁ RESOLVEU algo, você DEVE procurar na lista de tarefas pendentes abaixo qual tarefa corresponde e retornar:
-{ "acao": "concluir", "task_id": "ID da tarefa encontrada", "titulo": "titulo original da tarefa" }
+    const totalGastos = (monthFinances || []).filter(f => f.tipo === "despesa").reduce((s, f) => s + Number(f.valor), 0);
+    const totalReceitas = (monthFinances || []).filter(f => f.tipo === "receita").reduce((s, f) => s + Number(f.valor), 0);
 
-Lista de tarefas/ideias pendentes do usuário:
-${taskListForPrompt || "(nenhuma tarefa pendente)"}
+    // Timezone
+    const spOffset = -3 * 60;
+    const spTime = new Date(now.getTime() + spOffset * 60 * 1000);
+    const spDate = spTime.toISOString().split("T")[0];
+    const spHour = spTime.toISOString().split("T")[1].substring(0, 5);
 
-Se NÃO for uma conclusão, retorne uma NOVA entrada:
-{ "acao": "criar", "tipo": "ideia" ou "tarefa", "titulo": "resumo direto ao ponto", "data_hora_agendada": "formato timestamp ISO ou null", "status": "pendente" }
+    // === PASSO C: OpenAI call with full context ===
+    const systemPrompt = `Você é um Assistente Pessoal humano, carismático e prestativo (use emojis com moderação). O usuário enviou uma mensagem pelo WhatsApp. Sua missão é interpretar o pedido e agir.
 
-REGRAS DE FUSO HORÁRIO (OBRIGATÓRIO): 1) O fuso horário do usuário é SEMPRE America/Sao_Paulo (UTC-3). 2) A data de HOJE em São Paulo é ${spDate} e agora são ${spHour} (horário de Brasília). 3) Todos os horários mencionados pelo usuário já estão em horário de Brasília. 4) O campo data_hora_agendada DEVE usar o offset -03:00. Exemplo: se o usuário diz "amanhã às 9h", e hoje é ${spDate}, retorne a data de amanhã com "T09:00:00-03:00". NUNCA use UTC (Z ou +00:00).
+DATA ATUAL: ${spDate} | HORA: ${spHour} (Brasília, UTC-3)
 
-REGRAS DE HORÁRIO AM/PM (CRÍTICO): Quando o usuário diz um horário SEM especificar "da tarde" ou "da noite", use o contexto: - "2h da manhã" ou "2h da madrugada" = 02:00 - "2h da tarde" = 14:00 - Se disser apenas "às 2h" sem contexto, use o bom senso: horários entre 1h-6h sem contexto = madrugada (01:00-06:00). Horários entre 7h-12h sem contexto = manhã (07:00-12:00). NUNCA converta automaticamente para formato PM (somando 12). Só some 12 se o usuário EXPLICITAMENTE disser "da tarde" ou "da noite".`;
+=== CATEGORIAS DO USUÁRIO ===
+${catList || "(nenhuma categoria criada ainda)"}
+
+=== TAREFAS PENDENTES ===
+${taskList || "(nenhuma tarefa pendente)"}
+
+=== FINANÇAS DO MÊS ===
+${finList || "(nenhuma transação no mês)"}
+Total gastos: R$${totalGastos.toFixed(2)} | Total receitas: R$${totalReceitas.toFixed(2)} | Saldo: R$${(totalReceitas - totalGastos).toFixed(2)}
+
+=== INSTRUÇÕES ===
+Interprete a mensagem do usuário e retorne ESTRITAMENTE um JSON com:
+
+1. "mensagem_whatsapp": Texto conversacional e amigável que será enviado de volta ao usuário confirmando a ação ou respondendo a pergunta/relatório solicitado. Seja natural e humano.
+
+2. "db_actions": Array de ações no banco. Cada ação tem:
+   - "tabela": "financas" ou "itens_cerebro"
+   - "operacao": "insert", "update" ou "nenhuma"
+   - "dados": JSON com os campos exatos
+
+REGRAS:
+- Se for RELATÓRIO (ex: "quanto gastei?", "como estão minhas finanças?"): analise os dados acima e responda na mensagem_whatsapp. db_actions = [{"tabela":"","operacao":"nenhuma","dados":{}}]
+- Se for NOVA DESPESA/RECEITA: classifique na categoria correta (use o categoria_id). Se não houver categoria adequada, use null.
+  Campos da tabela financas: tipo ("receita"/"despesa"), valor, descricao, categoria_id, status ("pago"/"pendente"), is_recorrente (boolean)
+- Se for NOVA TAREFA/IDEIA: classifique na categoria correta.
+  Campos da tabela itens_cerebro: tipo ("tarefa"/"ideia"), titulo, descricao, data_hora_agendada (ISO com -03:00 ou null), status ("pendente"), categoria_id
+- Se for CONCLUSÃO de tarefa existente: use operacao "update" com os dados {id: "task_id", status: "concluida", completed_at: "${now.toISOString()}"}
+- Se for marcar finança como PAGA: use operacao "update" com {id: "financa_id", status: "pago"}
+
+REGRAS DE HORÁRIO (CRÍTICO):
+- "2h da manhã"/"2h da madrugada" = 02:00. "2h da tarde" = 14:00.
+- Sem contexto: 1h-6h = madrugada. 7h-12h = manhã. NUNCA some 12 automaticamente.
+- Use sempre offset -03:00 no timestamp.
+
+Retorne APENAS o JSON, sem markdown, sem backticks.`;
 
     const openaiResponse = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
@@ -246,50 +281,47 @@ REGRAS DE HORÁRIO AM/PM (CRÍTICO): Quando o usuário diz um horário SEM espec
     const cleanedContent = aiContent.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim();
     const parsed = JSON.parse(cleanedContent);
 
-    // === Salvar ou Concluir ===
-    if (parsed.acao === "concluir" && parsed.task_id) {
-      // Update existing task to completed
-      const { error: updateError } = await supabase
-        .from("itens_cerebro")
-        .update({ status: "concluida", completed_at: new Date().toISOString() })
-        .eq("id", parsed.task_id)
-        .eq("user_id", userId);
+    console.log("=== AI PARSED ===", JSON.stringify(parsed, null, 2));
 
-      if (updateError) throw updateError;
+    // === PASSO D: Execute db_actions ===
+    const actions = parsed.db_actions || [];
+    for (const action of actions) {
+      if (!action.tabela || action.operacao === "nenhuma" || !action.dados) continue;
 
-      if (UAZAPI_URL && UAZAPI_TOKEN) {
-        await sendWhatsApp(UAZAPI_URL, UAZAPI_TOKEN, userPhone,
-          `✅ Tarefa concluída: "${parsed.titulo}"\n\nMandou bem! 🎉`
-        );
+      if (action.operacao === "insert") {
+        const insertData = { ...action.dados, user_id: userId, user_phone: userPhone };
+        // Remove fields that shouldn't be in the insert
+        delete insertData.id;
+
+        const { error } = await supabase.from(action.tabela).insert(insertData);
+        if (error) {
+          console.error(`Insert error on ${action.tabela}:`, error);
+          throw error;
+        }
+      } else if (action.operacao === "update") {
+        const { id, ...updateData } = action.dados;
+        if (!id) continue;
+
+        const { error } = await supabase
+          .from(action.tabela)
+          .update(updateData)
+          .eq("id", id)
+          .eq("user_id", userId);
+        if (error) {
+          console.error(`Update error on ${action.tabela}:`, error);
+          throw error;
+        }
       }
-    } else {
-      // Create new item
-      const { error: insertError } = await supabase.from("itens_cerebro").insert({
-        user_phone: userPhone,
-        user_id: userId,
-        tipo: parsed.tipo || "tarefa",
-        titulo: parsed.titulo,
-        descricao: parsed.descricao || null,
-        data_hora_agendada: parsed.data_hora_agendada || null,
-        status: parsed.status || "pendente",
-      });
+    }
 
-      if (insertError) throw insertError;
+    // Decrement credits if not premium
+    if (!isPremium && !isUnlimited && credits > 0) {
+      await supabase.from("profiles").update({ credits: credits - 1 }).eq("id", userId);
+    }
 
-      // Decrementar créditos se não for premium/ilimitado
-      if (!isPremium && !isUnlimited && credits > 0) {
-        await supabase
-          .from("profiles")
-          .update({ credits: credits - 1 })
-          .eq("id", userId);
-      }
-
-      if (UAZAPI_URL && UAZAPI_TOKEN) {
-        const confirmMsg = isAudio
-          ? `🎙️ Entendi seu áudio!\n✅ Anotado: "${parsed.titulo}"`
-          : `✅ Anotado no seu Cérebro de Bolso!`;
-        await sendWhatsApp(UAZAPI_URL, UAZAPI_TOKEN, userPhone, confirmMsg);
-      }
+    // Send WhatsApp response
+    if (UAZAPI_URL && UAZAPI_TOKEN && parsed.mensagem_whatsapp) {
+      await sendWhatsApp(UAZAPI_URL, UAZAPI_TOKEN, userPhone, parsed.mensagem_whatsapp);
     }
 
     return new Response(JSON.stringify({ success: true }), {
