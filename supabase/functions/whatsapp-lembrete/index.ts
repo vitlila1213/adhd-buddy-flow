@@ -57,7 +57,7 @@ serve(async (req) => {
 
     const { data: tasks, error } = await supabase
       .from("itens_cerebro")
-      .select("*")
+      .select("*, categorias(nome, cor)")
       .eq("status", "pendente")
       .gte("data_hora_agendada", minuteStart.toISOString())
       .lt("data_hora_agendada", minuteEnd.toISOString());
@@ -66,9 +66,23 @@ serve(async (req) => {
 
     console.log("Found", tasks?.length || 0, "reminders to send");
 
+    const colorToEmoji: Record<string, string> = {
+      "#ef4444": "🔴", "#f97316": "🟠", "#f59e0b": "🟡", "#22c55e": "🟢",
+      "#14b8a6": "🟢", "#3b82f6": "🔵", "#6366f1": "🟣", "#8b5cf6": "🟣",
+      "#ec4899": "🔴", "#64748b": "⚪",
+    };
+
     let sent = 0;
     for (const task of tasks || []) {
-      const message = `⏰ Lembrete: "${task.titulo}"${task.descricao ? `\n${task.descricao}` : ""}`;
+      const cat = (task as any).categorias;
+      const catEmoji = cat?.cor ? (colorToEmoji[cat.cor] || "🔵") : "";
+      const catLabel = cat?.nome ? ` ${catEmoji} *${cat.nome}*` : "";
+      
+      const message = `⏰ *Lembrete, querido(a)!*\n\n` +
+        `📝 *${task.titulo}*${catLabel}\n` +
+        `${task.descricao ? `\n${task.descricao}\n` : ""}` +
+        `\nEstou aqui para te ajudar a não esquecer de nada! 💙`;
+      
       await sendWhatsApp(UAZAPI_URL, UAZAPI_TOKEN, task.user_phone, message);
       sent++;
     }
