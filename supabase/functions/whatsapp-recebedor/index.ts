@@ -95,14 +95,19 @@ serve(async (req) => {
       });
     }
 
-    // === Extract text (audio or text) ===
+    // === Detect message type: text, audio, or image ===
     let userText = "";
+    let imageBase64: string | null = null;
     const messageType = body?.message?.messageType || body?.message?.type || "";
     const isAudio = messageType.toLowerCase().includes("audio") ||
                     messageType.toLowerCase().includes("ptt") ||
                     (typeof body?.message?.content === "object" && body?.message?.content?.mimetype?.includes("audio"));
+    const isImage = messageType.toLowerCase().includes("image") ||
+                    messageType.toLowerCase().includes("document") ||
+                    (typeof body?.message?.content === "object" && body?.message?.content?.mimetype?.includes("image"));
 
     if (isAudio) {
+      // === AUDIO PROCESSING ===
       const messageId = body?.message?.id || body?.message?.messageid;
       if (!messageId || !UAZAPI_URL || !UAZAPI_TOKEN) {
         return new Response(JSON.stringify({ error: "Cannot download audio" }), {
@@ -162,7 +167,51 @@ serve(async (req) => {
           status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
+    } else if (isImage) {
+      // === IMAGE PROCESSING ===
+      const messageId = body?.message?.id || body?.message?.messageid;
+      if (!messageId || !UAZAPI_URL || !UAZAPI_TOKEN) {
+        return new Response(JSON.stringify({ error: "Cannot download image" }), {
+          status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      const downloadResponse = await fetch(`${UAZAPI_URL}/message/download`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", token: UAZAPI_TOKEN },
+        body: JSON.stringify({ id: messageId }),
+      });
+      const downloadResult = await downloadResponse.json();
+
+      let rawBase64 = downloadResult?.base64 || downloadResult?.data || downloadResult?.file;
+      let imgUrl = downloadResult?.fileURL || downloadResult?.url || downloadResult?.URL || downloadResult?.mediaUrl;
+
+      if (rawBase64) {
+        imageBase64 = rawBase64.replace(/^data:[^;]+;base64,/, "");
+      } else if (imgUrl) {
+        const imgResponse = await fetch(imgUrl);
+        if (imgResponse.ok) {
+          const imgBuffer = await imgResponse.arrayBuffer();
+          const bytes = new Uint8Array(imgBuffer);
+          let binary = "";
+          for (let i = 0; i < bytes.length; i++) binary += String.fromCharCode(bytes[i]);
+          imageBase64 = btoa(binary);
+        }
+      }
+
+      if (!imageBase64) {
+        if (UAZAPI_URL && UAZAPI_TOKEN) {
+          await sendWhatsApp(UAZAPI_URL, UAZAPI_TOKEN, userPhone, "❌ Não consegui processar sua imagem. Tente enviar novamente!");
+        }
+        return new Response(JSON.stringify({ error: "Could not download image" }), {
+          status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      // Caption text that may accompany the image
+      userText = body?.message?.caption || body?.message?.text || body?.message?.content?.caption || "Analise esta imagem.";
     } else {
+      // === TEXT PROCESSING ===
       userText = body?.message?.text || body?.message?.content || body?.text || body?.textMessage?.text || "";
       if (typeof userText !== "string") {
         return new Response(JSON.stringify({ error: "Text is not a string" }), {
@@ -171,13 +220,13 @@ serve(async (req) => {
       }
     }
 
-    if (!userText) {
-      return new Response(JSON.stringify({ error: "Missing text" }), {
+    if (!userText && !imageBase64) {
+      return new Response(JSON.stringify({ error: "Missing text or image" }), {
         status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
-    // === PASSO B: Context Injection (RAG) ===
+    // === Context Injection (RAG) ===
     const { data: userCategories } = await supabase
       .from("categorias")
       .select("id, nome, tipo, cor")
@@ -200,13 +249,12 @@ serve(async (req) => {
       .gte("created_at", monthStart)
       .order("created_at", { ascending: false });
 
-    // Fetch birthdays
     const { data: aniversariantes } = await supabase
       .from("aniversariantes")
       .select("id, nome, data_aniversario, parentesco")
       .eq("user_id", userId);
 
-    const anivList = (aniversariantes || []).map(a => 
+    const anivList = (aniversariantes || []).map(a =>
       `- ${a.nome} | ${a.parentesco} | ${a.data_aniversario}`
     ).join("\n");
 
@@ -214,7 +262,7 @@ serve(async (req) => {
     const taskList = (pendingTasks || []).map(t => `- ID: ${t.id} | ${t.tipo}: "${t.titulo}"`).join("\n");
     const finList = (monthFinances || []).map(f => {
       const cat = (userCategories || []).find(c => c.id === f.categoria_id);
-      return `- ${f.tipo}: R$${f.valor} "${f.descricao || "sem desc"}" [${f.status}] ${cat ? `(${cat.nome})` : ""} ${f.is_recorrente ? "(recorrente)" : ""}`;
+      return `- ID: ${f.id} | ${f.tipo}: R$${f.valor} "${f.descricao || "sem desc"}" [${f.status}] ${cat ? `(${cat.nome})` : ""} ${f.is_recorrente ? "(recorrente)" : ""} ${f.data_vencimento ? `venc: ${f.data_vencimento}` : ""}`;
     }).join("\n");
 
     const totalGastos = (monthFinances || []).filter(f => f.tipo === "despesa").reduce((s, f) => s + Number(f.valor), 0);
@@ -247,7 +295,7 @@ ${catList || "(nenhuma categoria criada ainda)"}
 === TAREFAS PENDENTES ===
 ${taskList || "(nenhuma tarefa pendente)"}
 
-=== FINANÇAS DO MÊS ===
+=== FINANÇAS DO MÊS (com IDs) ===
 ${finList || "(nenhuma transação no mês)"}
 Total gastos: R$${totalGastos.toFixed(2)} | Total receitas: R$${totalReceitas.toFixed(2)} | Saldo: R$${(totalReceitas - totalGastos).toFixed(2)}
 
@@ -278,22 +326,37 @@ Se precisar de mais detalhes, estou por aqui! 💙"
    - "operacao": "insert", "update" ou "nenhuma"
    - "dados": JSON com os campos exatos
 
+=== VISÃO COMPUTACIONAL / LEITURA DE IMAGENS ===
+Se o usuário enviar uma IMAGEM, aja como um Leitor Financeiro Inteligente. Analise a imagem e identifique:
+
+A) Se for um GASTO (nota fiscal, recibo, cupom fiscal, comprovante de pagamento):
+   - Extraia o valor total e o nome do estabelecimento/local.
+   - Gere uma ação de insert na tabela "financas" com: tipo="despesa", status="pago", descricao="<nome do local>", valor=<valor extraído>, data_vencimento="<data de hoje ${spDate}T12:00:00-03:00>".
+   - Classifique na categoria mais adequada do usuário (ex: Alimentação, Transporte).
+   - Responda: "🧾 Identifiquei um gasto de R$ XX,XX em <local>! Já registrei como pago. ✅"
+
+B) Se for uma CONTA ou BOLETO (conta de luz, água, internet, telefone, boleto bancário):
+   - Identifique o tipo de conta ou nome da empresa (ex: "Cemig", "Vero", "Sabesp").
+   - Extraia o valor exato e a DATA DE VENCIMENTO.
+   - Gere uma ação de insert na tabela "financas" com: tipo="despesa", status="pendente", descricao="<tipo/nome da conta>", valor=<valor>, data_vencimento="<data de vencimento extraída no formato ISO com -03:00>".
+   - Responda: "🧾 Li sua conta de <tipo> no valor de R$ XX,XX. O vencimento é dia DD/MM. Já agendei para te lembrar! 📅"
+
+C) Se a imagem não for financeira, descreva o que vê e pergunte como pode ajudar.
+
+=== BAIXA DE PAGAMENTO ===
+Se o usuário disser que PAGOU uma conta (ex: "paguei a vero", "conta de luz paga", "paguei o boleto da internet"):
+- Procure nas FINANÇAS DO MÊS acima qual despesa pendente corresponde (pelo nome/descrição).
+- Use o ID dessa despesa para gerar uma ação de "update" na tabela "financas" com {id: "<id encontrado>", status: "pago"}.
+- Responda celebrando: "✅ Conta paga! Boa organização! 🎉💪 Menos uma pendência!"
+- Se houver mais de uma possível, pergunte qual especificamente.
+- Se não encontrar nenhuma pendente correspondente, avise que não encontrou e pergunte mais detalhes.
+
 REGRAS PARA ANIVERSARIANTES (MUITO IMPORTANTE):
 - Se o usuário mencionar aniversário de alguém (ex: "aniversário do João dia 7 de agosto", "lembra do aniversário da Maria 15/03"), cadastre na tabela "aniversariantes".
 - Campos: nome (TEXT), data_aniversario (DATE no formato YYYY-MM-DD), parentesco (TEXT - use "amigo" como padrão se não especificado).
 - Parentescos válidos: amigo, amiga, pai, mãe, irmão, irmã, tio, tia, primo, prima, avô, avó, filho, filha, esposo, esposa, namorado, namorada, sogro, sogra, cunhado, cunhada, colega, chefe, outro.
 - Se o usuário disser o parentesco (ex: "aniversário do meu pai João"), use-o. Se não, use "amigo".
 - Na resposta, confirme o cadastro e informe que lembretes serão enviados automaticamente no dia anterior e no dia do aniversário, às 10:00.
-- Exemplo de resposta para cadastro de aniversário:
-
-"🎂 Aniversário registrado! ✅
-
-👨 *João* — Pai
-📅 07 de Agosto
-
-Fique tranquilo! Vou te enviar um lembrete no dia *06/08 às 10:00* e outro no dia *07/08 às 10:00* com uma mensagem especial de feliz aniversário pronta para você enviar! 🎉
-
-Se precisar de mais algo, estou por aqui! 💙"
 
 REGRAS GERAIS:
 - Se for RELATÓRIO: analise os dados e responda com detalhes por categoria. db_actions = [{"tabela":"","operacao":"nenhuma","dados":{}}]
@@ -311,6 +374,22 @@ REGRAS DE HORÁRIO (CRÍTICO):
 
 Retorne APENAS o JSON, sem markdown, sem backticks.`;
 
+    // === Build OpenAI messages ===
+    const userMessageContent: any[] = [];
+
+    if (imageBase64) {
+      userMessageContent.push({
+        type: "image_url",
+        image_url: { url: `data:image/jpeg;base64,${imageBase64}` },
+      });
+      userMessageContent.push({
+        type: "text",
+        text: userText || "Analise esta imagem e identifique se é um gasto, conta/boleto ou outro documento.",
+      });
+    } else {
+      userMessageContent.push({ type: "text", text: userText });
+    }
+
     const openaiResponse = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
       headers: { Authorization: `Bearer ${OPENAI_API_KEY}`, "Content-Type": "application/json" },
@@ -318,9 +397,10 @@ Retorne APENAS o JSON, sem markdown, sem backticks.`;
         model: "gpt-4o-mini",
         messages: [
           { role: "system", content: systemPrompt },
-          { role: "user", content: userText },
+          { role: "user", content: userMessageContent },
         ],
         temperature: 0.3,
+        max_tokens: 2000,
       }),
     });
 
@@ -369,7 +449,6 @@ Retorne APENAS o JSON, sem markdown, sem backticks.`;
           try {
             let accessToken = gcalIntegration.access_token;
 
-            // Refresh token if expired
             const expiresAt = gcalIntegration.token_expires_at ? new Date(gcalIntegration.token_expires_at) : null;
             if (expiresAt && expiresAt < new Date() && gcalIntegration.refresh_token) {
               const GOOGLE_CLIENT_ID = Deno.env.get("GOOGLE_CLIENT_ID");
@@ -398,7 +477,7 @@ Retorne APENAS o JSON, sem markdown, sem backticks.`;
             }
 
             const startDate = new Date(scheduledDate);
-            const endDate = new Date(startDate.getTime() + 60 * 60 * 1000); // +1 hour
+            const endDate = new Date(startDate.getTime() + 60 * 60 * 1000);
 
             const summary = action.dados.titulo || action.dados.descricao || "Compromisso - Cérebro de Bolso";
             const description = action.dados.descricao || action.dados.titulo || "";
@@ -451,12 +530,11 @@ Retorne APENAS o JSON, sem markdown, sem backticks.`;
       await supabase.from("profiles").update({ credits: credits - 1 }).eq("id", userId);
     }
 
-    // Send WhatsApp response with Google Calendar confirmation if applicable
+    // Send WhatsApp response
     if (UAZAPI_URL && UAZAPI_TOKEN && parsed.mensagem_whatsapp) {
       let finalMessage = parsed.mensagem_whatsapp;
 
-      // Check if any action synced to Google Calendar
-      const hadCalendarSync = actions.some(action => {
+      const hadCalendarSync = actions.some((action: any) => {
         if (!action.tabela || action.operacao !== "insert" || !action.dados) return false;
         const scheduledDate = action.dados.data_hora_agendada || action.dados.data_vencimento;
         return gcalIntegration?.access_token && scheduledDate;
