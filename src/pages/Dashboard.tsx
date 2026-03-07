@@ -16,17 +16,17 @@ import { motion, AnimatePresence } from "framer-motion";
 type Tab = "tarefas" | "financas" | "categorias" | "aniversariantes" | "metricas" | "integracoes";
 
 const tabs = [
-  { id: "tarefas" as Tab, label: "Tarefas", icon: ListTodo, emoji: "🧠" },
+  { id: "metricas" as Tab, label: "Métricas", icon: BarChart3, emoji: "📊" },
   { id: "financas" as Tab, label: "Finanças", icon: DollarSign, emoji: "💰" },
+  { id: "tarefas" as Tab, label: "Tarefas", icon: ListTodo, emoji: "🧠" },
   { id: "aniversariantes" as Tab, label: "Aniversários", icon: Cake, emoji: "🎂" },
   { id: "categorias" as Tab, label: "Categorias", icon: Settings, emoji: "⚙️" },
-  { id: "metricas" as Tab, label: "Métricas", icon: BarChart3, emoji: "📊" },
   { id: "integracoes" as Tab, label: "Integrações", icon: Link2, emoji: "🔗" },
 ];
 
 const Dashboard = () => {
   const { profile, logout } = useAuth();
-  const [activeTab, setActiveTab] = useState<Tab>("tarefas");
+  const [activeTab, setActiveTab] = useState<Tab>("metricas");
   const [showUpgrade, setShowUpgrade] = useState(false);
   const { limitReached } = useFreemiumStatus();
 
