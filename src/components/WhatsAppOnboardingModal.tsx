@@ -30,18 +30,34 @@ const WhatsAppOnboardingModal = () => {
     try {
       await updateProfile({ whatsapp_number: cleaned });
 
-      // Send welcome message via edge function
+      // Refresh profile to get latest data (pending_activation may have updated credits)
+      await refreshProfile();
+
+      // Send welcome message based on subscription status
       try {
+        const { data: freshProfile } = await supabase
+          .from("profiles")
+          .select("subscription_status, credits")
+          .eq("id", profile.id)
+          .single();
+
+        const isPremium = freshProfile?.subscription_status === "active" || freshProfile?.credits === -1;
+
+        const message = isPremium
+          ? `🎉 *Bem-vindo ao Cérebro de Bolso!*\n\n` +
+            `Sua assinatura foi ativada com sucesso! ✅\n` +
+            `Seus créditos são *ilimitados*! 🚀\n\n` +
+            `Me envie mensagens de texto ou áudio com suas ideias e tarefas.\n\n` +
+            `Eu vou organizar tudo automaticamente no seu painel. 🧠\n\n` +
+            `Experimente agora! Me mande uma ideia ou tarefa.`
+          : `🎉 *Bem-vindo ao Cérebro de Bolso!*\n\n` +
+            `Você ganhou *10 créditos gratuitos* para testar! 🎁\n\n` +
+            `Me envie mensagens de texto ou áudio com suas ideias e tarefas.\n\n` +
+            `Eu vou organizar tudo automaticamente no seu painel. 🧠\n\n` +
+            `Experimente agora! Me mande uma ideia ou tarefa.`;
+
         await supabase.functions.invoke("whatsapp-lembrete", {
-          body: {
-            type: "welcome",
-            phone: cleaned,
-            message: `🎉 *Bem-vindo ao Cérebro de Bolso!*\n\n` +
-              `Você ganhou *10 créditos gratuitos* para testar! 🎁\n\n` +
-              `Me envie mensagens de texto ou áudio com suas ideias e tarefas.\n\n` +
-              `Eu vou organizar tudo automaticamente no seu painel. 🧠\n\n` +
-              `Experimente agora! Me mande uma ideia ou tarefa.`,
-          },
+          body: { type: "welcome", phone: cleaned, message },
         });
       } catch (e) {
         console.log("Welcome message error (non-blocking):", e);
