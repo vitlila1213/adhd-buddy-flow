@@ -70,10 +70,10 @@ serve(async (req) => {
       .lte("data_vencimento", tomorrowEnd);
 
     // Group by user
-    const userPendencies: Record<string, { tasks: any[]; bills: any[] }> = {};
+    const userPendencies: Record<string, { tasks: any[]; bills: any[]; tomorrowBills: any[] }> = {};
 
     const ensure = (uid: string) => {
-      if (!userPendencies[uid]) userPendencies[uid] = { tasks: [], bills: [] };
+      if (!userPendencies[uid]) userPendencies[uid] = { tasks: [], bills: [], tomorrowBills: [] };
     };
 
     for (const task of (pendingTasks || [])) {
@@ -86,6 +86,12 @@ serve(async (req) => {
       if (!bill.user_id) continue;
       ensure(bill.user_id);
       userPendencies[bill.user_id].bills.push(bill);
+    }
+
+    for (const bill of (tomorrowBills || [])) {
+      if (!bill.user_id) continue;
+      ensure(bill.user_id);
+      userPendencies[bill.user_id].tomorrowBills.push(bill);
     }
 
     const userIds = Object.keys(userPendencies);
@@ -109,10 +115,10 @@ serve(async (req) => {
       const pending = userPendencies[profile.id];
       if (!pending) continue;
 
-      const { tasks, bills } = pending;
-      if (tasks.length === 0 && bills.length === 0) continue;
+      const { tasks, bills, tomorrowBills: tmrwBills } = pending;
+      if (tasks.length === 0 && bills.length === 0 && tmrwBills.length === 0) continue;
 
-      let message = "Boa noite! 🌙 Passando para te lembrar que você ainda tem pendências:\n";
+      let message = "Boa tarde! ☀️ Passando para te lembrar das suas pendências:\n";
 
       if (tasks.length > 0) {
         message += "\n📋 *Tarefas pendentes:*\n";
@@ -122,15 +128,25 @@ serve(async (req) => {
       }
 
       if (bills.length > 0) {
-        message += "\n💰 *Contas pendentes:*\n";
+        message += "\n💰 *Contas vencendo hoje ou atrasadas:*\n";
         for (const bill of bills) {
           const desc = bill.descricao || "Conta";
           const valor = Number(bill.valor).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
-          message += `  ⏳ ${desc} (${valor})\n`;
+          const venc = bill.data_vencimento ? new Date(bill.data_vencimento).toLocaleDateString("pt-BR") : "";
+          message += `  🚨 ${desc} (${valor})${venc ? ` — vence ${venc}` : ""}\n`;
         }
       }
 
-      message += "\nSe já concluiu alguma, me avisa que dou baixa! Se não conseguiu hoje, sem stress — amanhã aparece de novo no seu resumo matinal 💪";
+      if (tmrwBills.length > 0) {
+        message += "\n⚠️ *Contas vencendo AMANHÃ:*\n";
+        for (const bill of tmrwBills) {
+          const desc = bill.descricao || "Conta";
+          const valor = Number(bill.valor).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+          message += `  📅 ${desc} (${valor}) — vence amanhã!\n`;
+        }
+      }
+
+      message += "\nSe já pagou alguma, me avisa que dou baixa! 💪";
 
       await sendWhatsApp(UAZAPI_URL, UAZAPI_TOKEN, profile.whatsapp_number, message);
       sentCount++;
