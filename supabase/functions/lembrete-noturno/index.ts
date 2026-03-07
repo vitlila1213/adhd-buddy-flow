@@ -39,7 +39,12 @@ serve(async (req) => {
     const todayStart = `${todayStr}T00:00:00-03:00`;
     const todayEnd = `${todayStr}T23:59:59-03:00`;
 
-    // Fetch tasks still pending that were scheduled for today
+    // Tomorrow for day-before reminders
+    const spTomorrow = new Date(spTime.getTime() + 24 * 60 * 60 * 1000);
+    const tomorrowStr = spTomorrow.toISOString().split("T")[0];
+    const tomorrowEnd = `${tomorrowStr}T23:59:59-03:00`;
+
+    // Fetch tasks still pending that were scheduled for today or earlier
     const { data: pendingTasks } = await supabase
       .from("itens_cerebro")
       .select("id, titulo, tipo, status, user_id, data_hora_agendada")
@@ -53,6 +58,16 @@ serve(async (req) => {
       .eq("status", "pendente")
       .eq("tipo", "despesa")
       .lte("data_vencimento", todayEnd);
+
+    // Fetch bills due TOMORROW (day-before reminder)
+    const tomorrowStart = `${tomorrowStr}T00:00:00-03:00`;
+    const { data: tomorrowBills } = await supabase
+      .from("financas")
+      .select("id, tipo, valor, descricao, status, user_id, data_vencimento")
+      .eq("status", "pendente")
+      .eq("tipo", "despesa")
+      .gte("data_vencimento", tomorrowStart)
+      .lte("data_vencimento", tomorrowEnd);
 
     // Group by user
     const userPendencies: Record<string, { tasks: any[]; bills: any[] }> = {};
