@@ -3,7 +3,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import type { Tables } from "@/integrations/supabase/types";
 
-export type ItemCerebro = Tables<"itens_cerebro">;
+export type ItemCerebro = Tables<"itens_cerebro"> & {
+  categorias?: { nome: string; cor: string } | null;
+};
 
 export const useItens = () => {
   const { user } = useAuth();
@@ -15,7 +17,7 @@ export const useItens = () => {
       if (!user) return [];
       const { data, error } = await supabase
         .from("itens_cerebro")
-        .select("*")
+        .select("*, categorias(nome, cor)")
         .eq("user_id", user.id)
         .order("created_at", { ascending: false });
       if (error) throw error;
