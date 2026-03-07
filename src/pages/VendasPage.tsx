@@ -1,4 +1,4 @@
-import { Brain, Check, Crown, Sparkles, Zap, Shield, MessageSquare, ArrowRight, Calendar, Gift, Tag, Mic, BarChart3, Bell, Star, ChevronDown } from "lucide-react";
+import { Brain, Check, Crown, Sparkles, Zap, Shield, MessageSquare, ArrowRight, Calendar, Gift, Tag, Mic, BarChart3, Bell, Star, ChevronDown, X, Camera, FileText, CreditCard } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
@@ -11,11 +11,14 @@ const features = [
   { icon: Bell, title: "Lembretes Automáticos", desc: "Nunca mais esqueça um compromisso. Receba alertas no WhatsApp no horário certo." },
   { icon: Gift, title: "Aniversariantes", desc: "Cadastre aniversários e receba lembretes no dia anterior e no dia. Nunca mais esqueça de parabenizar alguém." },
   { icon: Calendar, title: "Google Agenda Integrado", desc: "Seus compromissos sincronizam automaticamente com o Google Agenda. Organização total em um só lugar." },
+  { icon: Camera, title: "Visão Computacional", desc: "Envie foto de boletos e notas fiscais. A IA lê, extrai valores e datas de vencimento, e registra tudo automaticamente." },
+  { icon: CreditCard, title: "Baixa Automática de Contas", desc: "Diga \"paguei a conta de luz\" e o sistema encontra a conta pendente e dá baixa automaticamente." },
+  { icon: BarChart3, title: "Lembrete Diário", desc: "Todo dia às 7h você recebe no WhatsApp um resumo das contas a pagar e tarefas do dia." },
 ];
 
 const howItWorks = [
-  { step: "1", title: "Mande uma mensagem", desc: "Texto ou áudio no WhatsApp. Ex: \"gastei 50 no mercado\" ou \"reunião amanhã às 15h\"." },
-  { step: "2", title: "A IA organiza tudo", desc: "Categoriza automaticamente, registra no banco e sincroniza com Google Agenda." },
+  { step: "1", title: "Mande uma mensagem", desc: "Texto, áudio ou foto no WhatsApp. Ex: \"gastei 50 no mercado\", envie a foto do boleto ou diga \"reunião amanhã às 15h\"." },
+  { step: "2", title: "A IA organiza tudo", desc: "Categoriza automaticamente, registra no banco, lê boletos e notas, e sincroniza com Google Agenda." },
   { step: "3", title: "Acompanhe no painel", desc: "Veja tudo organizado em um painel visual com Kanban, gráficos e relatórios." },
 ];
 
@@ -25,9 +28,9 @@ const examples = [
   "Aniversário do meu pai dia 7 de agosto",
   "Quanto gastei esse mês?",
   "Recebi 5 mil de salário",
-  "Ligar para dona Maria às 14h",
+  "📸 [Foto do boleto de internet]",
+  "Paguei a conta da Vero",
   "Me dá um relatório de gastos",
-  "Paguei a conta de luz de 200 reais",
 ];
 
 const testimonials = [
@@ -67,9 +70,11 @@ const plans = [
 
 const planFeatures = [
   "Uso Ilimitado do Assistente",
-  "Texto e Áudio no WhatsApp",
+  "Texto, Áudio e Imagem no WhatsApp",
+  "Leitura de Boletos e Notas Fiscais",
   "Kanban Visual Premium",
   "Lembretes via WhatsApp",
+  "Lembrete Diário às 7h",
   "Categorias Personalizadas",
   "Aba de Aniversariantes",
   "Integração Google Agenda",
@@ -77,13 +82,30 @@ const planFeatures = [
   "Suporte Prioritário",
 ];
 
+// Comparativo
+const comparisonFeatures = [
+  { feature: "Assistente via WhatsApp", cerebro: true, others: false },
+  { feature: "Texto e Áudio", cerebro: true, others: false },
+  { feature: "Leitura de Boletos por Foto 📸", cerebro: true, others: false },
+  { feature: "Leitura de Notas Fiscais por Foto", cerebro: true, others: false },
+  { feature: "Baixa Automática de Contas", cerebro: true, others: false },
+  { feature: "Lembrete Diário às 7h no WhatsApp", cerebro: true, others: false },
+  { feature: "Aniversariantes com Lembrete Automático 🎂", cerebro: true, others: false },
+  { feature: "Google Agenda Integrado", cerebro: true, others: false },
+  { feature: "Categorias com Cores Personalizadas", cerebro: true, others: false },
+  { feature: "Relatório Financeiro por Categoria", cerebro: true, others: true },
+  { feature: "Kanban de Tarefas", cerebro: true, others: true },
+  { feature: "Controle de Gastos", cerebro: true, others: true },
+];
+
 const faqs = [
-  { q: "Como funciona o Cérebro de Bolso?", a: "Você envia mensagens de texto ou áudio pelo WhatsApp. Nossa IA interpreta, categoriza e registra automaticamente suas tarefas, ideias e finanças. Tudo aparece organizado no seu painel." },
+  { q: "Como funciona o Cérebro de Bolso?", a: "Você envia mensagens de texto, áudio ou fotos pelo WhatsApp. Nossa IA interpreta, categoriza e registra automaticamente suas tarefas, ideias e finanças. Envie foto de um boleto e ele lê o valor e vencimento! Tudo aparece organizado no seu painel." },
   { q: "Preciso instalar algum aplicativo?", a: "Não! O Cérebro de Bolso funciona 100% pelo WhatsApp. O painel é acessado pelo navegador do celular ou computador, sem instalar nada." },
   { q: "Meus dados estão seguros?", a: "Sim. Utilizamos criptografia e todas as informações são armazenadas com segurança. Cada usuário só tem acesso aos seus próprios dados." },
-  { q: "Como funciona a integração com Google Agenda?", a: "Após conectar sua conta Google na aba Integrações, todos os compromissos e tarefas com data/hora são sincronizados automaticamente com sua Google Agenda." },
+  { q: "Como funciona a leitura de boletos?", a: "Basta enviar uma foto do boleto pelo WhatsApp. A IA identifica o valor, a empresa e a data de vencimento. Registra automaticamente como conta pendente e te lembra no dia do vencimento!" },
   { q: "Posso testar antes de assinar?", a: "Sim! Você recebe 10 créditos gratuitos ao se cadastrar. Sem cartão de crédito." },
   { q: "O que é a aba de Aniversariantes?", a: "É um recurso exclusivo onde você cadastra aniversários de amigos e familiares. O sistema envia lembretes automáticos no dia anterior e no dia do aniversário, com mensagem pronta pra enviar!" },
+  { q: "Como funciona a baixa de contas?", a: "Quando você pagar uma conta, basta dizer \"paguei a conta de luz\" ou \"paguei a Vero\". A IA encontra a conta pendente e atualiza o status para pago automaticamente!" },
 ];
 
 const fadeUp = {
@@ -102,11 +124,11 @@ const VendasPage = () => {
     <div className="min-h-screen bg-background">
       {/* Announcement Bar */}
       <div className="bg-primary px-4 py-2 text-center text-sm font-medium text-primary-foreground">
-        ✨ Assessoria 24h no seu bolso — Texto e áudio pelo WhatsApp
+        ✨ Assessoria 24h no seu bolso — Texto, áudio e foto pelo WhatsApp
       </div>
 
-      {/* Header */}
-      <header className="glass fixed left-0 right-0 top-8 z-50">
+      {/* Header - FIXED */}
+      <header className="fixed left-0 right-0 top-0 z-50 border-b border-border/30 bg-background/80 backdrop-blur-xl">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-5 py-3">
           <Link to="/" className="flex items-center gap-3">
             <div className="flex h-9 w-9 items-center justify-center rounded-2xl bg-primary shadow-lg shadow-primary/25">
@@ -133,7 +155,7 @@ const VendasPage = () => {
       </header>
 
       {/* Hero */}
-      <section className="px-5 pb-16 pt-36 sm:pb-24 sm:pt-44">
+      <section className="px-5 pb-16 pt-32 sm:pb-24 sm:pt-40">
         <div className="mx-auto max-w-4xl text-center">
           <motion.p
             initial={{ opacity: 0, y: 10 }}
@@ -158,8 +180,8 @@ const VendasPage = () => {
             transition={{ delay: 0.25, duration: 0.5 }}
             className="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-muted-foreground"
           >
-            Mande áudio ou texto no WhatsApp. A IA organiza suas tarefas, finanças e compromissos automaticamente.
-            Com integração ao Google Agenda e lembretes de aniversário.
+            Mande áudio, texto ou foto no WhatsApp. A IA organiza tarefas, finanças e compromissos.
+            Lê boletos, dá baixa em contas e lembra seus aniversários.
           </motion.p>
 
           {/* Trust badges */}
@@ -167,48 +189,45 @@ const VendasPage = () => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.35 }}
-            className="mx-auto mt-8 flex flex-wrap items-center justify-center gap-6"
+            className="mx-auto mt-8 flex flex-wrap items-center justify-center gap-4"
           >
             <div className="flex items-center gap-2 rounded-full border border-border/50 bg-card px-4 py-2 text-sm text-muted-foreground">
               <Shield className="h-4 w-4 text-primary" />
               Dados Protegidos
             </div>
             <div className="flex items-center gap-2 rounded-full border border-border/50 bg-card px-4 py-2 text-sm text-muted-foreground">
-              <Zap className="h-4 w-4 text-primary" />
-              99.9% de Precisão
+              <Camera className="h-4 w-4 text-primary" />
+              Lê Boletos por Foto
             </div>
             <div className="flex items-center gap-2 rounded-full border border-border/50 bg-card px-4 py-2 text-sm text-muted-foreground">
               <Mic className="h-4 w-4 text-primary" />
-              Texto e Áudio
+              Texto, Áudio e Foto
             </div>
           </motion.div>
 
+          {/* CTA Principal - TESTE GRÁTIS em destaque */}
           <motion.div
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.45, duration: 0.5 }}
-            className="mt-10 flex flex-col items-center gap-3 sm:flex-row sm:justify-center"
+            className="mt-10 flex flex-col items-center gap-4"
           >
-            <a href="#planos">
-              <Button size="lg" className="h-14 rounded-2xl px-10 text-base font-semibold shadow-lg shadow-primary/20">
-                Quero ter um assistente →
-              </Button>
-            </a>
             <Link to="/">
-              <Button variant="outline" size="lg" className="h-14 rounded-2xl px-8 text-base font-semibold">
-                <Sparkles className="mr-2 h-5 w-5" />
-                Testar Grátis
+              <Button size="lg" className="h-16 rounded-2xl px-12 text-lg font-bold shadow-xl shadow-primary/30 animate-pulse hover:animate-none">
+                <Sparkles className="mr-3 h-6 w-6" />
+                Testar Grátis Agora
+                <ArrowRight className="ml-3 h-6 w-6" />
               </Button>
             </Link>
+            <p className="text-sm font-medium text-primary">
+              🎁 10 créditos grátis • Sem cartão de crédito • Acesso imediato
+            </p>
+            <a href="#planos">
+              <Button variant="ghost" size="lg" className="h-12 rounded-2xl px-8 text-base text-muted-foreground hover:text-foreground">
+                Ou veja os planos premium →
+              </Button>
+            </a>
           </motion.div>
-          <motion.p
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.6 }}
-            className="mt-4 text-xs text-muted-foreground/60"
-          >
-            10 créditos grátis • Sem cartão de crédito
-          </motion.p>
         </div>
       </section>
 
@@ -254,7 +273,7 @@ const VendasPage = () => {
           </p>
           <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
             {features.map((f, i) => {
-              const isExclusive = f.title === "Aniversariantes" || f.title === "Google Agenda Integrado";
+              const isExclusive = ["Aniversariantes", "Google Agenda Integrado", "Visão Computacional", "Baixa Automática de Contas", "Lembrete Diário"].includes(f.title);
               return (
                 <motion.div
                   key={f.title}
@@ -288,14 +307,84 @@ const VendasPage = () => {
         </div>
       </section>
 
-      {/* Interactive examples */}
+      {/* Comparativo - Cérebro de Bolso vs Concorrentes */}
       <section className="bg-card/50 px-5 py-16 sm:py-24">
+        <div className="mx-auto max-w-4xl">
+          <h2 className="mb-4 text-center font-heading text-2xl font-bold text-foreground sm:text-3xl">
+            Por que o Cérebro de Bolso é diferente?
+          </h2>
+          <p className="mb-12 text-center text-muted-foreground">
+            Veja o que só a gente oferece comparado com outros apps de organização
+          </p>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="overflow-hidden rounded-2xl border border-border/50 bg-card shadow-sm"
+          >
+            {/* Table Header */}
+            <div className="grid grid-cols-3 border-b border-border/50 bg-muted/30">
+              <div className="px-4 py-4 text-sm font-semibold text-muted-foreground sm:px-6">
+                Funcionalidade
+              </div>
+              <div className="flex items-center justify-center gap-2 px-4 py-4 text-sm font-bold text-primary sm:px-6">
+                <Brain className="h-4 w-4" />
+                Cérebro de Bolso
+              </div>
+              <div className="px-4 py-4 text-center text-sm font-semibold text-muted-foreground sm:px-6">
+                Outros Apps
+              </div>
+            </div>
+            {/* Table Rows */}
+            {comparisonFeatures.map((item, i) => (
+              <div
+                key={i}
+                className={`grid grid-cols-3 border-b border-border/20 last:border-0 ${
+                  !item.others ? "bg-primary/[0.03]" : ""
+                }`}
+              >
+                <div className="flex items-center px-4 py-3 text-xs font-medium text-foreground sm:px-6 sm:text-sm">
+                  {item.feature}
+                </div>
+                <div className="flex items-center justify-center px-4 py-3">
+                  <div className="flex h-7 w-7 items-center justify-center rounded-full bg-primary/15">
+                    <Check className="h-4 w-4 text-primary" />
+                  </div>
+                </div>
+                <div className="flex items-center justify-center px-4 py-3">
+                  {item.others ? (
+                    <div className="flex h-7 w-7 items-center justify-center rounded-full bg-muted">
+                      <Check className="h-4 w-4 text-muted-foreground" />
+                    </div>
+                  ) : (
+                    <div className="flex h-7 w-7 items-center justify-center rounded-full bg-destructive/10">
+                      <X className="h-4 w-4 text-destructive" />
+                    </div>
+                  )}
+                </div>
+              </div>
+            ))}
+          </motion.div>
+          <div className="mt-8 text-center">
+            <Link to="/">
+              <Button size="lg" className="h-14 rounded-2xl px-10 text-base font-bold shadow-xl shadow-primary/30">
+                <Sparkles className="mr-2 h-5 w-5" />
+                Começar Teste Grátis
+              </Button>
+            </Link>
+            <p className="mt-3 text-xs text-muted-foreground">10 créditos grátis • Sem cartão</p>
+          </div>
+        </div>
+      </section>
+
+      {/* Interactive examples */}
+      <section className="px-5 py-16 sm:py-24">
         <div className="mx-auto max-w-4xl">
           <h2 className="mb-4 text-center font-heading text-2xl font-bold text-foreground sm:text-3xl">
             Interaja com o Cérebro de Bolso 24h por dia
           </h2>
           <p className="mb-10 text-center text-muted-foreground">
-            Pergunte e registre o que quiser. Veja alguns exemplos:
+            Pergunte, registre ou envie fotos. Veja alguns exemplos:
           </p>
           <div className="flex flex-wrap justify-center gap-3">
             {examples.map((ex, i) => (
@@ -313,17 +402,18 @@ const VendasPage = () => {
             ))}
           </div>
           <div className="mt-10 text-center">
-            <a href="#planos">
-              <Button size="lg" className="h-12 rounded-2xl px-8 font-semibold shadow-lg shadow-primary/20">
-                Quero assinar →
+            <Link to="/">
+              <Button size="lg" className="h-14 rounded-2xl px-10 text-base font-bold shadow-xl shadow-primary/30">
+                <Sparkles className="mr-2 h-5 w-5" />
+                Testar Grátis Agora
               </Button>
-            </a>
+            </Link>
           </div>
         </div>
       </section>
 
       {/* Testimonials */}
-      <section className="px-5 py-16 sm:py-24">
+      <section className="bg-card/50 px-5 py-16 sm:py-24">
         <div className="mx-auto max-w-5xl">
           <h2 className="mb-4 text-center font-heading text-2xl font-bold text-foreground sm:text-3xl">
             Quem usa, recomenda
@@ -364,7 +454,7 @@ const VendasPage = () => {
       </section>
 
       {/* Pricing */}
-      <section id="planos" className="bg-card/50 px-5 py-16 sm:py-24">
+      <section id="planos" className="px-5 py-16 sm:py-24">
         <div className="mx-auto max-w-5xl">
           <h2 className="mb-4 text-center font-heading text-2xl font-bold text-foreground sm:text-3xl">
             Organize-se agora
@@ -372,6 +462,26 @@ const VendasPage = () => {
           <p className="mb-12 text-center text-muted-foreground">
             Assistente pessoal via WhatsApp 24h por dia
           </p>
+
+          {/* Free trial CTA above plans */}
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="mx-auto mb-10 max-w-lg rounded-2xl border-2 border-dashed border-primary/40 bg-primary/5 p-6 text-center"
+          >
+            <p className="text-sm font-semibold text-primary">🎁 Ainda não tem certeza?</p>
+            <p className="mt-1 text-2xl font-extrabold text-foreground">Teste grátis primeiro!</p>
+            <p className="mt-2 text-sm text-muted-foreground">Receba 10 créditos gratuitos. Sem cartão de crédito.</p>
+            <Link to="/" className="mt-4 block">
+              <Button size="lg" className="h-14 w-full rounded-2xl text-base font-bold shadow-xl shadow-primary/30">
+                <Sparkles className="mr-2 h-5 w-5" />
+                Criar Conta Grátis
+                <ArrowRight className="ml-2 h-5 w-5" />
+              </Button>
+            </Link>
+          </motion.div>
+
           <div className="grid gap-5 sm:grid-cols-3">
             {plans.map((plan, i) => (
               <motion.div
@@ -437,7 +547,7 @@ const VendasPage = () => {
       </section>
 
       {/* FAQ */}
-      <section className="px-5 py-16 sm:py-24">
+      <section className="bg-card/50 px-5 py-16 sm:py-24">
         <div className="mx-auto max-w-3xl">
           <h2 className="mb-12 text-center font-heading text-2xl font-bold text-foreground sm:text-3xl">
             Perguntas Frequentes
@@ -490,10 +600,18 @@ const VendasPage = () => {
           <p className="mx-auto mt-4 max-w-lg text-muted-foreground">
             Comece agora e tenha um assistente pessoal no WhatsApp organizando sua vida 24 horas por dia.
           </p>
-          <div className="mt-8 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
+          <div className="mt-8 flex flex-col items-center gap-4">
+            <Link to="/">
+              <Button size="lg" className="h-16 rounded-2xl px-12 text-lg font-bold shadow-xl shadow-primary/30">
+                <Sparkles className="mr-3 h-6 w-6" />
+                Testar Grátis Agora
+                <ArrowRight className="ml-3 h-6 w-6" />
+              </Button>
+            </Link>
+            <p className="text-sm text-primary font-medium">🎁 10 créditos grátis • Sem cartão de crédito</p>
             <a href="#planos">
-              <Button size="lg" className="h-14 rounded-2xl px-10 text-base font-semibold shadow-lg shadow-primary/20">
-                Quero organizar minha vida →
+              <Button variant="ghost" className="text-muted-foreground hover:text-foreground">
+                Ou assine o plano premium →
               </Button>
             </a>
           </div>
