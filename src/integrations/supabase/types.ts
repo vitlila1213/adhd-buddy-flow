@@ -243,6 +243,7 @@ export type Database = {
           credits: number
           email: string | null
           id: string
+          last_remarketing_at: string | null
           subscription_expires_at: string | null
           subscription_status: string
           updated_at: string
@@ -253,6 +254,7 @@ export type Database = {
           credits?: number
           email?: string | null
           id: string
+          last_remarketing_at?: string | null
           subscription_expires_at?: string | null
           subscription_status?: string
           updated_at?: string
@@ -263,6 +265,7 @@ export type Database = {
           credits?: number
           email?: string | null
           id?: string
+          last_remarketing_at?: string | null
           subscription_expires_at?: string | null
           subscription_status?: string
           updated_at?: string
@@ -316,6 +319,14 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      auto_categorize_tasks: {
+        Args: {
+          p_category_id: string
+          p_category_name: string
+          p_user_id: string
+        }
+        Returns: number
+      }
       check_expired_subscriptions: { Args: never; Returns: undefined }
     }
     Enums: {
