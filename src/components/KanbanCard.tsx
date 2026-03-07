@@ -10,6 +10,8 @@ interface KanbanCardProps {
 }
 
 const KanbanCard = ({ item, index }: KanbanCardProps) => {
+  const cat = item.categorias;
+
   return (
     <Draggable draggableId={item.id} index={index}>
       {(provided, snapshot) => (
@@ -38,9 +40,11 @@ const KanbanCard = ({ item, index }: KanbanCardProps) => {
               </div>
             )}
             <div className="flex-1 min-w-0">
-              <h4 className={`text-sm font-semibold leading-snug text-card-foreground ${
-                item.status === "concluida" ? "line-through opacity-60" : ""
-              }`}>
+              <h4
+                className={`text-sm font-semibold leading-snug text-card-foreground ${
+                  item.status === "concluida" ? "line-through opacity-60" : ""
+                }`}
+              >
                 {item.titulo}
               </h4>
             </div>
@@ -53,6 +57,16 @@ const KanbanCard = ({ item, index }: KanbanCardProps) => {
           )}
 
           <div className="flex flex-wrap items-center gap-2 pl-[38px]">
+            {/* Category badge */}
+            {cat && (
+              <span
+                className="inline-flex items-center gap-1 rounded-lg px-2 py-0.5 text-[11px] font-semibold text-white"
+                style={{ backgroundColor: cat.cor || "#6366f1" }}
+              >
+                {cat.nome}
+              </span>
+            )}
+
             {/* Status badge */}
             {item.status === "concluida" ? (
               <span className="inline-flex items-center rounded-lg bg-status-done-bg px-2 py-0.5 text-[11px] font-semibold text-status-done-text">
@@ -64,10 +78,10 @@ const KanbanCard = ({ item, index }: KanbanCardProps) => {
               </span>
             )}
 
-            {item.status === "concluida" && (item as any).completed_at && (
+            {item.status === "concluida" && item.completed_at && (
               <span className="inline-flex items-center gap-1 rounded-lg bg-status-done-bg px-2 py-0.5 text-[11px] font-medium text-status-done-text">
                 <CheckCircle2 className="h-3 w-3" />
-                {format(new Date((item as any).completed_at), "dd MMM, HH:mm", { locale: ptBR })}
+                {format(new Date(item.completed_at), "dd MMM, HH:mm", { locale: ptBR })}
               </span>
             )}
 

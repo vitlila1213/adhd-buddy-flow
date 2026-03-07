@@ -23,3 +23,6 @@ verify_jwt = false
 
 [functions.lembrete-diario]
 verify_jwt = false
+
+[functions.remarketing-lembrete]
+verify_jwt = false
