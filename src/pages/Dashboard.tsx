@@ -8,11 +8,12 @@ import WhatsAppOnboardingModal from "@/components/WhatsAppOnboardingModal";
 import FreemiumBar from "@/components/FreemiumBar";
 import UpgradeModal from "@/components/UpgradeModal";
 import { useFreemiumStatus } from "@/components/FreemiumBar";
-import { Brain, LogOut, ListTodo, DollarSign, Settings, BarChart3, Cake } from "lucide-react";
+import { Brain, LogOut, ListTodo, DollarSign, Settings, BarChart3, Cake, Link2 } from "lucide-react";
 import AniversariantesTab from "@/components/AniversariantesTab";
+import IntegracoesTab from "@/components/IntegracoesTab";
 import { motion, AnimatePresence } from "framer-motion";
 
-type Tab = "tarefas" | "financas" | "categorias" | "aniversariantes" | "metricas";
+type Tab = "tarefas" | "financas" | "categorias" | "aniversariantes" | "metricas" | "integracoes";
 
 const tabs = [
   { id: "tarefas" as Tab, label: "Tarefas", icon: ListTodo, emoji: "🧠" },
@@ -20,6 +21,7 @@ const tabs = [
   { id: "aniversariantes" as Tab, label: "Aniversários", icon: Cake, emoji: "🎂" },
   { id: "categorias" as Tab, label: "Categorias", icon: Settings, emoji: "⚙️" },
   { id: "metricas" as Tab, label: "Métricas", icon: BarChart3, emoji: "📊" },
+  { id: "integracoes" as Tab, label: "Integrações", icon: Link2, emoji: "🔗" },
 ];
 
 const Dashboard = () => {
@@ -96,6 +98,7 @@ const Dashboard = () => {
               {activeTab === "financas" && <FinancasTab />}
               {activeTab === "aniversariantes" && <AniversariantesTab />}
               {activeTab === "categorias" && <CategoriasTab />}
+              {activeTab === "integracoes" && <IntegracoesTab />}
               {activeTab === "tarefas" && (
                 <KanbanBoard activeTab="tarefas" limitReached={limitReached} onUpgrade={() => setShowUpgrade(true)} />
               )}
