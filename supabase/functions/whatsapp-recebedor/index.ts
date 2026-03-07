@@ -451,9 +451,22 @@ Retorne APENAS o JSON, sem markdown, sem backticks.`;
       await supabase.from("profiles").update({ credits: credits - 1 }).eq("id", userId);
     }
 
-    // Send WhatsApp response
+    // Send WhatsApp response with Google Calendar confirmation if applicable
     if (UAZAPI_URL && UAZAPI_TOKEN && parsed.mensagem_whatsapp) {
-      await sendWhatsApp(UAZAPI_URL, UAZAPI_TOKEN, userPhone, parsed.mensagem_whatsapp);
+      let finalMessage = parsed.mensagem_whatsapp;
+
+      // Check if any action synced to Google Calendar
+      const hadCalendarSync = actions.some(action => {
+        if (!action.tabela || action.operacao !== "insert" || !action.dados) return false;
+        const scheduledDate = action.dados.data_hora_agendada || action.dados.data_vencimento;
+        return gcalIntegration?.access_token && scheduledDate;
+      });
+
+      if (hadCalendarSync) {
+        finalMessage += "\n\n📅 _Evento adicionado automaticamente ao seu Google Agenda!_";
+      }
+
+      await sendWhatsApp(UAZAPI_URL, UAZAPI_TOKEN, userPhone, finalMessage);
     }
 
     return new Response(JSON.stringify({ success: true }), {
