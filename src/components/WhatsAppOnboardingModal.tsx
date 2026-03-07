@@ -20,8 +20,21 @@ const WhatsAppOnboardingModal = () => {
 
   const isOpen = !!profile && !profile.whatsapp_number;
 
+  const normalizePhone = (raw: string): string => {
+    let num = raw.replace(/\D/g, "");
+    // Remove leading zero from DDD: 55 0XX -> 55 XX
+    if (num.startsWith("550")) {
+      num = "55" + num.slice(3);
+    }
+    // Ensure mobile 9: 55 XX 8xxx -> 55 XX 9 8xxx
+    if (num.length === 12 && num.startsWith("55")) {
+      num = num.slice(0, 4) + "9" + num.slice(4);
+    }
+    return num;
+  };
+
   const handleSave = async () => {
-    const cleaned = phone.replace(/\D/g, "");
+    const cleaned = normalizePhone(phone);
     if (cleaned.length < 12) {
       toast.error("Digite o número completo com código do país e DDD (ex: 553199999999)");
       return;
