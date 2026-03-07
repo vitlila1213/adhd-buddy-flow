@@ -77,10 +77,29 @@ serve(async (req) => {
       .single();
 
     if (profileError || !profile) {
-      console.log("Perfil não encontrado para:", buyerEmail);
+      console.log("Perfil não encontrado para:", buyerEmail, "- salvando ativação pendente");
+
+      if (newStatus === "active") {
+        const expiresAt = new Date();
+        expiresAt.setDate(expiresAt.getDate() + 30);
+
+        await supabase
+          .from("pending_activations")
+          .upsert({
+            email: buyerEmail,
+            subscription_status: "active",
+            credits: -1,
+            subscription_expires_at: expiresAt.toISOString(),
+            whatsapp_number: buyerPhone || null,
+            platform,
+          }, { onConflict: "email" });
+
+        console.log("Ativação pendente salva para:", buyerEmail);
+      }
+
       return new Response(JSON.stringify({
         success: true,
-        message: "User not registered yet.",
+        message: "Pending activation saved. Will apply on signup.",
         email: buyerEmail,
         status: newStatus,
       }), {

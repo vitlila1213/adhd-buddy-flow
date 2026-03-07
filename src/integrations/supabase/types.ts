@@ -204,6 +204,39 @@ export type Database = {
           },
         ]
       }
+      pending_activations: {
+        Row: {
+          created_at: string
+          credits: number
+          email: string
+          id: string
+          platform: string | null
+          subscription_expires_at: string | null
+          subscription_status: string
+          whatsapp_number: string | null
+        }
+        Insert: {
+          created_at?: string
+          credits?: number
+          email: string
+          id?: string
+          platform?: string | null
+          subscription_expires_at?: string | null
+          subscription_status?: string
+          whatsapp_number?: string | null
+        }
+        Update: {
+          created_at?: string
+          credits?: number
+          email?: string
+          id?: string
+          platform?: string | null
+          subscription_expires_at?: string | null
+          subscription_status?: string
+          whatsapp_number?: string | null
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string
