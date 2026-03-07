@@ -33,19 +33,30 @@ serve(async (req) => {
     const statusLower = status.toLowerCase();
 
     if (["approved", "paid"].includes(statusLower)) {
+      const expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString();
+
       const { data: profileData, error } = await supabase
         .from("profiles")
         .update({
           subscription_status: "active",
-          subscription_expires_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
-          credits: -1, // unlimited
+          subscription_expires_at: expiresAt,
+          credits: -1,
         })
         .eq("email", email)
         .select("whatsapp_number")
         .single();
 
       if (error) {
-        console.error("Erro ao ativar:", error);
+        console.log("Perfil não encontrado, salvando ativação pendente para:", email);
+        await supabase
+          .from("pending_activations")
+          .upsert({
+            email,
+            subscription_status: "active",
+            credits: -1,
+            subscription_expires_at: expiresAt,
+            platform: "kiwify",
+          }, { onConflict: "email" });
       } else {
         console.log("Assinatura ativada para:", email);
 
