@@ -26,3 +26,6 @@ verify_jwt = false
 
 [functions.remarketing-lembrete]
 verify_jwt = false
+
+[functions.lembrete-noturno]
+verify_jwt = false
