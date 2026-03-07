@@ -335,6 +335,15 @@ Retorne APENAS o JSON, sem markdown, sem backticks.`;
 
     // === Execute db_actions ===
     const actions = parsed.db_actions || [];
+
+    // Check if user has Google Calendar connected
+    const { data: gcalIntegration } = await supabase
+      .from("user_integrations")
+      .select("access_token, refresh_token, token_expires_at")
+      .eq("user_id", userId)
+      .eq("provider", "google_calendar")
+      .maybeSingle();
+
     for (const action of actions) {
       if (!action.tabela || action.operacao === "nenhuma" || !action.dados) continue;
 
@@ -352,6 +361,74 @@ Retorne APENAS o JSON, sem markdown, sem backticks.`;
         if (error) {
           console.error(`Insert error on ${action.tabela}:`, error);
           throw error;
+        }
+
+        // === Google Calendar sync ===
+        const scheduledDate = action.dados.data_hora_agendada || action.dados.data_vencimento;
+        if (gcalIntegration?.access_token && scheduledDate) {
+          try {
+            let accessToken = gcalIntegration.access_token;
+
+            // Refresh token if expired
+            const expiresAt = gcalIntegration.token_expires_at ? new Date(gcalIntegration.token_expires_at) : null;
+            if (expiresAt && expiresAt < new Date() && gcalIntegration.refresh_token) {
+              const GOOGLE_CLIENT_ID = Deno.env.get("GOOGLE_CLIENT_ID");
+              const GOOGLE_CLIENT_SECRET = Deno.env.get("GOOGLE_CLIENT_SECRET");
+              if (GOOGLE_CLIENT_ID && GOOGLE_CLIENT_SECRET) {
+                const refreshRes = await fetch("https://oauth2.googleapis.com/token", {
+                  method: "POST",
+                  headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                  body: new URLSearchParams({
+                    client_id: GOOGLE_CLIENT_ID,
+                    client_secret: GOOGLE_CLIENT_SECRET,
+                    refresh_token: gcalIntegration.refresh_token,
+                    grant_type: "refresh_token",
+                  }),
+                });
+                const refreshData = await refreshRes.json();
+                if (refreshData.access_token) {
+                  accessToken = refreshData.access_token;
+                  const newExpiry = new Date(Date.now() + (refreshData.expires_in || 3600) * 1000).toISOString();
+                  await supabase.from("user_integrations")
+                    .update({ access_token: accessToken, token_expires_at: newExpiry })
+                    .eq("user_id", userId)
+                    .eq("provider", "google_calendar");
+                }
+              }
+            }
+
+            const startDate = new Date(scheduledDate);
+            const endDate = new Date(startDate.getTime() + 60 * 60 * 1000); // +1 hour
+
+            const summary = action.dados.titulo || action.dados.descricao || "Compromisso - Cérebro de Bolso";
+            const description = action.dados.descricao || action.dados.titulo || "";
+
+            const calendarEvent = {
+              summary: `🧠 ${summary}`,
+              description: `${description}\n\n— Adicionado pelo Cérebro de Bolso`,
+              start: { dateTime: startDate.toISOString(), timeZone: "America/Sao_Paulo" },
+              end: { dateTime: endDate.toISOString(), timeZone: "America/Sao_Paulo" },
+              reminders: { useDefault: false, overrides: [{ method: "popup", minutes: 30 }] },
+            };
+
+            const calRes = await fetch("https://www.googleapis.com/calendar/v3/calendars/primary/events", {
+              method: "POST",
+              headers: {
+                Authorization: `Bearer ${accessToken}`,
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify(calendarEvent),
+            });
+
+            if (calRes.ok) {
+              console.log("✅ Google Calendar event created");
+            } else {
+              const calErr = await calRes.text();
+              console.error("Google Calendar error:", calErr);
+            }
+          } catch (calError) {
+            console.error("Google Calendar sync error:", calError);
+          }
         }
       } else if (action.operacao === "update") {
         const { id, ...updateData } = action.dados;
