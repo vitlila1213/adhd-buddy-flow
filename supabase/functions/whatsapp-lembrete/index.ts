@@ -27,12 +27,12 @@ serve(async (req) => {
       });
     }
 
-    // Check if it's a direct message request (welcome, etc.)
+    // Check if it's a direct message request
     let body: Record<string, unknown> | null = null;
     try {
       body = await req.json();
     } catch {
-      // No body = cron call for reminders
+      // No body = cron call
     }
 
     // === Welcome / direct message ===
@@ -44,7 +44,7 @@ serve(async (req) => {
       });
     }
 
-    // === Cron: check scheduled reminders ===
+    // === Cron: check scheduled reminders + birthdays ===
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseKey);
@@ -55,6 +55,7 @@ serve(async (req) => {
 
     console.log("Checking reminders between", minuteStart.toISOString(), "and", minuteEnd.toISOString());
 
+    // === TASK REMINDERS ===
     const { data: tasks, error } = await supabase
       .from("itens_cerebro")
       .select("*, categorias(nome, cor)")
@@ -64,7 +65,7 @@ serve(async (req) => {
 
     if (error) throw error;
 
-    console.log("Found", tasks?.length || 0, "reminders to send");
+    console.log("Found", tasks?.length || 0, "task reminders to send");
 
     const colorToEmoji: Record<string, string> = {
       "#ef4444": "🔴", "#f97316": "🟠", "#f59e0b": "🟡", "#22c55e": "🟢",
@@ -78,13 +79,95 @@ serve(async (req) => {
       const catEmoji = cat?.cor ? (colorToEmoji[cat.cor] || "🔵") : "";
       const catLabel = cat?.nome ? ` ${catEmoji} *${cat.nome}*` : "";
       
-      const message = `⏰ *Lembrete, querido(a)!*\n\n` +
+      const message = `⏰ *Lembrete!*\n\n` +
         `📝 *${task.titulo}*${catLabel}\n` +
         `${task.descricao ? `\n${task.descricao}\n` : ""}` +
         `\nEstou aqui para te ajudar a não esquecer de nada! 💙`;
       
       await sendWhatsApp(UAZAPI_URL, UAZAPI_TOKEN, task.user_phone, message);
       sent++;
+    }
+
+    // === BIRTHDAY REMINDERS (check at 10:00 BRT = 13:00 UTC) ===
+    const utcHour = now.getUTCHours();
+    const utcMinute = now.getUTCMinutes();
+    
+    // 10:00 BRT = 13:00 UTC. Check within the 13:00 minute window.
+    if (utcHour === 13 && utcMinute === 0) {
+      console.log("=== Checking birthday reminders ===");
+      
+      // Get all birthdays
+      const { data: allBirthdays, error: bdayError } = await supabase
+        .from("aniversariantes")
+        .select("*");
+      
+      if (bdayError) {
+        console.error("Birthday fetch error:", bdayError);
+      } else {
+        // BRT date calculation
+        const brtNow = new Date(now.getTime() - 3 * 60 * 60 * 1000);
+        const todayMonth = brtNow.getUTCMonth() + 1;
+        const todayDay = brtNow.getUTCDate();
+        
+        // Tomorrow in BRT
+        const brtTomorrow = new Date(brtNow.getTime() + 24 * 60 * 60 * 1000);
+        const tomorrowMonth = brtTomorrow.getUTCMonth() + 1;
+        const tomorrowDay = brtTomorrow.getUTCDate();
+
+        const parentescoEmoji: Record<string, string> = {
+          amigo: "👫", amiga: "👫", pai: "👨", "mãe": "👩", "irmão": "👦", "irmã": "👧",
+          tio: "👨‍🦳", tia: "👩‍🦳", primo: "🧑", prima: "🧑", "avô": "👴", "avó": "👵",
+          filho: "👦", filha: "👧", esposo: "💍", esposa: "💍", namorado: "❤️", namorada: "❤️",
+          sogro: "👨‍🦳", sogra: "👩‍🦳", cunhado: "🤝", cunhada: "🤝", colega: "💼", chefe: "👔", outro: "🎂"
+        };
+
+        for (const bday of allBirthdays || []) {
+          const bdayDate = new Date(bday.data_aniversario + "T12:00:00Z");
+          const bdayMonth = bdayDate.getUTCMonth() + 1;
+          const bdayDay = bdayDate.getUTCDate();
+          const emoji = parentescoEmoji[bday.parentesco] || "🎂";
+
+          // Check if birthday is TOMORROW (send day-before reminder)
+          if (bdayMonth === tomorrowMonth && bdayDay === tomorrowDay) {
+            const months = ["", "Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
+            const message = `🔔 *Lembrete de Aniversário — Amanhã!*\n\n` +
+              `${emoji} *${bday.nome}* (${bday.parentesco}) faz aniversário *amanhã*, dia ${tomorrowDay} de ${months[tomorrowMonth]}! 🎂\n\n` +
+              `💡 Já preparou uma mensagem especial? Aqui vai uma sugestão:\n\n` +
+              `───────────────\n` +
+              `🎉🎂 *Feliz Aniversário, ${bday.nome}!* 🎂🎉\n\n` +
+              `Que esse novo ciclo seja repleto de saúde, paz, amor e muitas conquistas! ✨\n` +
+              `Você merece todo o carinho do mundo! 🥳💖\n` +
+              `Um abraço enorme! 🤗\n` +
+              `───────────────\n\n` +
+              `Copie e envie amanhã! Se precisar de algo, estou aqui! 💙`;
+
+            await sendWhatsApp(UAZAPI_URL, UAZAPI_TOKEN, bday.user_phone, message);
+            sent++;
+            console.log(`Sent day-before birthday reminder for ${bday.nome} to ${bday.user_phone}`);
+          }
+
+          // Check if birthday is TODAY (send day-of reminder)
+          if (bdayMonth === todayMonth && bdayDay === todayDay) {
+            const months = ["", "Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
+            const message = `🎉🎂 *HOJE é o aniversário de ${bday.nome}!* 🎂🎉\n\n` +
+              `${emoji} *${bday.nome}* (${bday.parentesco}) está completando mais um ano de vida hoje, dia ${todayDay} de ${months[todayMonth]}! 🥳\n\n` +
+              `🎁 Não esqueça de enviar os parabéns! Aqui vai uma mensagem especial:\n\n` +
+              `───────────────\n` +
+              `🌟🎂 *Parabéns, ${bday.nome}!* 🎂🌟\n\n` +
+              `Hoje é o SEU dia! 🎈\n` +
+              `Que a vida te presenteie com momentos incríveis, muita saúde, felicidade e realizações! ✨\n` +
+              `Que todos os seus sonhos se realizem! 🙏💖\n` +
+              `Parabéns por mais um ano de vida! 🥳🎊\n` +
+              `Um abraço cheio de carinho! 🤗💝\n` +
+              `───────────────\n\n` +
+              `Aproveite para enviar agora! Se precisar de algo, estou aqui! 💙`;
+
+            await sendWhatsApp(UAZAPI_URL, UAZAPI_TOKEN, bday.user_phone, message);
+            sent++;
+            console.log(`Sent birthday reminder for ${bday.nome} to ${bday.user_phone}`);
+          }
+        }
+      }
     }
 
     return new Response(JSON.stringify({ success: true, reminders_sent: sent }), {

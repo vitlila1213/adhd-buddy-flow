@@ -14,6 +14,47 @@ export type Database = {
   }
   public: {
     Tables: {
+      aniversariantes: {
+        Row: {
+          created_at: string
+          data_aniversario: string
+          id: string
+          nome: string
+          parentesco: string
+          updated_at: string
+          user_id: string
+          user_phone: string
+        }
+        Insert: {
+          created_at?: string
+          data_aniversario: string
+          id?: string
+          nome: string
+          parentesco?: string
+          updated_at?: string
+          user_id: string
+          user_phone: string
+        }
+        Update: {
+          created_at?: string
+          data_aniversario?: string
+          id?: string
+          nome?: string
+          parentesco?: string
+          updated_at?: string
+          user_id?: string
+          user_phone?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "aniversariantes_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       categorias: {
         Row: {
           cor: string

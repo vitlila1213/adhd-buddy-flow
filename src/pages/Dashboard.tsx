@@ -8,14 +8,16 @@ import WhatsAppOnboardingModal from "@/components/WhatsAppOnboardingModal";
 import FreemiumBar from "@/components/FreemiumBar";
 import UpgradeModal from "@/components/UpgradeModal";
 import { useFreemiumStatus } from "@/components/FreemiumBar";
-import { Brain, LogOut, ListTodo, DollarSign, Settings, BarChart3 } from "lucide-react";
+import { Brain, LogOut, ListTodo, DollarSign, Settings, BarChart3, Cake } from "lucide-react";
+import AniversariantesTab from "@/components/AniversariantesTab";
 import { motion, AnimatePresence } from "framer-motion";
 
-type Tab = "tarefas" | "financas" | "categorias" | "metricas";
+type Tab = "tarefas" | "financas" | "categorias" | "aniversariantes" | "metricas";
 
 const tabs = [
   { id: "tarefas" as Tab, label: "Tarefas", icon: ListTodo, emoji: "🧠" },
   { id: "financas" as Tab, label: "Finanças", icon: DollarSign, emoji: "💰" },
+  { id: "aniversariantes" as Tab, label: "Aniversários", icon: Cake, emoji: "🎂" },
   { id: "categorias" as Tab, label: "Categorias", icon: Settings, emoji: "⚙️" },
   { id: "metricas" as Tab, label: "Métricas", icon: BarChart3, emoji: "📊" },
 ];
@@ -92,6 +94,7 @@ const Dashboard = () => {
             >
               {activeTab === "metricas" && <MetricasDoDia />}
               {activeTab === "financas" && <FinancasTab />}
+              {activeTab === "aniversariantes" && <AniversariantesTab />}
               {activeTab === "categorias" && <CategoriasTab />}
               {activeTab === "tarefas" && (
                 <KanbanBoard activeTab="tarefas" limitReached={limitReached} onUpgrade={() => setShowUpgrade(true)} />

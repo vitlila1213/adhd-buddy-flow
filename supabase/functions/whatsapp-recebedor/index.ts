@@ -178,13 +178,11 @@ serve(async (req) => {
     }
 
     // === PASSO B: Context Injection (RAG) ===
-    // Fetch user categories
     const { data: userCategories } = await supabase
       .from("categorias")
       .select("id, nome, tipo, cor")
       .eq("user_id", userId);
 
-    // Fetch pending tasks
     const { data: pendingTasks } = await supabase
       .from("itens_cerebro")
       .select("id, titulo, tipo, status, categoria_id")
@@ -193,7 +191,6 @@ serve(async (req) => {
       .order("created_at", { ascending: false })
       .limit(30);
 
-    // Fetch current month finances
     const now = new Date();
     const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
     const { data: monthFinances } = await supabase
@@ -203,7 +200,16 @@ serve(async (req) => {
       .gte("created_at", monthStart)
       .order("created_at", { ascending: false });
 
-    // Build context string
+    // Fetch birthdays
+    const { data: aniversariantes } = await supabase
+      .from("aniversariantes")
+      .select("id, nome, data_aniversario, parentesco")
+      .eq("user_id", userId);
+
+    const anivList = (aniversariantes || []).map(a => 
+      `- ${a.nome} | ${a.parentesco} | ${a.data_aniversario}`
+    ).join("\n");
+
     const catList = (userCategories || []).map(c => `- ID: ${c.id} | "${c.nome}" (${c.tipo}) | Cor: ${c.cor}`).join("\n");
     const taskList = (pendingTasks || []).map(t => `- ID: ${t.id} | ${t.tipo}: "${t.titulo}"`).join("\n");
     const finList = (monthFinances || []).map(f => {
@@ -214,19 +220,17 @@ serve(async (req) => {
     const totalGastos = (monthFinances || []).filter(f => f.tipo === "despesa").reduce((s, f) => s + Number(f.valor), 0);
     const totalReceitas = (monthFinances || []).filter(f => f.tipo === "receita").reduce((s, f) => s + Number(f.valor), 0);
 
-    // Timezone
     const spOffset = -3 * 60;
     const spTime = new Date(now.getTime() + spOffset * 60 * 1000);
     const spDate = spTime.toISOString().split("T")[0];
     const spHour = spTime.toISOString().split("T")[1].substring(0, 5);
 
-    // === PASSO C: OpenAI call with full context ===
     const systemPrompt = `Você é o *Cérebro de Bolso* 🧠, um assistente pessoal educado, profissional e detalhista. Use emojis com frequência para tornar a conversa leve e agradável.
 
 PERSONALIDADE:
 - Seja educado e profissional. NÃO use termos como "querido(a)", "meu bem", "meu amor" ou similares. Trate o usuário de forma respeitosa e direta.
 - Dê respostas DETALHADAS e organizadas com quebras de linha
-- Use emojis relacionados ao contexto (🍔 comida, 🚗 transporte, 💼 trabalho, etc.)
+- Use emojis relacionados ao contexto (🍔 comida, 🚗 transporte, 💼 trabalho, 🎂 aniversário, etc.)
 - Quando listar itens, organize de forma clara
 - Finalize com uma frase educada oferecendo ajuda
 
@@ -247,19 +251,13 @@ ${taskList || "(nenhuma tarefa pendente)"}
 ${finList || "(nenhuma transação no mês)"}
 Total gastos: R$${totalGastos.toFixed(2)} | Total receitas: R$${totalReceitas.toFixed(2)} | Saldo: R$${(totalReceitas - totalGastos).toFixed(2)}
 
+=== ANIVERSARIANTES CADASTRADOS ===
+${anivList || "(nenhum aniversariante cadastrado)"}
+
 === INSTRUÇÕES ===
 Interprete a mensagem do usuário e retorne ESTRITAMENTE um JSON com:
 
-1. "mensagem_whatsapp": Texto conversacional organizado e educado. Confirme a ação com clareza, mencione a categoria com seu emoji de cor. Exemplo de resposta para registro:
-
-"Registrei sua despesa! ✅
-
-🔴 *Comida* — R$ 17,00
-📝 Gasto no posto
-
-Seus gastos este mês em Comida: R$ 247,00
-
-Se precisar de mais algo, estou por aqui! 💙"
+1. "mensagem_whatsapp": Texto conversacional organizado e educado. Confirme a ação com clareza, mencione a categoria com seu emoji de cor.
 
 FORMATO DE RELATÓRIO (MUITO IMPORTANTE):
 Quando o usuário pedir relatório de gastos/finanças, organize OBRIGATORIAMENTE assim, agrupando por categoria com datas e subtotais:
@@ -269,32 +267,42 @@ Quando o usuário pedir relatório de gastos/finanças, organize OBRIGATORIAMENT
 🔴 *Alimentação*
  - 04/04/2025: R$ 50,00 (Gasto no iFood)
  - 04/04/2025: R$ 50,00 (Gasto na padaria)
- - 05/04/2025: R$ 230,00 (Gasto no iFood)
  - *Subtotal: R$ 330,00*
-
-🟠 *Outros*
- - 06/04/2025: R$ 150,00 (Presente de namorada)
- - *Subtotal: R$ 150,00*
 
 💰 *Total Geral: R$ 480,00*
 
-Se precisar de mais detalhes ou alguma outra informação, estou por aqui! E lembre-se, você pode acessar mais informações na plataforma web em ${APP_URL} 🔗"
+Se precisar de mais detalhes, estou por aqui! 💙"
 
 2. "db_actions": Array de ações no banco. Cada ação tem:
-   - "tabela": "financas", "itens_cerebro" ou "categorias"
+   - "tabela": "financas", "itens_cerebro", "categorias" ou "aniversariantes"
    - "operacao": "insert", "update" ou "nenhuma"
    - "dados": JSON com os campos exatos
 
-REGRAS:
-- Se for RELATÓRIO (ex: "quanto gastei?", "como estão minhas finanças?"): analise os dados acima e responda na mensagem_whatsapp com detalhes por categoria usando o formato acima (agrupado por categoria, com datas, valores, descrições e subtotais). db_actions = [{"tabela":"","operacao":"nenhuma","dados":{}}]
-- Se for CRIAR CATEGORIA: use tabela "categorias". Campos: nome (texto), tipo ("financa" ou "tarefa"). Exemplo: {"tabela":"categorias","operacao":"insert","dados":{"nome":"Comida","tipo":"financa"}}
-- Se for NOVA DESPESA/RECEITA: classifique na categoria correta (use o categoria_id). Se não houver categoria adequada, use null.
-  Campos da tabela financas: tipo ("receita"/"despesa"), valor, descricao, categoria_id, status ("pago"/"pendente"), is_recorrente (boolean)
-- Se for NOVA TAREFA/IDEIA: classifique na categoria correta.
-  Campos da tabela itens_cerebro: tipo ("tarefa"/"ideia"), titulo, descricao, data_hora_agendada (ISO com -03:00 ou null), status ("pendente"), categoria_id
-- Se for CONCLUSÃO de tarefa existente: use operacao "update" com os dados {id: "task_id", status: "concluida", completed_at: "${now.toISOString()}"}
-- Se for marcar finança como PAGA: use operacao "update" com {id: "financa_id", status: "pago"}
-- NUNCA insira categorias na tabela itens_cerebro. Categorias vão SEMPRE na tabela "categorias".
+REGRAS PARA ANIVERSARIANTES (MUITO IMPORTANTE):
+- Se o usuário mencionar aniversário de alguém (ex: "aniversário do João dia 7 de agosto", "lembra do aniversário da Maria 15/03"), cadastre na tabela "aniversariantes".
+- Campos: nome (TEXT), data_aniversario (DATE no formato YYYY-MM-DD), parentesco (TEXT - use "amigo" como padrão se não especificado).
+- Parentescos válidos: amigo, amiga, pai, mãe, irmão, irmã, tio, tia, primo, prima, avô, avó, filho, filha, esposo, esposa, namorado, namorada, sogro, sogra, cunhado, cunhada, colega, chefe, outro.
+- Se o usuário disser o parentesco (ex: "aniversário do meu pai João"), use-o. Se não, use "amigo".
+- Na resposta, confirme o cadastro e informe que lembretes serão enviados automaticamente no dia anterior e no dia do aniversário, às 10:00.
+- Exemplo de resposta para cadastro de aniversário:
+
+"🎂 Aniversário registrado! ✅
+
+👨 *João* — Pai
+📅 07 de Agosto
+
+Fique tranquilo! Vou te enviar um lembrete no dia *06/08 às 10:00* e outro no dia *07/08 às 10:00* com uma mensagem especial de feliz aniversário pronta para você enviar! 🎉
+
+Se precisar de mais algo, estou por aqui! 💙"
+
+REGRAS GERAIS:
+- Se for RELATÓRIO: analise os dados e responda com detalhes por categoria. db_actions = [{"tabela":"","operacao":"nenhuma","dados":{}}]
+- Se for CRIAR CATEGORIA: use tabela "categorias". Campos: nome, tipo ("financa" ou "tarefa")
+- Se for NOVA DESPESA/RECEITA: classifique na categoria correta. Campos: tipo, valor, descricao, categoria_id, status, is_recorrente
+- Se for NOVA TAREFA/IDEIA: Campos: tipo, titulo, descricao, data_hora_agendada (ISO com -03:00 ou null), status ("pendente"), categoria_id
+- Se for CONCLUSÃO de tarefa: use "update" com {id, status: "concluida", completed_at: "${now.toISOString()}"}
+- Se for marcar finança como PAGA: use "update" com {id, status: "pago"}
+- NUNCA insira categorias na tabela itens_cerebro.
 
 REGRAS DE HORÁRIO (CRÍTICO):
 - "2h da manhã"/"2h da madrugada" = 02:00. "2h da tarde" = 14:00.
@@ -325,18 +333,19 @@ Retorne APENAS o JSON, sem markdown, sem backticks.`;
 
     console.log("=== AI PARSED ===", JSON.stringify(parsed, null, 2));
 
-    // === PASSO D: Execute db_actions ===
+    // === Execute db_actions ===
     const actions = parsed.db_actions || [];
     for (const action of actions) {
       if (!action.tabela || action.operacao === "nenhuma" || !action.dados) continue;
 
       if (action.operacao === "insert") {
         const insertData: Record<string, unknown> = { ...action.dados, user_id: userId };
-        // Only add user_phone for itens_cerebro (other tables don't have this column)
         if (action.tabela === "itens_cerebro") {
           insertData.user_phone = userPhone;
         }
-        // Remove fields that shouldn't be in the insert
+        if (action.tabela === "aniversariantes") {
+          insertData.user_phone = userPhone;
+        }
         delete insertData.id;
 
         const { error } = await supabase.from(action.tabela).insert(insertData);
