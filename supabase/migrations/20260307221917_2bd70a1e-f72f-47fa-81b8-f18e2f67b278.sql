@@ -1,0 +1,1 @@
+UPDATE financas SET valor = 91.53 WHERE id = '56ea2621-f8ca-4685-af27-3adec5d13f97'
