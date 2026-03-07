@@ -20,3 +20,6 @@ verify_jwt = false
 
 [functions.google-calendar-callback]
 verify_jwt = false
+
+[functions.lembrete-diario]
+verify_jwt = false
