@@ -29,3 +29,6 @@ verify_jwt = false
 
 [functions.lembrete-noturno]
 verify_jwt = false
+
+[functions.auto-categorize]
+verify_jwt = false
