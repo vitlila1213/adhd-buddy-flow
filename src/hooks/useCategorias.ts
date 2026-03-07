@@ -50,15 +50,18 @@ export const useCategorias = () => {
     onSuccess: async (result) => {
       queryClient.invalidateQueries({ queryKey: ["categorias"] });
 
-      // Auto-categorize uncategorized tasks when a tarefa category is created
+      // AI-powered auto-categorize uncategorized tasks
       if (result.tipo === "tarefa" && user) {
         try {
-          const { data } = await supabase.rpc("auto_categorize_tasks" as any, {
-            p_category_id: result.id,
-            p_category_name: result.nome,
-            p_user_id: user.id,
+          const { data, error } = await supabase.functions.invoke("auto-categorize", {
+            body: {
+              category_id: result.id,
+              category_name: result.nome,
+              user_id: user.id,
+            },
           });
-          const count = data as number;
+          if (error) throw error;
+          const count = data?.moved || 0;
           if (count > 0) {
             toast.info(`${count} tarefa(s) movida(s) para "${result.nome}" automaticamente!`);
             queryClient.invalidateQueries({ queryKey: ["itens_cerebro"] });
