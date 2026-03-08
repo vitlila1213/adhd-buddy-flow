@@ -41,7 +41,7 @@ const Dashboard = () => {
       <header className="glass fixed left-0 right-0 top-0 z-50">
         <div className="mx-auto flex max-w-2xl items-center justify-between px-5 py-3">
           <div className="flex items-center gap-3">
-            <img src={logoImg} alt="Cérebro de Bolso" className="h-9 w-9 rounded-xl object-contain" />
+            <img src={logoImg} alt="Cérebro de Bolso" className="h-12 w-12 rounded-xl object-contain" />
             <div>
               <h1 className="font-heading text-base font-bold tracking-tight text-foreground">
                 Cérebro de Bolso
