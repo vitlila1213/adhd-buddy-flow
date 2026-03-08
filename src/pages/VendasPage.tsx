@@ -40,33 +40,18 @@ const testimonials = [
   { name: "Fernanda Costa", role: "Autônoma", text: "A integração com Google Agenda mudou minha vida. Tudo sincronizado automaticamente.", stars: 5 },
 ];
 
-const plans = [
-  {
-    name: "Mensal",
-    price: "29,90",
-    period: "/mês",
-    link: "https://pay.kiwify.com.br/o9VoTdd",
-    highlight: false,
-    badge: null,
-  },
-  {
-    name: "Trimestral",
-    price: "74,90",
-    period: "/trimestre",
-    pricePerMonth: "24,97",
-    link: "https://pay.kiwify.com.br/qaehX5t",
-    highlight: true,
-    badge: "Mais Vendido",
-  },
-  {
-    name: "Semestral",
-    price: "119,90",
-    period: "/semestre",
-    pricePerMonth: "19,98",
-    link: "https://pay.kiwify.com.br/TonUbU4",
-    highlight: false,
-    badge: "Melhor Custo-Benefício",
-  },
+const plan = {
+  name: "Premium Mensal",
+  price: "29,90",
+  period: "/mês",
+  link: "https://pay.kiwify.com.br/o9VoTdd",
+};
+
+const monthlyBenefits = [
+  { icon: Zap, text: "Sem fidelidade — cancele quando quiser" },
+  { icon: Shield, text: "Sem surpresas — valor fixo todo mês" },
+  { icon: Sparkles, text: "Acesso total desde o primeiro dia" },
+  { icon: CreditCard, text: "Menos de R$1 por dia para ter um assistente 24h" },
 ];
 
 const planFeatures = [
