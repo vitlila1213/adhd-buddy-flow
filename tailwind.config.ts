@@ -55,6 +55,11 @@ export default {
           DEFAULT: "hsl(var(--success))",
           foreground: "hsl(var(--success-foreground))",
         },
+        navy: {
+          DEFAULT: "hsl(var(--navy))",
+          foreground: "hsl(var(--navy-foreground))",
+          light: "hsl(var(--navy-light))",
+        },
         status: {
           "pending-bg": "hsl(var(--status-pending-bg))",
           "pending-text": "hsl(var(--status-pending-text))",
