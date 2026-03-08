@@ -538,7 +538,10 @@ Retorne APENAS o JSON, sem markdown, sem backticks.`;
             const startDate = new Date(scheduledDate);
             const endDate = new Date(startDate.getTime() + 60 * 60 * 1000);
 
-            const summary = action.dados.titulo || action.dados.descricao || "Compromisso - Cérebro de Bolso";
+            const isBill = action.tabela === "financas" && action.dados.status === "pendente";
+            const summary = isBill
+              ? `💰 Vencimento: ${action.dados.descricao || "Conta"} - R$${action.dados.valor}`
+              : (action.dados.titulo || action.dados.descricao || "Compromisso - Cérebro de Bolso");
             const description = action.dados.descricao || action.dados.titulo || "";
 
             const calendarEvent = {
