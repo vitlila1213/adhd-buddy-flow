@@ -2,12 +2,18 @@ import { DragDropContext, type DropResult } from "@hello-pangea/dnd";
 import KanbanColumn, { type CategoryGroup } from "./KanbanColumn";
 import { useItens } from "@/hooks/useItens";
 import { useCategorias } from "@/hooks/useCategorias";
-import { useMemo } from "react";
-import { Loader2 } from "lucide-react";
+import { useMemo, useState } from "react";
+import { Loader2, CalendarIcon } from "lucide-react";
 import type { ItemCerebro } from "@/hooks/useItens";
+import { format, isSameDay, isSameMonth, isSameYear, parseISO } from "date-fns";
+import { ptBR } from "date-fns/locale";
+import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
+import { Calendar } from "./ui/calendar";
+import { Button } from "./ui/button";
+import { cn } from "@/lib/utils";
 
 interface KanbanBoardProps {
-  activeTab?: "ideias" | "tarefas" | "concluidas";
+  activeTab?: "anotacoes" | "tarefas" | "concluidas";
   limitReached?: boolean;
   onUpgrade?: () => void;
 }
@@ -27,7 +33,6 @@ function groupByCategory(
 
   const groups: CategoryGroup[] = [];
 
-  // Named categories first (sorted by name)
   const catEntries = [...grouped.entries()].filter(([k]) => k !== null);
   catEntries.sort((a, b) => {
     const catA = catMap.get(a[0]!)?.nome || "";
@@ -45,7 +50,6 @@ function groupByCategory(
     });
   }
 
-  // Uncategorized last
   const uncategorized = grouped.get(null);
   if (uncategorized?.length) {
     groups.push({
@@ -62,36 +66,52 @@ function groupByCategory(
 const KanbanBoard = ({ activeTab, limitReached, onUpgrade }: KanbanBoardProps) => {
   const { data: items, isLoading, updateStatus, updateTipo } = useItens();
   const { data: categorias, isLoading: catLoading } = useCategorias();
+  const [filterDate, setFilterDate] = useState<Date | undefined>(undefined);
 
   const tarefaCats = useMemo(
     () => (categorias || []).filter((c) => c.tipo === "tarefa"),
     [categorias]
   );
 
+  const filterItems = (list: ItemCerebro[]) => {
+    if (!filterDate) return list;
+    return list.filter((item) => {
+      const itemDate = item.created_at ? new Date(item.created_at) : null;
+      if (!itemDate) return false;
+      return isSameDay(itemDate, filterDate);
+    });
+  };
+
   const columns = useMemo(() => {
     const all = items || [];
     return {
-      ideias: all.filter((i) => i.tipo === "ideia" && i.status !== "concluida"),
+      anotacoes: all.filter((i) => i.tipo === "ideia" && i.status !== "concluida"),
       tarefas: all.filter((i) => i.tipo === "tarefa" && i.status === "pendente"),
       concluidas: all.filter((i) => i.status === "concluida"),
     };
   }, [items]);
 
+  const filteredColumns = useMemo(() => ({
+    anotacoes: filterItems(columns.anotacoes),
+    tarefas: filterItems(columns.tarefas),
+    concluidas: filterItems(columns.concluidas),
+  }), [columns, filterDate]);
+
   const tarefasGroups = useMemo(
-    () => groupByCategory(columns.tarefas, tarefaCats),
-    [columns.tarefas, tarefaCats]
+    () => groupByCategory(filteredColumns.tarefas, tarefaCats),
+    [filteredColumns.tarefas, tarefaCats]
   );
 
   const concluidasGroups = useMemo(
-    () => groupByCategory(columns.concluidas, tarefaCats),
-    [columns.concluidas, tarefaCats]
+    () => groupByCategory(filteredColumns.concluidas, tarefaCats),
+    [filteredColumns.concluidas, tarefaCats]
   );
 
   const handleDragEnd = (result: DropResult) => {
     if (!result.destination) return;
     const { draggableId, destination } = result;
 
-    if (destination.droppableId === "ideias") {
+    if (destination.droppableId === "anotacoes") {
       updateTipo.mutate({ id: draggableId, tipo: "ideia" });
       updateStatus.mutate({ id: draggableId, status: "pendente" });
     } else if (destination.droppableId === "tarefas") {
@@ -116,17 +136,55 @@ const KanbanBoard = ({ activeTab, limitReached, onUpgrade }: KanbanBoardProps) =
 
   return (
     <DragDropContext onDragEnd={handleDragEnd}>
+      {/* Date filter */}
+      <div className="mb-4 flex items-center gap-2">
+        <Popover>
+          <PopoverTrigger asChild>
+            <Button
+              variant="outline"
+              className={cn(
+                "justify-start text-left font-normal text-sm h-9",
+                !filterDate && "text-muted-foreground"
+              )}
+            >
+              <CalendarIcon className="mr-2 h-4 w-4" />
+              {filterDate ? format(filterDate, "dd/MM/yyyy", { locale: ptBR }) : "Filtrar por data"}
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-auto p-0" align="start">
+            <Calendar
+              mode="single"
+              selected={filterDate}
+              onSelect={setFilterDate}
+              initialFocus
+              className={cn("p-3 pointer-events-auto")}
+              locale={ptBR}
+            />
+          </PopoverContent>
+        </Popover>
+        {filterDate && (
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setFilterDate(undefined)}
+            className="h-9 text-xs text-muted-foreground"
+          >
+            Limpar filtro
+          </Button>
+        )}
+      </div>
+
       {/* Mobile: show only active tab column */}
       <div className="block sm:hidden">
-        {activeTab === "ideias" && (
-          <KanbanColumn id="ideias" title="Ideias Soltas" emoji="💡" items={columns.ideias} />
+        {activeTab === "anotacoes" && (
+          <KanbanColumn id="anotacoes" title="Anotações" emoji="📝" items={filteredColumns.anotacoes} />
         )}
         {activeTab === "tarefas" && (
           <KanbanColumn
             id="tarefas"
             title="Tarefas do Dia"
             emoji="📋"
-            items={columns.tarefas}
+            items={filteredColumns.tarefas}
             groups={tarefasGroups}
           />
         )}
@@ -135,7 +193,7 @@ const KanbanBoard = ({ activeTab, limitReached, onUpgrade }: KanbanBoardProps) =
             id="concluidas"
             title="Concluídas"
             emoji="✅"
-            items={columns.concluidas}
+            items={filteredColumns.concluidas}
             groups={concluidasGroups}
           />
         )}
@@ -143,19 +201,19 @@ const KanbanBoard = ({ activeTab, limitReached, onUpgrade }: KanbanBoardProps) =
 
       {/* Desktop: horizontal kanban */}
       <div className="hidden gap-4 sm:flex">
-        <KanbanColumn id="ideias" title="Ideias Soltas" emoji="💡" items={columns.ideias} />
+        <KanbanColumn id="anotacoes" title="Anotações" emoji="📝" items={filteredColumns.anotacoes} />
         <KanbanColumn
           id="tarefas"
           title="Tarefas do Dia"
           emoji="📋"
-          items={columns.tarefas}
+          items={filteredColumns.tarefas}
           groups={tarefasGroups}
         />
         <KanbanColumn
           id="concluidas"
           title="Concluídas"
           emoji="✅"
-          items={columns.concluidas}
+          items={filteredColumns.concluidas}
           groups={concluidasGroups}
         />
       </div>
