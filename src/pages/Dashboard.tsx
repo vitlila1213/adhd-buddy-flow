@@ -16,13 +16,13 @@ import { motion, AnimatePresence } from "framer-motion";
 type Tab = "tarefas" | "financas" | "categorias" | "aniversariantes" | "metricas" | "integracoes" | "anotacoes";
 
 const tabs = [
-  { id: "metricas" as Tab, label: "Métricas", icon: BarChart3, emoji: "📊" },
-  { id: "financas" as Tab, label: "Finanças", icon: DollarSign, emoji: "💰" },
-  { id: "tarefas" as Tab, label: "Tarefas", icon: ListTodo, emoji: "🧠" },
-  { id: "anotacoes" as Tab, label: "Anotações", icon: Brain, emoji: "📝" },
-  { id: "aniversariantes" as Tab, label: "Aniversários", icon: Cake, emoji: "🎂" },
-  { id: "categorias" as Tab, label: "Categorias", icon: Settings, emoji: "⚙️" },
-  { id: "integracoes" as Tab, label: "Integrações", icon: Link2, emoji: "🔗" },
+  { id: "metricas" as Tab, label: "Métricas", icon: BarChart3, emoji: "📊", center: false },
+  { id: "financas" as Tab, label: "Finanças", icon: DollarSign, emoji: "💰", center: false },
+  { id: "tarefas" as Tab, label: "Tarefas", icon: ListTodo, emoji: "🧠", center: false },
+  { id: "anotacoes" as Tab, label: "Cérebro", icon: Brain, emoji: "🧠", center: true },
+  { id: "aniversariantes" as Tab, label: "Aniversários", icon: Cake, emoji: "🎂", center: false },
+  { id: "categorias" as Tab, label: "Categorias", icon: Settings, emoji: "⚙️", center: false },
+  { id: "integracoes" as Tab, label: "Integrações", icon: Link2, emoji: "🔗", center: false },
 ];
 
 const Dashboard = () => {
@@ -113,25 +113,55 @@ const Dashboard = () => {
 
       {/* Bottom Navigation - Mobile */}
       <nav className="glass fixed bottom-0 left-0 right-0 z-50 sm:hidden safe-bottom">
-        <div className="flex items-center justify-around px-2 py-1">
+        <div className="flex items-center justify-around px-1 py-1.5">
           {tabs.map((tab) => {
             const isActive = activeTab === tab.id;
+            if (tab.center) {
+              return (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id)}
+                  className="relative -mt-5 flex flex-col items-center"
+                >
+                  <div
+                    className={`flex h-14 w-14 items-center justify-center rounded-full shadow-lg transition-all duration-200 ${
+                      isActive
+                        ? "bg-primary shadow-primary/30"
+                        : "bg-card border border-border shadow-md"
+                    }`}
+                  >
+                    <tab.icon
+                      className={`h-7 w-7 ${
+                        isActive ? "text-primary-foreground stroke-[2.5]" : "text-muted-foreground"
+                      }`}
+                    />
+                  </div>
+                  <span
+                    className={`mt-0.5 text-[10px] font-medium ${
+                      isActive ? "font-semibold text-primary" : "text-muted-foreground"
+                    }`}
+                  >
+                    {tab.label}
+                  </span>
+                </button>
+              );
+            }
             return (
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`flex flex-1 flex-col items-center gap-0.5 rounded-xl py-2 transition-colors ${
+                className={`flex min-w-0 flex-col items-center gap-0.5 rounded-xl px-1 py-1.5 transition-colors ${
                   isActive ? "text-primary" : "text-muted-foreground"
                 }`}
               >
-                <tab.icon className={`h-5 w-5 ${isActive ? "stroke-[2.5]" : ""}`} />
-                <span className={`text-[10px] font-medium ${isActive ? "font-semibold" : ""}`}>
+                <tab.icon className={`h-5 w-5 flex-shrink-0 ${isActive ? "stroke-[2.5]" : ""}`} />
+                <span className={`truncate text-[9px] font-medium ${isActive ? "font-semibold" : ""}`}>
                   {tab.label}
                 </span>
                 {isActive && (
                   <motion.div
                     layoutId="bottomNav"
-                    className="mt-0.5 h-1 w-5 rounded-full bg-primary"
+                    className="h-1 w-4 rounded-full bg-primary"
                     transition={{ type: "spring", stiffness: 400, damping: 30 }}
                   />
                 )}
