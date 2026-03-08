@@ -477,6 +477,37 @@ Retorne APENAS o JSON, sem markdown, sem backticks.`;
 
     console.log("=== AI PARSED ===", JSON.stringify(parsed, null, 2));
 
+    // === POST-PROCESSING: Validate extracted financial values from images ===
+    if (imageBase64 && parsed.db_actions) {
+      for (const action of parsed.db_actions) {
+        if (action.tabela === "financas" && action.operacao === "insert" && action.dados?.valor) {
+          const val = Number(action.dados.valor);
+          // Heuristic: if value > 500 for residential bills, check if first digit was erroneously prepended
+          // e.g., 991.63 -> the real value might be 91.63 (first digit "9" was hallucinated from nearby text)
+          // e.g., 991.53 -> 91.53
+          const desc = (action.dados.descricao || "").toLowerCase();
+          const isResidentialBill = /água|agua|luz|energia|enel|cemig|copasa|sabesp|sanepar|internet|vero|claro|net|telefone|gás|gas|esgoto/.test(desc);
+          
+          if (isResidentialBill && val > 500) {
+            // Try removing the first digit and see if it's in a reasonable range
+            const valStr = val.toFixed(2);
+            const withoutFirst = parseFloat(valStr.substring(1));
+            if (withoutFirst >= 30 && withoutFirst <= 500) {
+              console.log(`⚠️ VALUE CORRECTION: ${val} -> ${withoutFirst} (removed hallucinated first digit)`);
+              action.dados.valor = withoutFirst;
+              // Also fix the WhatsApp message
+              if (parsed.mensagem_whatsapp) {
+                parsed.mensagem_whatsapp = parsed.mensagem_whatsapp
+                  .replace(val.toFixed(2).replace(".", ","), withoutFirst.toFixed(2).replace(".", ","))
+                  .replace(`R$ ${val}`, `R$ ${withoutFirst}`)
+                  .replace(`R$${val}`, `R$${withoutFirst}`);
+              }
+            }
+          }
+        }
+      }
+    }
+
     // === Execute db_actions ===
     const actions = parsed.db_actions || [];
 
