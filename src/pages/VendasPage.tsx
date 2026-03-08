@@ -40,33 +40,18 @@ const testimonials = [
   { name: "Fernanda Costa", role: "Autônoma", text: "A integração com Google Agenda mudou minha vida. Tudo sincronizado automaticamente.", stars: 5 },
 ];
 
-const plans = [
-  {
-    name: "Mensal",
-    price: "29,90",
-    period: "/mês",
-    link: "https://pay.kiwify.com.br/o9VoTdd",
-    highlight: false,
-    badge: null,
-  },
-  {
-    name: "Trimestral",
-    price: "74,90",
-    period: "/trimestre",
-    pricePerMonth: "24,97",
-    link: "https://pay.kiwify.com.br/qaehX5t",
-    highlight: true,
-    badge: "Mais Vendido",
-  },
-  {
-    name: "Semestral",
-    price: "119,90",
-    period: "/semestre",
-    pricePerMonth: "19,98",
-    link: "https://pay.kiwify.com.br/TonUbU4",
-    highlight: false,
-    badge: "Melhor Custo-Benefício",
-  },
+const plan = {
+  name: "Premium Mensal",
+  price: "29,90",
+  period: "/mês",
+  link: "https://pay.kiwify.com.br/o9VoTdd",
+};
+
+const monthlyBenefits = [
+  { icon: Zap, text: "Sem fidelidade — cancele quando quiser" },
+  { icon: Shield, text: "Sem surpresas — valor fixo todo mês" },
+  { icon: Sparkles, text: "Acesso total desde o primeiro dia" },
+  { icon: CreditCard, text: "Menos de R$1 por dia para ter um assistente 24h" },
 ];
 
 const planFeatures = [
@@ -485,66 +470,70 @@ const VendasPage = () => {
             </Link>
           </motion.div>
 
-          <div className="grid gap-5 sm:grid-cols-3">
-            {plans.map((plan, i) => (
-              <motion.div
-                key={plan.name}
-                custom={i}
-                initial="hidden"
-                whileInView="visible"
-                viewport={{ once: true, margin: "-50px" }}
-                variants={fadeUp}
-                className={`relative overflow-hidden rounded-2xl border p-6 transition-shadow hover:shadow-md ${
-                  plan.highlight
-                    ? "border-primary bg-navy-light shadow-lg shadow-primary/20 ring-2 ring-primary/30"
-                    : "border-white/10 bg-white/5"
-                }`}
-              >
-                {plan.badge && (
-                  <div className={`absolute right-3 top-3 rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-wide ${
-                    plan.highlight
-                      ? "bg-accent text-accent-foreground"
-                      : "bg-white/10 text-white/70"
-                  }`}>
-                    {plan.badge}
-                  </div>
-                )}
-                <h3 className="font-heading text-lg font-bold text-white">{plan.name}</h3>
-                <div className="mt-3 flex items-baseline gap-1">
-                  <span className="text-sm text-white/50">R$</span>
-                  <span className="font-heading text-3xl font-extrabold text-white">
-                    {plan.price}
-                  </span>
-                  <span className="text-sm text-white/50">{plan.period}</span>
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="mx-auto max-w-lg"
+          >
+            <div className="relative overflow-hidden rounded-3xl border-2 border-primary bg-navy-light p-8 shadow-2xl shadow-primary/20 ring-2 ring-primary/30">
+              <div className="absolute -right-10 -top-10 h-40 w-40 rounded-full bg-primary/10 blur-[60px]" />
+              <div className="absolute -left-10 bottom-0 h-32 w-32 rounded-full bg-success/10 blur-[50px]" />
+
+              <div className="relative">
+                <div className="mb-2 inline-flex items-center gap-2 rounded-full bg-accent px-3 py-1 text-xs font-bold uppercase tracking-wider text-accent-foreground">
+                  <Crown className="h-3.5 w-3.5" />
+                  Plano Recomendado
                 </div>
-                {plan.pricePerMonth && (
-                  <p className="mt-1 text-xs font-medium text-success">
-                    equivale a R${plan.pricePerMonth}/mês
-                  </p>
-                )}
-                <ul className="mt-5 space-y-2">
+
+                <h3 className="font-heading text-2xl font-bold text-white">{plan.name}</h3>
+
+                <div className="mt-4 flex items-baseline gap-1">
+                  <span className="text-base text-white/50">R$</span>
+                  <span className="font-heading text-5xl font-extrabold text-white">{plan.price}</span>
+                  <span className="text-base text-white/50">{plan.period}</span>
+                </div>
+                <p className="mt-1 text-sm font-medium text-success">
+                  Menos de R$1 por dia para organizar sua vida inteira
+                </p>
+
+                {/* Monthly benefits */}
+                <div className="mt-6 space-y-3">
+                  {monthlyBenefits.map((b, i) => (
+                    <div key={i} className="flex items-center gap-3 text-sm text-white/80">
+                      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary/15">
+                        <b.icon className="h-4 w-4 text-primary" />
+                      </div>
+                      {b.text}
+                    </div>
+                  ))}
+                </div>
+
+                <div className="my-6 border-t border-white/10" />
+
+                {/* Features list */}
+                <ul className="space-y-2.5">
                   {planFeatures.map((f) => (
-                    <li key={f} className="flex items-center gap-2 text-sm text-white/60">
+                    <li key={f} className="flex items-center gap-2.5 text-sm text-white/70">
                       <Check className="h-4 w-4 shrink-0 text-success" />
                       {f}
                     </li>
                   ))}
                 </ul>
-                <a href={plan.link} target="_blank" rel="noopener noreferrer" className="mt-6 block">
-                  <Button
-                    className={`w-full rounded-xl font-semibold ${
-                      plan.highlight
-                        ? "bg-primary text-white shadow-lg shadow-primary/20 hover:bg-primary/90"
-                        : "border-white/20 bg-white/10 text-white hover:bg-white/20"
-                    }`}
-                  >
-                    <Crown className="mr-2 h-4 w-4" />
-                    Assinar Agora
+
+                <a href={plan.link} target="_blank" rel="noopener noreferrer" className="mt-8 block">
+                  <Button size="lg" className="h-16 w-full rounded-2xl bg-success text-lg font-bold text-white shadow-xl shadow-success/30 hover:bg-success/90">
+                    <Crown className="mr-3 h-6 w-6" />
+                    Assinar Agora — R$29,90/mês
+                    <ArrowRight className="ml-3 h-6 w-6" />
                   </Button>
                 </a>
-              </motion.div>
-            ))}
-          </div>
+                <p className="mt-3 text-center text-xs text-white/40">
+                  Pagamento seguro via Kiwify • Cancele a qualquer momento
+                </p>
+              </div>
+            </div>
+          </motion.div>
         </div>
       </section>
 
