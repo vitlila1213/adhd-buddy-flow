@@ -351,17 +351,16 @@ Quando o usuário pedir para ser LEMBRADO de algo (ex: "me lembra", "me avisa", 
 === VISÃO COMPUTACIONAL / LEITURA DE IMAGENS ===
 Se o usuário enviar uma IMAGEM, aja como um Leitor Financeiro Inteligente. Analise a imagem e identifique:
 
-⚠️ REGRA CRÍTICA DE LEITURA DE VALORES — LEIA COM ATENÇÃO ⚠️
+⚠️ REGRA CRÍTICA DE LEITURA DE VALORES — LEIA COM EXTREMA ATENÇÃO ⚠️
 - Procure o campo "TOTAL A PAGAR", "VALOR TOTAL", "TOTAL" ou similar na imagem.
+- SOLETRE o valor dígito por dígito antes de converter. Ex: se vê "R$91,53", soletre: "9", "1", vírgula, "5", "3" = 91.53
 - Em moeda brasileira: PONTO = separador de MILHARES, VÍRGULA = separador de CENTAVOS.
   Exemplo: "R$ 1.234,56" = 1234.56 (mil duzentos e trinta e quatro reais).
-- ⚠️ ERRO COMUM: NÃO junte dígitos antes da vírgula com dígitos após!
-  "R$ 91,53" → valor JSON = 91.53 (NOVENTA E UM reais). NÃO é 991.53!
-  "R$ 191,63" → valor JSON = 191.63. NÃO é 1916.3!
-  "R$ 1.091,53" → valor JSON = 1091.53 (MIL e noventa e um reais).
-- Leia os dígitos EXATAMENTE como aparecem na imagem. Não invente dígitos extras.
-- Se a imagem mostra "91,53", registre 91.53. Se mostra "991,63", registre 991.63.
-- VALIDAÇÃO: Contas residenciais (água, luz, internet, gás) normalmente custam entre R$30 e R$500. Se o valor extraído parecer fora dessa faixa, RELEIA a imagem com cuidado.
+- ⚠️ NÃO adicione dígitos que não existem na imagem!
+  "R$ 91,53" → 91.53 (2 dígitos antes da vírgula). NÃO é 991.53 (3 dígitos)!
+  "R$ 91,53" tem EXATAMENTE 2 dígitos antes da vírgula: "9" e "1".
+- Se a imagem mostra "R$91,53" no campo TOTAL A PAGAR, o valor é NOVENTA E UM reais e cinquenta e três centavos = 91.53
+- VALIDAÇÃO: Contas residenciais (água, luz, internet, gás) normalmente custam entre R$30 e R$500. Se o valor extraído for >500, RELEIA o campo TOTAL A PAGAR contando cada dígito.
 - Na dúvida entre dois valores, escolha o que está no campo "TOTAL A PAGAR" ou "VALOR A PAGAR".
 
 ⚠️ REGRA CRÍTICA: GASTO vs CONTA/BOLETO ⚠️
@@ -476,6 +475,37 @@ Retorne APENAS o JSON, sem markdown, sem backticks.`;
     const parsed = JSON.parse(cleanedContent);
 
     console.log("=== AI PARSED ===", JSON.stringify(parsed, null, 2));
+
+    // === POST-PROCESSING: Validate extracted financial values from images ===
+    if (imageBase64 && parsed.db_actions) {
+      for (const action of parsed.db_actions) {
+        if (action.tabela === "financas" && action.operacao === "insert" && action.dados?.valor) {
+          const val = Number(action.dados.valor);
+          // Heuristic: if value > 500 for residential bills, check if first digit was erroneously prepended
+          // e.g., 991.63 -> the real value might be 91.63 (first digit "9" was hallucinated from nearby text)
+          // e.g., 991.53 -> 91.53
+          const desc = (action.dados.descricao || "").toLowerCase();
+          const isResidentialBill = /água|agua|luz|energia|enel|cemig|copasa|sabesp|sanepar|internet|vero|claro|net|telefone|gás|gas|esgoto/.test(desc);
+          
+          if (isResidentialBill && val > 500) {
+            // Try removing the first digit and see if it's in a reasonable range
+            const valStr = val.toFixed(2);
+            const withoutFirst = parseFloat(valStr.substring(1));
+            if (withoutFirst >= 30 && withoutFirst <= 500) {
+              console.log(`⚠️ VALUE CORRECTION: ${val} -> ${withoutFirst} (removed hallucinated first digit)`);
+              action.dados.valor = withoutFirst;
+              // Also fix the WhatsApp message
+              if (parsed.mensagem_whatsapp) {
+                parsed.mensagem_whatsapp = parsed.mensagem_whatsapp
+                  .replace(val.toFixed(2).replace(".", ","), withoutFirst.toFixed(2).replace(".", ","))
+                  .replace(`R$ ${val}`, `R$ ${withoutFirst}`)
+                  .replace(`R$${val}`, `R$${withoutFirst}`);
+              }
+            }
+          }
+        }
+      }
+    }
 
     // === Execute db_actions ===
     const actions = parsed.db_actions || [];
