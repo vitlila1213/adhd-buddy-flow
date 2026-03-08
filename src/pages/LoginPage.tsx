@@ -98,9 +98,9 @@ const LoginPage = () => {
             initial={{ scale: 0.8, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             transition={{ delay: 0.15, duration: 0.4, ease: "easeOut" }}
-            className="mx-auto mb-5 flex h-20 w-20 items-center justify-center rounded-[1.75rem] bg-primary shadow-xl shadow-primary/25"
+            className="mx-auto mb-5"
           >
-            <Brain className="h-10 w-10 text-primary-foreground" />
+            <img src={logoImg} alt="Cérebro de Bolso" className="mx-auto h-20 w-20 object-contain" />
           </motion.div>
           <h1 className="font-heading text-2xl font-bold tracking-tight text-foreground">
             Cérebro de Bolso
