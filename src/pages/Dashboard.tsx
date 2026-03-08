@@ -67,15 +67,15 @@ const Dashboard = () => {
         <div className="mx-auto max-w-2xl lg:max-w-6xl">
           {/* Desktop tabs */}
           <div className="mb-5 hidden pt-4 sm:block">
-            <div className="flex gap-1 rounded-2xl bg-muted/60 p-1.5">
+            <div className="flex gap-1 rounded-2xl bg-navy/5 p-1.5 border border-border/50">
               {tabs.map((tab) => (
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
                   className={`flex flex-1 items-center justify-center gap-2 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-200 ${
                     activeTab === tab.id
-                      ? "bg-card text-foreground shadow-sm"
-                      : "text-muted-foreground hover:text-foreground"
+                      ? "bg-primary text-primary-foreground shadow-sm shadow-primary/20"
+                      : "text-muted-foreground hover:text-foreground hover:bg-muted/60"
                   }`}
                 >
                   <tab.icon className="h-4 w-4" />
