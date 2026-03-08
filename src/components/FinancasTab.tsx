@@ -77,16 +77,16 @@ const FinancasTab = () => {
       {/* Summary Cards */}
       <div className="grid grid-cols-3 gap-3">
         {[
-          { label: "Gasto no Mês", value: resumo.gastos, icon: TrendingDown, color: "text-destructive", bg: "bg-destructive/10" },
-          { label: "Recebido", value: resumo.recebido, icon: TrendingUp, color: "text-status-done-text", bg: "bg-status-done-bg" },
-          { label: "Saldo", value: resumo.saldo, icon: Wallet, color: resumo.saldo >= 0 ? "text-status-done-text" : "text-destructive", bg: resumo.saldo >= 0 ? "bg-status-done-bg" : "bg-destructive/10" },
+          { label: "Gasto no Mês", value: resumo.gastos, icon: TrendingDown, color: "text-destructive", bg: "bg-destructive/10", border: "border-l-destructive" },
+          { label: "Recebido", value: resumo.recebido, icon: TrendingUp, color: "text-success", bg: "bg-success/10", border: "border-l-success" },
+          { label: "Saldo", value: resumo.saldo, icon: Wallet, color: resumo.saldo >= 0 ? "text-success" : "text-destructive", bg: resumo.saldo >= 0 ? "bg-success/10" : "bg-destructive/10", border: resumo.saldo >= 0 ? "border-l-success" : "border-l-destructive" },
         ].map((card, i) => (
           <motion.div
             key={card.label}
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: i * 0.08 }}
-            className="rounded-2xl border border-border/60 bg-card p-3 shadow-sm"
+            className={`rounded-2xl border border-border/60 border-l-4 ${card.border} bg-card p-3 shadow-sm`}
           >
             <div className={`mb-2 flex h-8 w-8 items-center justify-center rounded-xl ${card.bg}`}>
               <card.icon className={`h-4 w-4 ${card.color}`} />
@@ -118,7 +118,7 @@ const FinancasTab = () => {
       {/* Add button */}
       <button
         onClick={() => setShowForm(!showForm)}
-        className="flex w-full items-center justify-center gap-2 rounded-2xl border border-dashed border-border bg-card/50 py-3 text-sm font-medium text-muted-foreground transition-colors hover:border-primary hover:text-primary"
+        className="flex w-full items-center justify-center gap-2 rounded-2xl border border-dashed border-primary/30 bg-primary/[0.03] py-3 text-sm font-medium text-primary transition-colors hover:border-primary hover:bg-primary/5"
       >
         <Plus className="h-4 w-4" />
         Nova Transação
@@ -131,7 +131,7 @@ const FinancasTab = () => {
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: "auto" }}
             exit={{ opacity: 0, height: 0 }}
-            className="overflow-hidden rounded-2xl border border-border/60 bg-card p-4 shadow-sm"
+            className="overflow-hidden rounded-2xl border border-primary/20 bg-card p-4 shadow-sm"
           >
             <div className="space-y-3">
               <div className="flex gap-2">
@@ -141,7 +141,7 @@ const FinancasTab = () => {
                     onClick={() => setForm(f => ({ ...f, tipo: t }))}
                     className={`flex-1 rounded-xl py-2 text-sm font-semibold transition-colors ${
                       form.tipo === t
-                        ? t === "despesa" ? "bg-destructive/10 text-destructive" : "bg-status-done-bg text-status-done-text"
+                        ? t === "despesa" ? "bg-destructive/10 text-destructive" : "bg-success/10 text-success"
                         : "bg-muted text-muted-foreground"
                     }`}
                   >
@@ -224,13 +224,15 @@ const FinancasTab = () => {
                   key={f.id}
                   initial={{ opacity: 0, y: 8 }}
                   animate={{ opacity: 1, y: 0 }}
-                  className="flex items-center gap-3 rounded-2xl border border-border/60 bg-card p-3 shadow-sm"
+                  className={`flex items-center gap-3 rounded-2xl border border-border/60 border-l-4 bg-card p-3 shadow-sm ${
+                    f.tipo === "receita" ? "border-l-success" : "border-l-destructive"
+                  }`}
                 >
                   <div className={`flex h-9 w-9 items-center justify-center rounded-xl ${
-                    f.tipo === "receita" ? "bg-status-done-bg" : "bg-destructive/10"
+                    f.tipo === "receita" ? "bg-success/10" : "bg-destructive/10"
                   }`}>
                     <DollarSign className={`h-4 w-4 ${
-                      f.tipo === "receita" ? "text-status-done-text" : "text-destructive"
+                      f.tipo === "receita" ? "text-success" : "text-destructive"
                     }`} />
                   </div>
                   <div className="flex-1 min-w-0">
@@ -250,7 +252,7 @@ const FinancasTab = () => {
                     </div>
                   </div>
                   <span className={`font-heading text-sm font-bold ${
-                    f.tipo === "receita" ? "text-status-done-text" : "text-destructive"
+                    f.tipo === "receita" ? "text-success" : "text-destructive"
                   }`}>
                     {f.tipo === "receita" ? "+" : "-"}R$ {Number(f.valor).toFixed(2)}
                   </span>
