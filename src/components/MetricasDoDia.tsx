@@ -101,8 +101,8 @@ const MetricasDoDia = () => {
         transition={{ delay: 0.4, duration: 0.3, ease: "easeOut" }}
         className="flex items-center gap-3 rounded-2xl border border-border/60 bg-card p-4 shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md"
       >
-        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[hsl(142,70%,45%)]/10">
-          <MessageCircle className="h-5 w-5 text-[hsl(142,70%,45%)]" />
+        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-success/10">
+          <MessageCircle className="h-5 w-5 text-success" />
         </div>
         <div className="flex-1">
           <p className="text-sm font-semibold text-card-foreground">Falar com o Agente</p>
