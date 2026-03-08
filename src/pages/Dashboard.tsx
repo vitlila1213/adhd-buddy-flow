@@ -113,7 +113,7 @@ const Dashboard = () => {
 
       {/* Bottom Navigation - Mobile */}
       <nav className="glass fixed bottom-0 left-0 right-0 z-50 sm:hidden safe-bottom">
-        <div className="flex items-center justify-around px-1 py-1.5">
+        <div className="flex items-end justify-around px-1 pb-1.5 pt-2">
           {tabs.map((tab) => {
             const isActive = activeTab === tab.id;
             if (tab.center) {
@@ -122,22 +122,31 @@ const Dashboard = () => {
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
                   className="relative flex flex-col items-center px-1"
+                  style={{ marginBottom: '0px' }}
                 >
-                  <div
-                    className={`-mt-4 mb-0.5 flex h-12 w-12 items-center justify-center rounded-full shadow-lg transition-all duration-200 ${
+                  <motion.div
+                    className={`-mt-7 flex h-14 w-14 items-center justify-center rounded-full shadow-lg transition-colors duration-200 ${
                       isActive
                         ? "bg-primary shadow-primary/30"
                         : "bg-card border border-border shadow-md"
                     }`}
+                    animate={isActive ? { scale: [1, 1.1, 1] } : { scale: 1 }}
+                    transition={isActive ? { duration: 0.4, ease: "easeInOut" } : {}}
+                    whileTap={{ scale: 0.9 }}
                   >
-                    <tab.icon
-                      className={`h-6 w-6 ${
-                        isActive ? "text-primary-foreground stroke-[2.5]" : "text-muted-foreground"
-                      }`}
-                    />
-                  </div>
+                    <motion.div
+                      animate={isActive ? { rotate: [0, -10, 10, -5, 5, 0] } : { rotate: 0 }}
+                      transition={isActive ? { duration: 0.6, ease: "easeInOut" } : {}}
+                    >
+                      <tab.icon
+                        className={`h-7 w-7 ${
+                          isActive ? "text-primary-foreground stroke-[2.5]" : "text-muted-foreground"
+                        }`}
+                      />
+                    </motion.div>
+                  </motion.div>
                   <span
-                    className={`truncate text-[9px] font-medium ${
+                    className={`mt-1 text-[9px] font-medium leading-none ${
                       isActive ? "font-semibold text-primary" : "text-muted-foreground"
                     }`}
                   >
@@ -150,18 +159,18 @@ const Dashboard = () => {
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`flex min-w-0 flex-col items-center gap-0.5 rounded-xl px-1 py-1.5 transition-colors ${
+                className={`flex min-w-0 flex-col items-center gap-0.5 rounded-xl px-1 py-0.5 transition-colors ${
                   isActive ? "text-primary" : "text-muted-foreground"
                 }`}
               >
                 <tab.icon className={`h-5 w-5 flex-shrink-0 ${isActive ? "stroke-[2.5]" : ""}`} />
-                <span className={`truncate text-[9px] font-medium ${isActive ? "font-semibold" : ""}`}>
+                <span className={`truncate text-[9px] font-medium leading-none ${isActive ? "font-semibold" : ""}`}>
                   {tab.label}
                 </span>
                 {isActive && (
                   <motion.div
                     layoutId="bottomNav"
-                    className="h-1 w-4 rounded-full bg-primary"
+                    className="mt-0.5 h-1 w-4 rounded-full bg-primary"
                     transition={{ type: "spring", stiffness: 400, damping: 30 }}
                   />
                 )}
