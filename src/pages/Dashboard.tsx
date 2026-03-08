@@ -121,23 +121,23 @@ const Dashboard = () => {
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
-                  className="relative -mt-5 flex flex-col items-center"
+                  className="relative flex flex-col items-center px-1"
                 >
                   <div
-                    className={`flex h-14 w-14 items-center justify-center rounded-full shadow-lg transition-all duration-200 ${
+                    className={`-mt-4 mb-0.5 flex h-12 w-12 items-center justify-center rounded-full shadow-lg transition-all duration-200 ${
                       isActive
                         ? "bg-primary shadow-primary/30"
                         : "bg-card border border-border shadow-md"
                     }`}
                   >
                     <tab.icon
-                      className={`h-7 w-7 ${
+                      className={`h-6 w-6 ${
                         isActive ? "text-primary-foreground stroke-[2.5]" : "text-muted-foreground"
                       }`}
                     />
                   </div>
                   <span
-                    className={`mt-0.5 text-[10px] font-medium ${
+                    className={`truncate text-[9px] font-medium ${
                       isActive ? "font-semibold text-primary" : "text-muted-foreground"
                     }`}
                   >
