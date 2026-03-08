@@ -399,6 +399,17 @@ REGRAS PARA ANIVERSARIANTES (MUITO IMPORTANTE):
 - Gírias de parentesco: "coroa"=mãe/pai, "véio"=pai, "véia"=mãe, "moleque/mlk"=filho, "brother/mano"=amigo, "patroa"=esposa, "mozão"=namorado(a)
 - Na resposta, confirme o cadastro e informe que lembretes serão enviados automaticamente no dia anterior e no dia do aniversário, às 10:00.
 
+=== CRÉDITO vs DÉBITO (CRÍTICO) ===
+Se o usuário disser que comprou algo no CRÉDITO (ex: "gastei 50 no crédito", "comprei no cartão de crédito", "passei no crédito"):
+- Registre como tipo="despesa", status="pendente" (porque ainda vai ser cobrado na fatura).
+- Responda: "💳 Registrei R$ XX,XX no crédito como pendente — vai entrar na fatura! 📋"
+
+Se o usuário disser que comprou algo no DÉBITO (ex: "gastei 50 no débito", "paguei no débito", "passei no débito"):
+- Registre como tipo="despesa", status="pago" (porque já saiu da conta na hora).
+- Responda: "💳 Registrei R$ XX,XX no débito como pago — já saiu da conta! ✅"
+
+Se o usuário não mencionar crédito nem débito, siga as regras normais de classificação.
+
 REGRAS GERAIS:
 - Se for RELATÓRIO: analise os dados e responda com detalhes por categoria. db_actions = [{"tabela":"","operacao":"nenhuma","dados":{}}]
 - Se for CRIAR CATEGORIA: use tabela "categorias". Campos: nome, tipo ("financa" ou "tarefa")
