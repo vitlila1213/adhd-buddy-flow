@@ -13,12 +13,13 @@ import AniversariantesTab from "@/components/AniversariantesTab";
 import IntegracoesTab from "@/components/IntegracoesTab";
 import { motion, AnimatePresence } from "framer-motion";
 
-type Tab = "tarefas" | "financas" | "categorias" | "aniversariantes" | "metricas" | "integracoes";
+type Tab = "tarefas" | "financas" | "categorias" | "aniversariantes" | "metricas" | "integracoes" | "anotacoes";
 
 const tabs = [
   { id: "metricas" as Tab, label: "Métricas", icon: BarChart3, emoji: "📊" },
   { id: "financas" as Tab, label: "Finanças", icon: DollarSign, emoji: "💰" },
   { id: "tarefas" as Tab, label: "Tarefas", icon: ListTodo, emoji: "🧠" },
+  { id: "anotacoes" as Tab, label: "Anotações", icon: Brain, emoji: "📝" },
   { id: "aniversariantes" as Tab, label: "Aniversários", icon: Cake, emoji: "🎂" },
   { id: "categorias" as Tab, label: "Categorias", icon: Settings, emoji: "⚙️" },
   { id: "integracoes" as Tab, label: "Integrações", icon: Link2, emoji: "🔗" },
@@ -101,6 +102,9 @@ const Dashboard = () => {
               {activeTab === "integracoes" && <IntegracoesTab />}
               {activeTab === "tarefas" && (
                 <KanbanBoard activeTab="tarefas" limitReached={limitReached} onUpgrade={() => setShowUpgrade(true)} />
+              )}
+              {activeTab === "anotacoes" && (
+                <KanbanBoard activeTab="anotacoes" limitReached={limitReached} onUpgrade={() => setShowUpgrade(true)} />
               )}
             </motion.div>
           </AnimatePresence>

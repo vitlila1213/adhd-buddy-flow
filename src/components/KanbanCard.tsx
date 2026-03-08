@@ -1,6 +1,6 @@
 import { Draggable } from "@hello-pangea/dnd";
 import type { ItemCerebro } from "@/hooks/useItens";
-import { Lightbulb, CheckCircle2, Clock } from "lucide-react";
+import { StickyNote, CheckCircle2, Clock } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
@@ -28,7 +28,7 @@ const KanbanCard = ({ item, index }: KanbanCardProps) => {
           <div className="mb-2 flex items-start gap-2.5">
             {item.tipo === "ideia" ? (
               <div className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-xl bg-status-pending-bg">
-                <Lightbulb className="h-3.5 w-3.5 text-status-pending-text" />
+                <StickyNote className="h-3.5 w-3.5 text-status-pending-text" />
               </div>
             ) : item.status === "concluida" ? (
               <div className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-xl bg-status-done-bg">

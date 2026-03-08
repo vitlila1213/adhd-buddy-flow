@@ -424,8 +424,14 @@ REGRAS GERAIS:
 - Se for RELATÓRIO: analise os dados e responda com detalhes por categoria. db_actions = [{"tabela":"","operacao":"nenhuma","dados":{}}]
 - Se for CRIAR CATEGORIA: use tabela "categorias". Campos: nome, tipo ("financa" ou "tarefa")
 - Se for NOVA DESPESA/RECEITA: classifique na categoria correta. Campos: tipo, valor, descricao, categoria_id, status, is_recorrente
-- Se for NOVA TAREFA/IDEIA: Campos: tipo, titulo, descricao, data_hora_agendada (ISO com -03:00 ou null), status ("pendente"), categoria_id
-- Se for CONCLUSÃO de tarefa: use "update" com {id, status: "concluida", completed_at: "${now.toISOString()}"}
+- Se for NOVA TAREFA: tipo="tarefa". Campos: tipo, titulo, descricao, data_hora_agendada (ISO com -03:00 ou null), status ("pendente"), categoria_id
+- Se for ANOTAÇÃO/IDEIA/NOTA/RECADO ou qualquer mensagem que NÃO seja tarefa, finança, categoria ou aniversário: tipo="ideia". Campos: tipo="ideia", titulo, descricao, status="pendente", categoria_id: null
+  Exemplos de anotações: "preciso otimizar a ferramenta", "lembrar de comprar presente", "ideia para projeto novo", "anotar que fulano ligou"
+  QUALQUER mensagem que não se encaixe claramente como tarefa com prazo, finança ou aniversário DEVE ser salva como anotação (tipo="ideia").
+- Se for CONCLUSÃO de tarefa: SOMENTE marque como concluída se o usuário EXPLICITAMENTE disser que TERMINOU/CONCLUIU/FEZ a tarefa.
+  O usuário DEVE usar palavras como: "fiz", "terminei", "concluí", "feito", "pronto", "acabei", "finalizei", "tá feito", "done".
+  ⚠️ NUNCA marque uma tarefa como concluída apenas porque o usuário MENCIONOU palavras similares ao título da tarefa!
+  Exemplo: se existe tarefa "otimizar ferramenta" e o usuário diz "preciso otimizar ferramenta paulo" → isso é uma NOVA ANOTAÇÃO, NÃO é conclusão da tarefa!
 - Se for marcar finança como PAGA: use "update" com {id, status: "pago"}
 - NUNCA insira categorias na tabela itens_cerebro.
 - Ao criar tarefa, SEMPRE associe à categoria mais relevante do usuário. Se não houver correspondência, use categoria_id: null.
