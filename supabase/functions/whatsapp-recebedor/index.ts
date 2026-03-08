@@ -378,8 +378,14 @@ A) Se for um GASTO (nota fiscal, recibo, cupom fiscal, comprovante de pagamento 
 B) Se for uma CONTA ou BOLETO (conta de luz, água, internet, telefone, boleto bancário — cobrança AINDA NÃO PAGA):
    - Identifique o tipo de conta ou nome da empresa (ex: "Cemig", "Vero", "Sabesp", "Copasa").
    - Extraia o valor exato do campo "TOTAL A PAGAR" e a DATA DE VENCIMENTO.
-   - Gere uma ação de insert na tabela "financas" com: tipo="despesa", status="pendente", descricao="<tipo/nome da conta>", valor=<valor>, data_vencimento="<data de vencimento extraída no formato ISO com -03:00>".
-   - Responda: "🧾 Li sua conta de <tipo> no valor de R$ XX,XX. O vencimento é dia DD/MM. Registrei como pendente e vou te lembrar! 📅"
+   ⚠️ EXTRAÇÃO DE DATA DE VENCIMENTO (OBRIGATÓRIO):
+   - Procure na imagem por campos como "VENCIMENTO", "DATA VENCIMENTO", "VENCE EM", "PAGAR ATÉ", "DATA LIMITE DE PAGAMENTO".
+   - A data DEVE ser extraída e convertida para formato ISO: YYYY-MM-DDT12:00:00-03:00
+   - Exemplo: se vencimento é "09/03/2026", o campo data_vencimento DEVE ser "2026-03-09T12:00:00-03:00"
+   - Se o ano não aparecer na imagem, use o ano atual (${spDate.split("-")[0]}).
+   - NUNCA deixe data_vencimento como null quando o documento claramente mostra uma data de vencimento!
+   - Gere uma ação de insert na tabela "financas" com: tipo="despesa", status="pendente", descricao="Conta <tipo/nome da empresa>", valor=<valor>, data_vencimento="<data ISO extraída>".
+   - Na mensagem_whatsapp, SEMPRE mencione a data de vencimento formatada: "🧾 Li sua conta de <tipo> no valor de R$ XX,XX. *Vencimento: DD/MM/AAAA*. Registrei como pendente e vou te lembrar! 📅"
 
 C) Se a imagem não for financeira, descreva o que vê e pergunte como pode ajudar.
 
