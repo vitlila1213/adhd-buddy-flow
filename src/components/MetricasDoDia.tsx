@@ -52,7 +52,7 @@ const MetricasDoDia = () => {
     {
       icon: <Lightbulb className="h-5 w-5 text-status-pending-text" />,
       bg: "bg-status-pending-bg",
-      label: "Ideias Capturadas",
+      label: "Anotações Capturadas",
       value: metrics.ideias,
     },
     {

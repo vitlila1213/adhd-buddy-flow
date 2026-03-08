@@ -113,7 +113,7 @@ const Dashboard = () => {
 
       {/* Bottom Navigation - Mobile */}
       <nav className="glass fixed bottom-0 left-0 right-0 z-50 sm:hidden safe-bottom">
-        <div className="flex items-end justify-around px-1 pb-1.5 pt-2">
+        <div className="grid grid-cols-7 items-end pb-1.5 pt-2">
           {tabs.map((tab) => {
             const isActive = activeTab === tab.id;
             if (tab.center) {
@@ -121,7 +121,7 @@ const Dashboard = () => {
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
-                  className="relative flex flex-col items-center px-1"
+                  className="relative flex flex-col items-center"
                   style={{ marginBottom: '0px' }}
                 >
                   <motion.div
@@ -159,7 +159,7 @@ const Dashboard = () => {
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`flex min-w-0 flex-col items-center gap-0.5 rounded-xl px-1 py-0.5 transition-colors ${
+                className={`flex flex-col items-center gap-0.5 py-0.5 transition-colors ${
                   isActive ? "text-primary" : "text-muted-foreground"
                 }`}
               >
