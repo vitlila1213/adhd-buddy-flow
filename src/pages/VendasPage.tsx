@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { useState } from "react";
+import logoImg from "@/assets/logo.png";
 
 const features = [
   { icon: MessageSquare, title: "Registre Tudo no WhatsApp", desc: "Envie texto ou áudio. A IA entende, classifica e registra automaticamente. Sem cadastros, sem apps extras." },
@@ -82,7 +83,6 @@ const planFeatures = [
   "Suporte Prioritário",
 ];
 
-// Comparativo
 const comparisonFeatures = [
   { feature: "Assistente via WhatsApp", cerebro: true, others: false },
   { feature: "Texto e Áudio", cerebro: true, others: false },
@@ -123,17 +123,15 @@ const VendasPage = () => {
   return (
     <div className="min-h-screen bg-background">
       {/* Announcement Bar */}
-      <div className="bg-primary px-4 py-2 text-center text-sm font-medium text-primary-foreground">
+      <div className="bg-navy px-4 py-2.5 text-center text-sm font-medium text-navy-foreground">
         ✨ Assessoria 24h no seu bolso — Texto, áudio e foto pelo WhatsApp
       </div>
 
-      {/* Header - FIXED */}
+      {/* Header */}
       <header className="fixed left-0 right-0 top-0 z-50 border-b border-border/30 bg-background/80 backdrop-blur-xl">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-5 py-3">
           <Link to="/" className="flex items-center gap-3">
-            <div className="flex h-9 w-9 items-center justify-center rounded-2xl bg-primary shadow-lg shadow-primary/25">
-              <Brain className="h-5 w-5 text-primary-foreground" />
-            </div>
+            <img src={logoImg} alt="Cérebro de Bolso" className="h-9 w-9 rounded-xl object-contain" />
             <span className="font-heading text-base font-bold tracking-tight text-foreground">
               Cérebro de Bolso
             </span>
@@ -154,13 +152,18 @@ const VendasPage = () => {
         </div>
       </header>
 
-      {/* Hero */}
-      <section className="px-5 pb-16 pt-32 sm:pb-24 sm:pt-40">
-        <div className="mx-auto max-w-4xl text-center">
+      {/* Hero - Navy background */}
+      <section className="relative overflow-hidden bg-navy px-5 pb-20 pt-32 sm:pb-28 sm:pt-40">
+        {/* Gradient orbs */}
+        <div className="pointer-events-none absolute -left-32 top-20 h-72 w-72 rounded-full bg-primary/20 blur-[100px]" />
+        <div className="pointer-events-none absolute -right-20 bottom-10 h-56 w-56 rounded-full bg-success/15 blur-[80px]" />
+        <div className="pointer-events-none absolute left-1/2 top-1/3 h-40 w-40 -translate-x-1/2 rounded-full bg-accent/15 blur-[60px]" />
+
+        <div className="relative mx-auto max-w-4xl text-center">
           <motion.p
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            className="mb-6 text-base text-primary font-semibold"
+            className="mb-6 text-base font-semibold text-primary"
           >
             Você ainda tá tentando lembrar tudo de cabeça?
           </motion.p>
@@ -168,17 +171,19 @@ const VendasPage = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1, duration: 0.5 }}
-            className="font-heading text-4xl font-extrabold leading-tight tracking-tight text-foreground sm:text-6xl"
+            className="font-heading text-4xl font-extrabold leading-tight tracking-tight text-white sm:text-6xl"
           >
             Tenha um assistente pessoal
             <br />
-            <span className="text-primary">trabalhando 24h por dia pra você</span>
+            <span className="bg-gradient-to-r from-primary via-primary to-success bg-clip-text text-transparent">
+              trabalhando 24h por dia pra você
+            </span>
           </motion.h1>
           <motion.p
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.25, duration: 0.5 }}
-            className="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-muted-foreground"
+            className="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-white/70"
           >
             Mande áudio, texto ou foto no WhatsApp. A IA organiza tarefas, finanças e compromissos.
             Lê boletos, dá baixa em contas e lembra seus aniversários.
@@ -189,23 +194,23 @@ const VendasPage = () => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.35 }}
-            className="mx-auto mt-8 flex flex-wrap items-center justify-center gap-4"
+            className="mx-auto mt-8 flex flex-wrap items-center justify-center gap-3"
           >
-            <div className="flex items-center gap-2 rounded-full border border-border/50 bg-card px-4 py-2 text-sm text-muted-foreground">
-              <Shield className="h-4 w-4 text-primary" />
+            <div className="flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm text-white/80 backdrop-blur-sm">
+              <Shield className="h-4 w-4 text-success" />
               Dados Protegidos
             </div>
-            <div className="flex items-center gap-2 rounded-full border border-border/50 bg-card px-4 py-2 text-sm text-muted-foreground">
-              <Camera className="h-4 w-4 text-primary" />
+            <div className="flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm text-white/80 backdrop-blur-sm">
+              <Camera className="h-4 w-4 text-accent" />
               Lê Boletos por Foto
             </div>
-            <div className="flex items-center gap-2 rounded-full border border-border/50 bg-card px-4 py-2 text-sm text-muted-foreground">
+            <div className="flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm text-white/80 backdrop-blur-sm">
               <Mic className="h-4 w-4 text-primary" />
               Texto, Áudio e Foto
             </div>
           </motion.div>
 
-          {/* CTA Principal - TESTE GRÁTIS em destaque */}
+          {/* CTA */}
           <motion.div
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
@@ -213,17 +218,17 @@ const VendasPage = () => {
             className="mt-10 flex flex-col items-center gap-4"
           >
             <Link to="/">
-              <Button size="lg" className="h-16 rounded-2xl px-12 text-lg font-bold shadow-xl shadow-primary/30 animate-pulse hover:animate-none">
+              <Button size="lg" className="h-16 rounded-2xl bg-success px-12 text-lg font-bold text-white shadow-xl shadow-success/30 hover:bg-success/90">
                 <Sparkles className="mr-3 h-6 w-6" />
                 Testar Grátis Agora
                 <ArrowRight className="ml-3 h-6 w-6" />
               </Button>
             </Link>
-            <p className="text-sm font-medium text-primary">
+            <p className="text-sm font-medium text-success">
               🎁 10 créditos grátis • Sem cartão de crédito • Acesso imediato
             </p>
             <a href="#planos">
-              <Button variant="ghost" size="lg" className="h-12 rounded-2xl px-8 text-base text-muted-foreground hover:text-foreground">
+              <Button variant="ghost" size="lg" className="h-12 rounded-2xl px-8 text-base text-white/60 hover:text-white hover:bg-white/5">
                 Ou veja os planos premium →
               </Button>
             </a>
@@ -232,7 +237,7 @@ const VendasPage = () => {
       </section>
 
       {/* How it works */}
-      <section id="como-funciona" className="bg-card/50 px-5 py-16 sm:py-24">
+      <section id="como-funciona" className="bg-background px-5 py-16 sm:py-24">
         <div className="mx-auto max-w-5xl">
           <h2 className="mb-4 text-center font-heading text-2xl font-bold text-foreground sm:text-3xl">
             Como funciona
@@ -263,12 +268,12 @@ const VendasPage = () => {
       </section>
 
       {/* Features Grid */}
-      <section className="px-5 py-16 sm:py-24">
+      <section className="bg-navy px-5 py-16 sm:py-24">
         <div className="mx-auto max-w-5xl">
-          <h2 className="mb-4 text-center font-heading text-2xl font-bold text-foreground sm:text-3xl">
+          <h2 className="mb-4 text-center font-heading text-2xl font-bold text-white sm:text-3xl">
             Tudo que você precisa em um só lugar
           </h2>
-          <p className="mb-12 text-center text-muted-foreground">
+          <p className="mb-12 text-center text-white/60">
             Funcionalidades exclusivas que nenhum concorrente oferece juntas
           </p>
           <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
@@ -284,22 +289,22 @@ const VendasPage = () => {
                   variants={fadeUp}
                   className={`relative rounded-2xl border p-6 shadow-sm ${
                     isExclusive
-                      ? "border-primary/30 bg-primary/5"
-                      : "border-border/50 bg-card"
+                      ? "border-primary/30 bg-primary/10"
+                      : "border-white/10 bg-white/5"
                   }`}
                 >
                   {isExclusive && (
-                    <span className="absolute right-3 top-3 rounded-full bg-primary px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-primary-foreground">
+                    <span className="absolute right-3 top-3 rounded-full bg-accent px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-accent-foreground">
                       Exclusivo
                     </span>
                   )}
                   <div className={`mb-4 flex h-11 w-11 items-center justify-center rounded-xl ${
-                    isExclusive ? "bg-primary/20" : "bg-primary/10"
+                    isExclusive ? "bg-primary/25" : "bg-white/10"
                   }`}>
-                    <f.icon className="h-5 w-5 text-primary" />
+                    <f.icon className={`h-5 w-5 ${isExclusive ? "text-primary" : "text-success"}`} />
                   </div>
-                  <h3 className="font-heading text-base font-bold text-foreground">{f.title}</h3>
-                  <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{f.desc}</p>
+                  <h3 className="font-heading text-base font-bold text-white">{f.title}</h3>
+                  <p className="mt-2 text-sm leading-relaxed text-white/60">{f.desc}</p>
                 </motion.div>
               );
             })}
@@ -307,8 +312,8 @@ const VendasPage = () => {
         </div>
       </section>
 
-      {/* Comparativo - Cérebro de Bolso vs Concorrentes */}
-      <section className="bg-card/50 px-5 py-16 sm:py-24">
+      {/* Comparativo */}
+      <section className="bg-background px-5 py-16 sm:py-24">
         <div className="mx-auto max-w-4xl">
           <h2 className="mb-4 text-center font-heading text-2xl font-bold text-foreground sm:text-3xl">
             Por que o Cérebro de Bolso é diferente?
@@ -322,33 +327,31 @@ const VendasPage = () => {
             viewport={{ once: true }}
             className="overflow-hidden rounded-2xl border border-border/50 bg-card shadow-sm"
           >
-            {/* Table Header */}
-            <div className="grid grid-cols-3 border-b border-border/50 bg-muted/30">
-              <div className="px-4 py-4 text-sm font-semibold text-muted-foreground sm:px-6">
+            <div className="grid grid-cols-3 border-b border-border/50 bg-navy">
+              <div className="px-4 py-4 text-sm font-semibold text-white/70 sm:px-6">
                 Funcionalidade
               </div>
               <div className="flex items-center justify-center gap-2 px-4 py-4 text-sm font-bold text-primary sm:px-6">
                 <Brain className="h-4 w-4" />
                 Cérebro de Bolso
               </div>
-              <div className="px-4 py-4 text-center text-sm font-semibold text-muted-foreground sm:px-6">
+              <div className="px-4 py-4 text-center text-sm font-semibold text-white/50 sm:px-6">
                 Outros Apps
               </div>
             </div>
-            {/* Table Rows */}
             {comparisonFeatures.map((item, i) => (
               <div
                 key={i}
                 className={`grid grid-cols-3 border-b border-border/20 last:border-0 ${
-                  !item.others ? "bg-primary/[0.03]" : ""
+                  !item.others ? "bg-success/[0.04]" : ""
                 }`}
               >
                 <div className="flex items-center px-4 py-3 text-xs font-medium text-foreground sm:px-6 sm:text-sm">
                   {item.feature}
                 </div>
                 <div className="flex items-center justify-center px-4 py-3">
-                  <div className="flex h-7 w-7 items-center justify-center rounded-full bg-primary/15">
-                    <Check className="h-4 w-4 text-primary" />
+                  <div className="flex h-7 w-7 items-center justify-center rounded-full bg-success/15">
+                    <Check className="h-4 w-4 text-success" />
                   </div>
                 </div>
                 <div className="flex items-center justify-center px-4 py-3">
@@ -367,7 +370,7 @@ const VendasPage = () => {
           </motion.div>
           <div className="mt-8 text-center">
             <Link to="/">
-              <Button size="lg" className="h-14 rounded-2xl px-10 text-base font-bold shadow-xl shadow-primary/30">
+              <Button size="lg" className="h-14 rounded-2xl bg-success px-10 text-base font-bold text-white shadow-xl shadow-success/30 hover:bg-success/90">
                 <Sparkles className="mr-2 h-5 w-5" />
                 Começar Teste Grátis
               </Button>
@@ -378,12 +381,12 @@ const VendasPage = () => {
       </section>
 
       {/* Interactive examples */}
-      <section className="px-5 py-16 sm:py-24">
+      <section className="bg-navy px-5 py-16 sm:py-24">
         <div className="mx-auto max-w-4xl">
-          <h2 className="mb-4 text-center font-heading text-2xl font-bold text-foreground sm:text-3xl">
+          <h2 className="mb-4 text-center font-heading text-2xl font-bold text-white sm:text-3xl">
             Interaja com o Cérebro de Bolso 24h por dia
           </h2>
-          <p className="mb-10 text-center text-muted-foreground">
+          <p className="mb-10 text-center text-white/60">
             Pergunte, registre ou envie fotos. Veja alguns exemplos:
           </p>
           <div className="flex flex-wrap justify-center gap-3">
@@ -395,7 +398,7 @@ const VendasPage = () => {
                 whileInView="visible"
                 viewport={{ once: true }}
                 variants={fadeUp}
-                className="rounded-full border border-primary/20 bg-primary/5 px-4 py-2 text-sm text-foreground"
+                className="rounded-full border border-primary/30 bg-primary/10 px-4 py-2.5 text-sm text-white"
               >
                 💬 {ex}
               </motion.div>
@@ -403,7 +406,7 @@ const VendasPage = () => {
           </div>
           <div className="mt-10 text-center">
             <Link to="/">
-              <Button size="lg" className="h-14 rounded-2xl px-10 text-base font-bold shadow-xl shadow-primary/30">
+              <Button size="lg" className="h-14 rounded-2xl bg-success px-10 text-base font-bold text-white shadow-xl shadow-success/30 hover:bg-success/90">
                 <Sparkles className="mr-2 h-5 w-5" />
                 Testar Grátis Agora
               </Button>
@@ -413,7 +416,7 @@ const VendasPage = () => {
       </section>
 
       {/* Testimonials */}
-      <section className="bg-card/50 px-5 py-16 sm:py-24">
+      <section className="bg-background px-5 py-16 sm:py-24">
         <div className="mx-auto max-w-5xl">
           <h2 className="mb-4 text-center font-heading text-2xl font-bold text-foreground sm:text-3xl">
             Quem usa, recomenda
@@ -430,11 +433,11 @@ const VendasPage = () => {
                 whileInView="visible"
                 viewport={{ once: true, margin: "-50px" }}
                 variants={fadeUp}
-                className="rounded-2xl border border-border/50 bg-card p-6 shadow-sm"
+                className="rounded-2xl border border-border/50 bg-card p-6 shadow-sm transition-shadow hover:shadow-md"
               >
                 <div className="mb-3 flex gap-0.5">
                   {Array.from({ length: t.stars }).map((_, j) => (
-                    <Star key={j} className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                    <Star key={j} className="h-4 w-4 fill-accent text-accent" />
                   ))}
                 </div>
                 <p className="text-sm leading-relaxed text-muted-foreground">"{t.text}"</p>
@@ -454,27 +457,27 @@ const VendasPage = () => {
       </section>
 
       {/* Pricing */}
-      <section id="planos" className="px-5 py-16 sm:py-24">
+      <section id="planos" className="bg-navy px-5 py-16 sm:py-24">
         <div className="mx-auto max-w-5xl">
-          <h2 className="mb-4 text-center font-heading text-2xl font-bold text-foreground sm:text-3xl">
+          <h2 className="mb-4 text-center font-heading text-2xl font-bold text-white sm:text-3xl">
             Organize-se agora
           </h2>
-          <p className="mb-12 text-center text-muted-foreground">
+          <p className="mb-12 text-center text-white/60">
             Assistente pessoal via WhatsApp 24h por dia
           </p>
 
-          {/* Free trial CTA above plans */}
+          {/* Free trial CTA */}
           <motion.div
             initial={{ opacity: 0, y: 16 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="mx-auto mb-10 max-w-lg rounded-2xl border-2 border-dashed border-primary/40 bg-primary/5 p-6 text-center"
+            className="mx-auto mb-10 max-w-lg rounded-2xl border-2 border-dashed border-success/40 bg-success/10 p-6 text-center"
           >
-            <p className="text-sm font-semibold text-primary">🎁 Ainda não tem certeza?</p>
-            <p className="mt-1 text-2xl font-extrabold text-foreground">Teste grátis primeiro!</p>
-            <p className="mt-2 text-sm text-muted-foreground">Receba 10 créditos gratuitos. Sem cartão de crédito.</p>
+            <p className="text-sm font-semibold text-success">🎁 Ainda não tem certeza?</p>
+            <p className="mt-1 text-2xl font-extrabold text-white">Teste grátis primeiro!</p>
+            <p className="mt-2 text-sm text-white/60">Receba 10 créditos gratuitos. Sem cartão de crédito.</p>
             <Link to="/" className="mt-4 block">
-              <Button size="lg" className="h-14 w-full rounded-2xl text-base font-bold shadow-xl shadow-primary/30">
+              <Button size="lg" className="h-14 w-full rounded-2xl bg-success text-base font-bold text-white shadow-xl shadow-success/30 hover:bg-success/90">
                 <Sparkles className="mr-2 h-5 w-5" />
                 Criar Conta Grátis
                 <ArrowRight className="ml-2 h-5 w-5" />
@@ -491,38 +494,38 @@ const VendasPage = () => {
                 whileInView="visible"
                 viewport={{ once: true, margin: "-50px" }}
                 variants={fadeUp}
-                className={`relative overflow-hidden rounded-2xl border p-6 shadow-sm transition-shadow hover:shadow-md ${
+                className={`relative overflow-hidden rounded-2xl border p-6 transition-shadow hover:shadow-md ${
                   plan.highlight
-                    ? "border-primary bg-card shadow-lg shadow-primary/10 ring-2 ring-primary/20"
-                    : "border-border/50 bg-card"
+                    ? "border-primary bg-navy-light shadow-lg shadow-primary/20 ring-2 ring-primary/30"
+                    : "border-white/10 bg-white/5"
                 }`}
               >
                 {plan.badge && (
                   <div className={`absolute right-3 top-3 rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-wide ${
                     plan.highlight
-                      ? "bg-primary text-primary-foreground"
-                      : "bg-muted text-muted-foreground"
+                      ? "bg-accent text-accent-foreground"
+                      : "bg-white/10 text-white/70"
                   }`}>
                     {plan.badge}
                   </div>
                 )}
-                <h3 className="font-heading text-lg font-bold text-foreground">{plan.name}</h3>
+                <h3 className="font-heading text-lg font-bold text-white">{plan.name}</h3>
                 <div className="mt-3 flex items-baseline gap-1">
-                  <span className="text-sm text-muted-foreground">R$</span>
-                  <span className="font-heading text-3xl font-extrabold text-foreground">
+                  <span className="text-sm text-white/50">R$</span>
+                  <span className="font-heading text-3xl font-extrabold text-white">
                     {plan.price}
                   </span>
-                  <span className="text-sm text-muted-foreground">{plan.period}</span>
+                  <span className="text-sm text-white/50">{plan.period}</span>
                 </div>
                 {plan.pricePerMonth && (
-                  <p className="mt-1 text-xs text-primary font-medium">
+                  <p className="mt-1 text-xs font-medium text-success">
                     equivale a R${plan.pricePerMonth}/mês
                   </p>
                 )}
                 <ul className="mt-5 space-y-2">
                   {planFeatures.map((f) => (
-                    <li key={f} className="flex items-center gap-2 text-sm text-muted-foreground">
-                      <Check className="h-4 w-4 shrink-0 text-primary" />
+                    <li key={f} className="flex items-center gap-2 text-sm text-white/60">
+                      <Check className="h-4 w-4 shrink-0 text-success" />
                       {f}
                     </li>
                   ))}
@@ -531,10 +534,9 @@ const VendasPage = () => {
                   <Button
                     className={`w-full rounded-xl font-semibold ${
                       plan.highlight
-                        ? "shadow-lg shadow-primary/20"
-                        : ""
+                        ? "bg-primary text-white shadow-lg shadow-primary/20 hover:bg-primary/90"
+                        : "border-white/20 bg-white/10 text-white hover:bg-white/20"
                     }`}
-                    variant={plan.highlight ? "default" : "outline"}
                   >
                     <Crown className="mr-2 h-4 w-4" />
                     Assinar Agora
@@ -547,7 +549,7 @@ const VendasPage = () => {
       </section>
 
       {/* FAQ */}
-      <section className="bg-card/50 px-5 py-16 sm:py-24">
+      <section className="bg-background px-5 py-16 sm:py-24">
         <div className="mx-auto max-w-3xl">
           <h2 className="mb-12 text-center font-heading text-2xl font-bold text-foreground sm:text-3xl">
             Perguntas Frequentes
@@ -561,11 +563,11 @@ const VendasPage = () => {
                 whileInView="visible"
                 viewport={{ once: true }}
                 variants={fadeUp}
-                className="rounded-2xl border border-border/50 bg-card overflow-hidden"
+                className="overflow-hidden rounded-2xl border border-border/50 bg-card"
               >
                 <button
                   onClick={() => setOpenFaq(openFaq === i ? null : i)}
-                  className="flex w-full items-center justify-between px-6 py-4 text-left text-sm font-semibold text-foreground hover:bg-muted/50 transition-colors"
+                  className="flex w-full items-center justify-between px-6 py-4 text-left text-sm font-semibold text-foreground transition-colors hover:bg-muted/50"
                 >
                   {faq.q}
                   <ChevronDown className={`h-4 w-4 shrink-0 text-muted-foreground transition-transform ${openFaq === i ? "rotate-180" : ""}`} />
@@ -582,35 +584,37 @@ const VendasPage = () => {
       </section>
 
       {/* Final CTA */}
-      <section className="px-5 py-16 sm:py-24">
+      <section className="bg-navy px-5 py-16 sm:py-24">
         <div className="mx-auto max-w-3xl text-center">
           <motion.div
             initial={{ scale: 0.8, opacity: 0 }}
             whileInView={{ scale: 1, opacity: 1 }}
             viewport={{ once: true }}
-            className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-[1.75rem] bg-primary shadow-xl shadow-primary/25"
+            className="mx-auto mb-6"
           >
-            <Brain className="h-10 w-10 text-primary-foreground" />
+            <img src={logoImg} alt="Cérebro de Bolso" className="mx-auto h-20 w-20 rounded-[1.75rem] object-contain shadow-xl shadow-primary/25" />
           </motion.div>
-          <h2 className="font-heading text-2xl font-extrabold text-foreground sm:text-4xl">
+          <h2 className="font-heading text-2xl font-extrabold text-white sm:text-4xl">
             Pare de tentar lembrar de tudo.
             <br />
-            <span className="text-primary">Deixe o Cérebro de Bolso fazer isso por você.</span>
+            <span className="bg-gradient-to-r from-primary to-success bg-clip-text text-transparent">
+              Deixe o Cérebro de Bolso fazer isso por você.
+            </span>
           </h2>
-          <p className="mx-auto mt-4 max-w-lg text-muted-foreground">
+          <p className="mx-auto mt-4 max-w-lg text-white/60">
             Comece agora e tenha um assistente pessoal no WhatsApp organizando sua vida 24 horas por dia.
           </p>
           <div className="mt-8 flex flex-col items-center gap-4">
             <Link to="/">
-              <Button size="lg" className="h-16 rounded-2xl px-12 text-lg font-bold shadow-xl shadow-primary/30">
+              <Button size="lg" className="h-16 rounded-2xl bg-success px-12 text-lg font-bold text-white shadow-xl shadow-success/30 hover:bg-success/90">
                 <Sparkles className="mr-3 h-6 w-6" />
                 Testar Grátis Agora
                 <ArrowRight className="ml-3 h-6 w-6" />
               </Button>
             </Link>
-            <p className="text-sm text-primary font-medium">🎁 10 créditos grátis • Sem cartão de crédito</p>
+            <p className="text-sm font-medium text-success">🎁 10 créditos grátis • Sem cartão de crédito</p>
             <a href="#planos">
-              <Button variant="ghost" className="text-muted-foreground hover:text-foreground">
+              <Button variant="ghost" className="text-white/60 hover:bg-white/5 hover:text-white">
                 Ou assine o plano premium →
               </Button>
             </a>
@@ -619,9 +623,9 @@ const VendasPage = () => {
       </section>
 
       {/* Footer */}
-      <footer className="border-t border-border/50 px-5 py-8">
+      <footer className="border-t border-border/50 bg-navy px-5 py-8">
         <div className="mx-auto max-w-5xl text-center">
-          <p className="text-xs text-muted-foreground/60">
+          <p className="text-xs text-white/40">
             © {new Date().getFullYear()} Cérebro de Bolso. Todos os direitos reservados.
           </p>
         </div>

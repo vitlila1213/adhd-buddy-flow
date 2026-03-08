@@ -39,6 +39,10 @@
     --success: 160 95% 43%;
     --success-foreground: 0 0% 100%;
 
+    --navy: 224 60% 11%;
+    --navy-foreground: 0 0% 100%;
+    --navy-light: 224 50% 18%;
+
     --status-pending-bg: 32 100% 95%;
     --status-pending-text: 32 80% 40%;
     --status-done-bg: 160 60% 93%;
@@ -79,6 +83,9 @@
     --ring: 217 100% 61%;
     --success: 160 95% 43%;
     --success-foreground: 0 0% 100%;
+    --navy: 224 60% 11%;
+    --navy-foreground: 0 0% 100%;
+    --navy-light: 224 50% 18%;
     --status-pending-bg: 32 50% 15%;
     --status-pending-text: 32 80% 70%;
     --status-done-bg: 160 30% 14%;
