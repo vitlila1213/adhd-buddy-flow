@@ -44,14 +44,14 @@ const MetricasDoDia = () => {
 
   const cards = [
     {
-      icon: <CheckCircle2 className="h-5 w-5 text-status-done-text" />,
-      bg: "bg-status-done-bg",
+      icon: <CheckCircle2 className="h-5 w-5 text-success" />,
+      bg: "bg-success/10",
       label: "Concluídas Hoje",
       value: metrics.concluidas,
     },
     {
-      icon: <Lightbulb className="h-5 w-5 text-status-pending-text" />,
-      bg: "bg-status-pending-bg",
+      icon: <Lightbulb className="h-5 w-5 text-accent" />,
+      bg: "bg-accent/10",
       label: "Anotações Capturadas",
       value: metrics.ideias,
     },
