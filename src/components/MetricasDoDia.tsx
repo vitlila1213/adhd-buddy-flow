@@ -46,24 +46,28 @@ const MetricasDoDia = () => {
     {
       icon: <CheckCircle2 className="h-5 w-5 text-success" />,
       bg: "bg-success/10",
+      borderAccent: "border-l-success",
       label: "Concluídas Hoje",
       value: metrics.concluidas,
     },
     {
       icon: <Lightbulb className="h-5 w-5 text-accent" />,
       bg: "bg-accent/10",
+      borderAccent: "border-l-accent",
       label: "Anotações Capturadas",
       value: metrics.ideias,
     },
     {
       icon: <ListTodo className="h-5 w-5 text-primary" />,
       bg: "bg-primary/10",
+      borderAccent: "border-l-primary",
       label: "Pendentes",
       value: metrics.pendentes,
     },
     {
-      icon: <Brain className="h-5 w-5 text-muted-foreground" />,
-      bg: "bg-muted",
+      icon: <Brain className="h-5 w-5 text-navy" />,
+      bg: "bg-navy/10",
+      borderAccent: "border-l-navy",
       label: "Total no Cérebro",
       value: metrics.total,
     },
@@ -78,7 +82,7 @@ const MetricasDoDia = () => {
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: i * 0.08, duration: 0.3, ease: "easeOut" }}
-            className="rounded-2xl border border-border/60 bg-card p-4 shadow-sm"
+            className={`rounded-2xl border border-border/60 border-l-4 ${card.borderAccent} bg-card p-4 shadow-sm`}
           >
             <div className={`mb-3 flex h-10 w-10 items-center justify-center rounded-xl ${card.bg}`}>
               {card.icon}
@@ -99,16 +103,16 @@ const MetricasDoDia = () => {
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.4, duration: 0.3, ease: "easeOut" }}
-        className="flex items-center gap-3 rounded-2xl border border-border/60 bg-card p-4 shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md"
+        className="flex items-center gap-3 rounded-2xl border border-success/30 bg-success/5 p-4 shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md"
       >
-        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-success/10">
+        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-success/15">
           <MessageCircle className="h-5 w-5 text-success" />
         </div>
         <div className="flex-1">
           <p className="text-sm font-semibold text-card-foreground">Falar com o Agente</p>
           <p className="text-xs text-muted-foreground">WhatsApp do Cérebro de Bolso</p>
         </div>
-        <span className="text-xs font-medium text-primary">Abrir →</span>
+        <span className="text-xs font-medium text-success">Abrir →</span>
       </motion.a>
     </div>
   );

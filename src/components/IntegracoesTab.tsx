@@ -34,7 +34,6 @@ const IntegracoesTab = () => {
   useEffect(() => {
     fetchIntegration();
 
-    // Check URL params for callback status
     const params = new URLSearchParams(window.location.search);
     const gcalStatus = params.get("gcal_status");
     if (gcalStatus === "success") {
@@ -85,7 +84,7 @@ const IntegracoesTab = () => {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-12">
-        <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+        <Loader2 className="h-6 w-6 animate-spin text-primary" />
       </div>
     );
   }
@@ -99,7 +98,7 @@ const IntegracoesTab = () => {
         </p>
       </div>
 
-      <Card className="p-5">
+      <Card className="p-5 border-l-4 border-l-primary">
         <div className="flex items-start gap-4">
           <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10">
             <Calendar className="h-6 w-6 text-primary" />
@@ -108,7 +107,7 @@ const IntegracoesTab = () => {
             <div className="flex items-center gap-2">
               <h3 className="font-semibold text-foreground">Google Agenda</h3>
               {integration ? (
-                <span className="inline-flex items-center gap-1 rounded-full bg-green-500/10 px-2 py-0.5 text-xs font-medium text-green-600">
+                <span className="inline-flex items-center gap-1 rounded-full bg-success/10 px-2 py-0.5 text-xs font-medium text-success">
                   <CheckCircle className="h-3 w-3" />
                   Conectado
                 </span>
@@ -136,7 +135,7 @@ const IntegracoesTab = () => {
                   Desconectar
                 </Button>
               ) : (
-                <Button onClick={handleConnect} disabled={connecting} size="sm">
+                <Button onClick={handleConnect} disabled={connecting} size="sm" className="bg-primary hover:bg-primary/90">
                   {connecting ? (
                     <>
                       <Loader2 className="h-4 w-4 animate-spin" />
@@ -155,7 +154,7 @@ const IntegracoesTab = () => {
         </div>
       </Card>
 
-      <Card className="border-dashed p-5">
+      <Card className="border-dashed border-accent/30 p-5">
         <div className="text-center text-muted-foreground">
           <p className="text-sm">🚀 Mais integrações em breve!</p>
           <p className="text-xs mt-1">Notion, Trello, e mais...</p>

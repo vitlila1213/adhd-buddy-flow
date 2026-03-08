@@ -20,6 +20,12 @@ interface KanbanColumnProps {
   groups?: CategoryGroup[];
 }
 
+const columnColors: Record<string, { badge: string; dropzone: string }> = {
+  anotacoes: { badge: "bg-accent/15 text-accent", dropzone: "bg-accent/5" },
+  tarefas: { badge: "bg-primary/15 text-primary", dropzone: "bg-primary/5" },
+  concluidas: { badge: "bg-success/15 text-success", dropzone: "bg-success/5" },
+};
+
 const KanbanColumn = ({ id, title, items, emoji, groups }: KanbanColumnProps) => {
   const [collapsed, setCollapsed] = useState<Record<string, boolean>>({});
 
@@ -28,11 +34,12 @@ const KanbanColumn = ({ id, title, items, emoji, groups }: KanbanColumnProps) =>
     ? groups!.reduce((s, g) => s + g.items.length, 0)
     : items.length;
 
+  const colors = columnColors[id] || columnColors.tarefas;
+
   const toggleGroup = (key: string) => {
     setCollapsed((prev) => ({ ...prev, [key]: !prev[key] }));
   };
 
-  // Pre-compute visible items with sequential indices for drag-drop
   const renderData = useMemo(() => {
     if (!useGroups) return null;
     let idx = 0;
@@ -52,7 +59,7 @@ const KanbanColumn = ({ id, title, items, emoji, groups }: KanbanColumnProps) =>
         <h3 className="font-heading text-sm font-bold tracking-tight text-foreground">
           {title}
         </h3>
-        <span className="ml-auto flex h-6 w-6 items-center justify-center rounded-full bg-muted text-xs font-semibold text-muted-foreground">
+        <span className={`ml-auto flex h-6 w-6 items-center justify-center rounded-full text-xs font-semibold ${colors.badge}`}>
           {totalItems}
         </span>
       </div>
@@ -63,13 +70,12 @@ const KanbanColumn = ({ id, title, items, emoji, groups }: KanbanColumnProps) =>
             ref={provided.innerRef}
             {...provided.droppableProps}
             className={`flex flex-1 flex-col gap-1 rounded-2xl p-1 transition-colors duration-200 ${
-              snapshot.isDraggingOver ? "bg-primary/5" : ""
+              snapshot.isDraggingOver ? colors.dropzone : ""
             }`}
           >
             {renderData ? (
               renderData.map((group) => (
                 <div key={group.key} className="mb-1">
-                  {/* Category header */}
                   <button
                     onClick={() => toggleGroup(group.key)}
                     className="flex w-full items-center gap-2 rounded-xl px-2 py-2 text-left transition-colors hover:bg-muted/60"
@@ -93,7 +99,6 @@ const KanbanColumn = ({ id, title, items, emoji, groups }: KanbanColumnProps) =>
                     </span>
                   </button>
 
-                  {/* Items */}
                   <AnimatePresence initial={false}>
                     {!group.isCollapsed && (
                       <motion.div

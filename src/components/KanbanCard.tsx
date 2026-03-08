@@ -19,24 +19,28 @@ const KanbanCard = ({ item, index }: KanbanCardProps) => {
           ref={provided.innerRef}
           {...provided.draggableProps}
           {...provided.dragHandleProps}
-          className={`rounded-2xl border border-border/60 bg-card p-4 shadow-sm transition-all duration-300 ${
+          className={`rounded-2xl border bg-card p-4 shadow-sm transition-all duration-300 ${
             snapshot.isDragging
-              ? "shadow-xl ring-2 ring-primary/20 scale-[1.02]"
-              : "hover:-translate-y-0.5 hover:shadow-md active:scale-[0.98]"
+              ? "border-primary shadow-xl ring-2 ring-primary/20 scale-[1.02]"
+              : "border-border/60 hover:-translate-y-0.5 hover:shadow-md active:scale-[0.98]"
+          } ${
+            item.status === "concluida" ? "border-l-4 border-l-success" :
+            item.tipo === "ideia" ? "border-l-4 border-l-accent" :
+            "border-l-4 border-l-primary"
           }`}
         >
           <div className="mb-2 flex items-start gap-2.5">
             {item.tipo === "ideia" ? (
-              <div className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-xl bg-status-pending-bg">
-                <StickyNote className="h-3.5 w-3.5 text-status-pending-text" />
+              <div className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-xl bg-accent/15">
+                <StickyNote className="h-3.5 w-3.5 text-accent" />
               </div>
             ) : item.status === "concluida" ? (
-              <div className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-xl bg-status-done-bg">
-                <CheckCircle2 className="h-3.5 w-3.5 text-status-done-text" />
+              <div className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-xl bg-success/15">
+                <CheckCircle2 className="h-3.5 w-3.5 text-success" />
               </div>
             ) : (
-              <div className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-xl bg-muted">
-                <Clock className="h-3.5 w-3.5 text-muted-foreground" />
+              <div className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-xl bg-primary/10">
+                <Clock className="h-3.5 w-3.5 text-primary" />
               </div>
             )}
             <div className="flex-1 min-w-0">
@@ -57,7 +61,6 @@ const KanbanCard = ({ item, index }: KanbanCardProps) => {
           )}
 
           <div className="flex flex-wrap items-center gap-2 pl-[38px]">
-            {/* Category badge */}
             {cat && (
               <span
                 className="inline-flex items-center gap-1 rounded-lg px-2 py-0.5 text-[11px] font-semibold text-white"
@@ -67,26 +70,25 @@ const KanbanCard = ({ item, index }: KanbanCardProps) => {
               </span>
             )}
 
-            {/* Status badge */}
             {item.status === "concluida" ? (
-              <span className="inline-flex items-center rounded-lg bg-status-done-bg px-2 py-0.5 text-[11px] font-semibold text-status-done-text">
+              <span className="inline-flex items-center rounded-lg bg-success/10 px-2 py-0.5 text-[11px] font-semibold text-success">
                 Concluída
               </span>
             ) : (
-              <span className="inline-flex items-center rounded-lg bg-status-pending-bg px-2 py-0.5 text-[11px] font-semibold text-status-pending-text">
+              <span className="inline-flex items-center rounded-lg bg-accent/10 px-2 py-0.5 text-[11px] font-semibold text-accent">
                 Pendente
               </span>
             )}
 
             {item.status === "concluida" && item.completed_at && (
-              <span className="inline-flex items-center gap-1 rounded-lg bg-status-done-bg px-2 py-0.5 text-[11px] font-medium text-status-done-text">
+              <span className="inline-flex items-center gap-1 rounded-lg bg-success/10 px-2 py-0.5 text-[11px] font-medium text-success">
                 <CheckCircle2 className="h-3 w-3" />
                 {format(new Date(item.completed_at), "dd MMM, HH:mm", { locale: ptBR })}
               </span>
             )}
 
             {item.data_hora_agendada && item.status !== "concluida" && (
-              <span className="inline-flex items-center gap-1 rounded-lg bg-muted px-2 py-0.5 text-[11px] font-medium text-muted-foreground">
+              <span className="inline-flex items-center gap-1 rounded-lg bg-primary/10 px-2 py-0.5 text-[11px] font-medium text-primary">
                 <Clock className="h-3 w-3" />
                 {format(new Date(item.data_hora_agendada), "dd MMM, HH:mm", { locale: ptBR })}
               </span>
