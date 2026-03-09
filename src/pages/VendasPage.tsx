@@ -509,6 +509,30 @@ const VendasPage = () => {
               <div className="absolute -left-10 bottom-0 h-32 w-32 rounded-full bg-success/10 blur-[50px]" />
 
               <div className="relative">
+                {/* Urgency Countdown */}
+                <div className="mb-4 rounded-xl bg-destructive/20 border border-destructive/30 p-4 text-center">
+                  <div className="flex items-center justify-center gap-2 mb-2">
+                    <Clock className="h-4 w-4 text-destructive animate-pulse" />
+                    <span className="text-sm font-bold text-destructive uppercase tracking-wider">Oferta expira em:</span>
+                  </div>
+                  <div className="flex justify-center gap-3">
+                    <div className="flex flex-col items-center">
+                      <span className="text-2xl font-extrabold text-white">{String(timeLeft.hours).padStart(2, '0')}</span>
+                      <span className="text-[10px] uppercase text-white/50">Horas</span>
+                    </div>
+                    <span className="text-2xl font-bold text-destructive">:</span>
+                    <div className="flex flex-col items-center">
+                      <span className="text-2xl font-extrabold text-white">{String(timeLeft.minutes).padStart(2, '0')}</span>
+                      <span className="text-[10px] uppercase text-white/50">Min</span>
+                    </div>
+                    <span className="text-2xl font-bold text-destructive">:</span>
+                    <div className="flex flex-col items-center">
+                      <span className="text-2xl font-extrabold text-white">{String(timeLeft.seconds).padStart(2, '0')}</span>
+                      <span className="text-[10px] uppercase text-white/50">Seg</span>
+                    </div>
+                  </div>
+                </div>
+
                 <div className="mb-2 inline-flex items-center gap-2 rounded-full bg-accent px-3 py-1 text-xs font-bold uppercase tracking-wider text-accent-foreground">
                   <Crown className="h-3.5 w-3.5" />
                   Plano Recomendado
