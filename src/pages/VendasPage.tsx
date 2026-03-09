@@ -1,9 +1,10 @@
-import { Brain, Check, Crown, Sparkles, Zap, Shield, MessageSquare, ArrowRight, Calendar, Gift, Tag, Mic, BarChart3, Bell, Star, ChevronDown, X, Camera, FileText, CreditCard, Clock } from "lucide-react";
+import { Brain, Check, Crown, Sparkles, Zap, Shield, MessageSquare, ArrowRight, Calendar, Gift, Tag, Mic, BarChart3, Bell, Star, ChevronDown, X, Camera, FileText, CreditCard, Clock, Rocket } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { useState, useEffect } from "react";
 import logoImg from "@/assets/logo.png";
+import InstallPWAButton from "@/components/InstallPWAButton";
 
 // Hook para countdown até fim do dia
 const useCountdown = () => {
@@ -162,6 +163,7 @@ const VendasPage = () => {
             <a href="#planos" className="hidden text-sm text-muted-foreground hover:text-foreground sm:block">
               Planos
             </a>
+            <InstallPWAButton />
             <Link to="/">
               <Button variant="outline" size="sm" className="rounded-xl text-sm">
                 Login
@@ -238,13 +240,13 @@ const VendasPage = () => {
           >
             <Link to="/">
               <Button size="lg" className="h-16 rounded-2xl bg-success px-12 text-lg font-bold text-white shadow-xl shadow-success/30 hover:bg-success/90">
-                <Sparkles className="mr-3 h-6 w-6" />
-                Testar Grátis Agora
+                <Rocket className="mr-3 h-6 w-6" />
+                Quero Organizar Minha Vida
                 <ArrowRight className="ml-3 h-6 w-6" />
               </Button>
             </Link>
             <p className="text-sm font-medium text-success">
-              🎁 10 créditos grátis • Sem cartão de crédito • Acesso imediato
+              🎁 10 créditos grátis • Sem cartão • Começa em 30 segundos
             </p>
             <a href="#planos">
               <Button variant="ghost" size="lg" className="h-12 rounded-2xl px-8 text-base text-white/60 hover:text-white hover:bg-white/5">
@@ -390,8 +392,8 @@ const VendasPage = () => {
           <div className="mt-8 text-center">
             <Link to="/">
               <Button size="lg" className="h-14 rounded-2xl bg-success px-10 text-base font-bold text-white shadow-xl shadow-success/30 hover:bg-success/90">
-                <Sparkles className="mr-2 h-5 w-5" />
-                Começar Teste Grátis
+                <Rocket className="mr-2 h-5 w-5" />
+                Experimentar de Graça
               </Button>
             </Link>
             <p className="mt-3 text-xs text-muted-foreground">10 créditos grátis • Sem cartão</p>
@@ -426,8 +428,8 @@ const VendasPage = () => {
           <div className="mt-10 text-center">
             <Link to="/">
               <Button size="lg" className="h-14 rounded-2xl bg-success px-10 text-base font-bold text-white shadow-xl shadow-success/30 hover:bg-success/90">
-                <Sparkles className="mr-2 h-5 w-5" />
-                Testar Grátis Agora
+                <Rocket className="mr-2 h-5 w-5" />
+                Começar Agora — É Grátis
               </Button>
             </Link>
           </div>
@@ -497,8 +499,8 @@ const VendasPage = () => {
             <p className="mt-2 text-sm text-white/60">Receba 10 créditos gratuitos. Sem cartão de crédito.</p>
             <Link to="/" className="mt-4 block">
               <Button size="lg" className="h-14 w-full rounded-2xl bg-success text-base font-bold text-white shadow-xl shadow-success/30 hover:bg-success/90">
-                <Sparkles className="mr-2 h-5 w-5" />
-                Criar Conta Grátis
+                <Rocket className="mr-2 h-5 w-5" />
+                Criar Minha Conta Grátis
                 <ArrowRight className="ml-2 h-5 w-5" />
               </Button>
             </Link>
@@ -582,12 +584,12 @@ const VendasPage = () => {
                 <a href={plan.link} target="_blank" rel="noopener noreferrer" className="mt-8 block">
                   <Button size="lg" className="h-16 w-full rounded-2xl bg-success text-lg font-bold text-white shadow-xl shadow-success/30 hover:bg-success/90">
                     <Crown className="mr-3 h-6 w-6" />
-                    Assinar Agora — R$29,90/mês
+                    Quero o Plano Premium — R${plan.price}/mês
                     <ArrowRight className="ml-3 h-6 w-6" />
                   </Button>
                 </a>
                 <p className="mt-3 text-center text-xs text-white/40">
-                  Pagamento seguro via Kiwify • Cancele a qualquer momento
+                  Pagamento 100% seguro • Cancele quando quiser
                 </p>
               </div>
             </div>
@@ -654,8 +656,8 @@ const VendasPage = () => {
           <div className="mt-8 flex flex-col items-center gap-4">
             <Link to="/">
               <Button size="lg" className="h-16 rounded-2xl bg-success px-12 text-lg font-bold text-white shadow-xl shadow-success/30 hover:bg-success/90">
-                <Sparkles className="mr-3 h-6 w-6" />
-                Testar Grátis Agora
+                <Rocket className="mr-3 h-6 w-6" />
+                Quero Começar Agora
                 <ArrowRight className="ml-3 h-6 w-6" />
               </Button>
             </Link>
