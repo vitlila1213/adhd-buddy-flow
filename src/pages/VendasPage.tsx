@@ -145,8 +145,6 @@ const VendasPage = () => {
           <span className="hidden sm:inline">— Garanta seu desconto agora</span>
         </div>
       </div>
-        ✨ Assessoria 24h no seu bolso — Texto, áudio e foto pelo WhatsApp
-      </div>
 
       {/* Header */}
       <header className="fixed left-0 right-0 top-0 z-50 border-b border-border/30 bg-background/80 backdrop-blur-xl">
