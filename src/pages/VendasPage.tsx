@@ -163,6 +163,7 @@ const VendasPage = () => {
             <a href="#planos" className="hidden text-sm text-muted-foreground hover:text-foreground sm:block">
               Planos
             </a>
+            <InstallPWAButton />
             <Link to="/">
               <Button variant="outline" size="sm" className="rounded-xl text-sm">
                 Login
