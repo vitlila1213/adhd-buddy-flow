@@ -132,7 +132,7 @@ const fadeUp = {
 
 const VendasPage = () => {
   const [openFaq, setOpenFaq] = useState<number | null>(null);
-
+  const timeLeft = useCountdown();
   return (
     <div className="min-h-screen bg-background">
       {/* Announcement Bar */}
