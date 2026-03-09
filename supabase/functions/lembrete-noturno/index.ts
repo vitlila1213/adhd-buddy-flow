@@ -69,6 +69,14 @@ serve(async (req) => {
       .gte("data_vencimento", tomorrowStart)
       .lte("data_vencimento", tomorrowEnd);
 
+    // Fetch tasks scheduled for TOMORROW (day-before reminder)
+    const { data: tomorrowTasks } = await supabase
+      .from("itens_cerebro")
+      .select("id, titulo, tipo, status, user_id, data_hora_agendada")
+      .eq("status", "pendente")
+      .gte("data_hora_agendada", tomorrowStart)
+      .lte("data_hora_agendada", tomorrowEnd);
+
     // Group by user
     const userPendencies: Record<string, { tasks: any[]; bills: any[]; tomorrowBills: any[] }> = {};
 
