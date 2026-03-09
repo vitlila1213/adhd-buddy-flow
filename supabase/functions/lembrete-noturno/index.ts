@@ -129,8 +129,8 @@ serve(async (req) => {
       const pending = userPendencies[profile.id];
       if (!pending) continue;
 
-      const { tasks, bills, tomorrowBills: tmrwBills } = pending;
-      if (tasks.length === 0 && bills.length === 0 && tmrwBills.length === 0) continue;
+      const { tasks, bills, tomorrowBills: tmrwBills, tomorrowTasks: tmrwTasks } = pending;
+      if (tasks.length === 0 && bills.length === 0 && tmrwBills.length === 0 && tmrwTasks.length === 0) continue;
 
       let message = "Boa tarde! ☀️ Passando para te lembrar das suas pendências:\n";
 
@@ -157,6 +157,13 @@ serve(async (req) => {
           const desc = bill.descricao || "Conta";
           const valor = Number(bill.valor).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
           message += `  📅 ${desc} (${valor}) — vence amanhã!\n`;
+        }
+      }
+
+      if (tmrwTasks.length > 0) {
+        message += "\n📌 *Tarefas agendadas para AMANHÃ:*\n";
+        for (const task of tmrwTasks) {
+          message += `  🗓️ ${task.titulo}\n`;
         }
       }
 
