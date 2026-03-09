@@ -584,12 +584,12 @@ const VendasPage = () => {
                 <a href={plan.link} target="_blank" rel="noopener noreferrer" className="mt-8 block">
                   <Button size="lg" className="h-16 w-full rounded-2xl bg-success text-lg font-bold text-white shadow-xl shadow-success/30 hover:bg-success/90">
                     <Crown className="mr-3 h-6 w-6" />
-                    Assinar Agora — R$29,90/mês
+                    Quero o Plano Premium — R${plan.price}/mês
                     <ArrowRight className="ml-3 h-6 w-6" />
                   </Button>
                 </a>
                 <p className="mt-3 text-center text-xs text-white/40">
-                  Pagamento seguro via Kiwify • Cancele a qualquer momento
+                  Pagamento 100% seguro • Cancele quando quiser
                 </p>
               </div>
             </div>
