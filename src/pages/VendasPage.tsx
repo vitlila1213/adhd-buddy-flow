@@ -1,9 +1,37 @@
-import { Brain, Check, Crown, Sparkles, Zap, Shield, MessageSquare, ArrowRight, Calendar, Gift, Tag, Mic, BarChart3, Bell, Star, ChevronDown, X, Camera, FileText, CreditCard } from "lucide-react";
+import { Brain, Check, Crown, Sparkles, Zap, Shield, MessageSquare, ArrowRight, Calendar, Gift, Tag, Mic, BarChart3, Bell, Star, ChevronDown, X, Camera, FileText, CreditCard, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import logoImg from "@/assets/logo.png";
+
+// Hook para countdown até fim do dia
+const useCountdown = () => {
+  const getTimeLeft = () => {
+    const now = new Date();
+    const endOfDay = new Date(now);
+    endOfDay.setHours(23, 59, 59, 999);
+    const diff = endOfDay.getTime() - now.getTime();
+    
+    const hours = Math.floor(diff / (1000 * 60 * 60));
+    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+    const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+    
+    return { hours, minutes, seconds };
+  };
+  
+  const [timeLeft, setTimeLeft] = useState(getTimeLeft());
+  
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setTimeLeft(getTimeLeft());
+    }, 1000);
+    
+    return () => clearInterval(timer);
+  }, []);
+  
+  return timeLeft;
+};
 
 const features = [
   { icon: MessageSquare, title: "Registre Tudo no WhatsApp", desc: "Envie texto ou áudio. A IA entende, classifica e registra automaticamente. Sem cadastros, sem apps extras." },
@@ -42,9 +70,9 @@ const testimonials = [
 
 const plan = {
   name: "Premium Mensal",
-  price: "29,90",
+  price: "27,97",
   period: "/mês",
-  link: "https://pay.kiwify.com.br/o9VoTdd",
+  link: "https://pay.kiwify.com.br/4IdnrMP",
 };
 
 const monthlyBenefits = [
@@ -104,12 +132,18 @@ const fadeUp = {
 
 const VendasPage = () => {
   const [openFaq, setOpenFaq] = useState<number | null>(null);
-
+  const timeLeft = useCountdown();
   return (
     <div className="min-h-screen bg-background">
-      {/* Announcement Bar */}
-      <div className="bg-navy px-4 py-2.5 text-center text-sm font-medium text-navy-foreground">
-        ✨ Assessoria 24h no seu bolso — Texto, áudio e foto pelo WhatsApp
+      {/* Announcement Bar with Urgency */}
+      <div className="bg-gradient-to-r from-destructive to-destructive/80 px-4 py-2.5 text-center text-sm font-medium text-white">
+        <div className="flex items-center justify-center gap-2 flex-wrap">
+          <span>🔥 Oferta por tempo limitado!</span>
+          <span className="font-bold">
+            {String(timeLeft.hours).padStart(2, '0')}:{String(timeLeft.minutes).padStart(2, '0')}:{String(timeLeft.seconds).padStart(2, '0')}
+          </span>
+          <span className="hidden sm:inline">— Garanta seu desconto agora</span>
+        </div>
       </div>
 
       {/* Header */}
@@ -481,6 +515,30 @@ const VendasPage = () => {
               <div className="absolute -left-10 bottom-0 h-32 w-32 rounded-full bg-success/10 blur-[50px]" />
 
               <div className="relative">
+                {/* Urgency Countdown */}
+                <div className="mb-4 rounded-xl bg-destructive/20 border border-destructive/30 p-4 text-center">
+                  <div className="flex items-center justify-center gap-2 mb-2">
+                    <Clock className="h-4 w-4 text-destructive animate-pulse" />
+                    <span className="text-sm font-bold text-destructive uppercase tracking-wider">Oferta expira em:</span>
+                  </div>
+                  <div className="flex justify-center gap-3">
+                    <div className="flex flex-col items-center">
+                      <span className="text-2xl font-extrabold text-white">{String(timeLeft.hours).padStart(2, '0')}</span>
+                      <span className="text-[10px] uppercase text-white/50">Horas</span>
+                    </div>
+                    <span className="text-2xl font-bold text-destructive">:</span>
+                    <div className="flex flex-col items-center">
+                      <span className="text-2xl font-extrabold text-white">{String(timeLeft.minutes).padStart(2, '0')}</span>
+                      <span className="text-[10px] uppercase text-white/50">Min</span>
+                    </div>
+                    <span className="text-2xl font-bold text-destructive">:</span>
+                    <div className="flex flex-col items-center">
+                      <span className="text-2xl font-extrabold text-white">{String(timeLeft.seconds).padStart(2, '0')}</span>
+                      <span className="text-[10px] uppercase text-white/50">Seg</span>
+                    </div>
+                  </div>
+                </div>
+
                 <div className="mb-2 inline-flex items-center gap-2 rounded-full bg-accent px-3 py-1 text-xs font-bold uppercase tracking-wider text-accent-foreground">
                   <Crown className="h-3.5 w-3.5" />
                   Plano Recomendado
