@@ -392,8 +392,8 @@ const VendasPage = () => {
           <div className="mt-8 text-center">
             <Link to="/">
               <Button size="lg" className="h-14 rounded-2xl bg-success px-10 text-base font-bold text-white shadow-xl shadow-success/30 hover:bg-success/90">
-                <Sparkles className="mr-2 h-5 w-5" />
-                Começar Teste Grátis
+                <Rocket className="mr-2 h-5 w-5" />
+                Experimentar de Graça
               </Button>
             </Link>
             <p className="mt-3 text-xs text-muted-foreground">10 créditos grátis • Sem cartão</p>
