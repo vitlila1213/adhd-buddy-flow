@@ -499,8 +499,8 @@ const VendasPage = () => {
             <p className="mt-2 text-sm text-white/60">Receba 10 créditos gratuitos. Sem cartão de crédito.</p>
             <Link to="/" className="mt-4 block">
               <Button size="lg" className="h-14 w-full rounded-2xl bg-success text-base font-bold text-white shadow-xl shadow-success/30 hover:bg-success/90">
-                <Sparkles className="mr-2 h-5 w-5" />
-                Criar Conta Grátis
+                <Rocket className="mr-2 h-5 w-5" />
+                Criar Minha Conta Grátis
                 <ArrowRight className="ml-2 h-5 w-5" />
               </Button>
             </Link>
