@@ -78,10 +78,10 @@ serve(async (req) => {
       .lte("data_hora_agendada", tomorrowEnd);
 
     // Group by user
-    const userPendencies: Record<string, { tasks: any[]; bills: any[]; tomorrowBills: any[] }> = {};
+    const userPendencies: Record<string, { tasks: any[]; bills: any[]; tomorrowBills: any[]; tomorrowTasks: any[] }> = {};
 
     const ensure = (uid: string) => {
-      if (!userPendencies[uid]) userPendencies[uid] = { tasks: [], bills: [], tomorrowBills: [] };
+      if (!userPendencies[uid]) userPendencies[uid] = { tasks: [], bills: [], tomorrowBills: [], tomorrowTasks: [] };
     };
 
     for (const task of (pendingTasks || [])) {
@@ -100,6 +100,12 @@ serve(async (req) => {
       if (!bill.user_id) continue;
       ensure(bill.user_id);
       userPendencies[bill.user_id].tomorrowBills.push(bill);
+    }
+
+    for (const task of (tomorrowTasks || [])) {
+      if (!task.user_id) continue;
+      ensure(task.user_id);
+      userPendencies[task.user_id].tomorrowTasks.push(task);
     }
 
     const userIds = Object.keys(userPendencies);
