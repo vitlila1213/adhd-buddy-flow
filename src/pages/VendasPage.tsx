@@ -135,8 +135,16 @@ const VendasPage = () => {
   const timeLeft = useCountdown();
   return (
     <div className="min-h-screen bg-background">
-      {/* Announcement Bar */}
-      <div className="bg-navy px-4 py-2.5 text-center text-sm font-medium text-navy-foreground">
+      {/* Announcement Bar with Urgency */}
+      <div className="bg-gradient-to-r from-destructive to-destructive/80 px-4 py-2.5 text-center text-sm font-medium text-white">
+        <div className="flex items-center justify-center gap-2 flex-wrap">
+          <span>🔥 Oferta por tempo limitado!</span>
+          <span className="font-bold">
+            {String(timeLeft.hours).padStart(2, '0')}:{String(timeLeft.minutes).padStart(2, '0')}:{String(timeLeft.seconds).padStart(2, '0')}
+          </span>
+          <span className="hidden sm:inline">— Garanta seu desconto agora</span>
+        </div>
+      </div>
         ✨ Assessoria 24h no seu bolso — Texto, áudio e foto pelo WhatsApp
       </div>
 
