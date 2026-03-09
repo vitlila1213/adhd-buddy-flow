@@ -240,13 +240,13 @@ const VendasPage = () => {
           >
             <Link to="/">
               <Button size="lg" className="h-16 rounded-2xl bg-success px-12 text-lg font-bold text-white shadow-xl shadow-success/30 hover:bg-success/90">
-                <Sparkles className="mr-3 h-6 w-6" />
-                Testar Grátis Agora
+                <Rocket className="mr-3 h-6 w-6" />
+                Quero Organizar Minha Vida
                 <ArrowRight className="ml-3 h-6 w-6" />
               </Button>
             </Link>
             <p className="text-sm font-medium text-success">
-              🎁 10 créditos grátis • Sem cartão de crédito • Acesso imediato
+              🎁 10 créditos grátis • Sem cartão • Começa em 30 segundos
             </p>
             <a href="#planos">
               <Button variant="ghost" size="lg" className="h-12 rounded-2xl px-8 text-base text-white/60 hover:text-white hover:bg-white/5">
