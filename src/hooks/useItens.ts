@@ -51,5 +51,16 @@ export const useItens = () => {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["itens_cerebro"] }),
   });
 
-  return { ...query, updateStatus, updateTipo };
+  const deleteItem = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase
+        .from("itens_cerebro")
+        .delete()
+        .eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["itens_cerebro"] }),
+  });
+
+  return { ...query, updateStatus, updateTipo, deleteItem };
 };
