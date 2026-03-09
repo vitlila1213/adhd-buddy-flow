@@ -656,8 +656,8 @@ const VendasPage = () => {
           <div className="mt-8 flex flex-col items-center gap-4">
             <Link to="/">
               <Button size="lg" className="h-16 rounded-2xl bg-success px-12 text-lg font-bold text-white shadow-xl shadow-success/30 hover:bg-success/90">
-                <Sparkles className="mr-3 h-6 w-6" />
-                Testar Grátis Agora
+                <Rocket className="mr-3 h-6 w-6" />
+                Quero Começar Agora
                 <ArrowRight className="ml-3 h-6 w-6" />
               </Button>
             </Link>
