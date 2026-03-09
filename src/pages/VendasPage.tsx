@@ -1,9 +1,10 @@
-import { Brain, Check, Crown, Sparkles, Zap, Shield, MessageSquare, ArrowRight, Calendar, Gift, Tag, Mic, BarChart3, Bell, Star, ChevronDown, X, Camera, FileText, CreditCard, Clock } from "lucide-react";
+import { Brain, Check, Crown, Sparkles, Zap, Shield, MessageSquare, ArrowRight, Calendar, Gift, Tag, Mic, BarChart3, Bell, Star, ChevronDown, X, Camera, FileText, CreditCard, Clock, Rocket } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { useState, useEffect } from "react";
 import logoImg from "@/assets/logo.png";
+import InstallPWAButton from "@/components/InstallPWAButton";
 
 // Hook para countdown até fim do dia
 const useCountdown = () => {
