@@ -70,9 +70,9 @@ const testimonials = [
 
 const plan = {
   name: "Premium Mensal",
-  price: "29,90",
+  price: "27,97",
   period: "/mês",
-  link: "https://pay.kiwify.com.br/o9VoTdd",
+  link: "https://pay.kiwify.com.br/4IdnrMP",
 };
 
 const monthlyBenefits = [
