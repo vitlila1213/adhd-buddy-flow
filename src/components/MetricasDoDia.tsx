@@ -1,12 +1,18 @@
 import { useItens } from "@/hooks/useItens";
-import { useMemo } from "react";
-import { CheckCircle2, Lightbulb, Loader2, ListTodo, Brain, MessageCircle } from "lucide-react";
-import { motion } from "framer-motion";
+import { useCategorias } from "@/hooks/useCategorias";
+import { useMemo, useState } from "react";
+import { CheckCircle2, Lightbulb, Loader2, ListTodo, Brain, MessageCircle, PieChart as PieChartIcon } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from "recharts";
 
 const WHATSAPP_AGENT = "5511934396102";
 
+type FilterType = "concluida" | "pendente";
+
 const MetricasDoDia = () => {
   const { data: items, isLoading } = useItens();
+  const { data: categorias } = useCategorias();
+  const [filter, setFilter] = useState<FilterType>("concluida");
 
   const metrics = useMemo(() => {
     const all = items || [];
@@ -33,6 +39,38 @@ const MetricasDoDia = () => {
       pendentes: all.filter((i) => i.status === "pendente").length,
     };
   }, [items]);
+
+  const chartData = useMemo(() => {
+    const all = items || [];
+    const cats = categorias || [];
+    
+    const filteredItems = all.filter((i) => i.status === filter);
+    
+    // Group by category
+    const categoryMap = new Map<string, { name: string; count: number; color: string }>();
+    
+    filteredItems.forEach((item) => {
+      const catId = item.categoria_id || "sem-categoria";
+      const cat = cats.find((c) => c.id === catId);
+      const catName = cat?.nome || "Sem categoria";
+      const catColor = cat?.cor || "#94a3b8";
+      
+      if (categoryMap.has(catId)) {
+        categoryMap.get(catId)!.count++;
+      } else {
+        categoryMap.set(catId, { name: catName, count: 1, color: catColor });
+      }
+    });
+    
+    const total = filteredItems.length;
+    
+    return Array.from(categoryMap.values()).map((cat) => ({
+      name: cat.name,
+      value: cat.count,
+      percentage: total > 0 ? Math.round((cat.count / total) * 100) : 0,
+      color: cat.color,
+    }));
+  }, [items, categorias, filter]);
 
   if (isLoading) {
     return (
@@ -73,6 +111,42 @@ const MetricasDoDia = () => {
     },
   ];
 
+  const CustomTooltip = ({ active, payload }: any) => {
+    if (active && payload && payload.length) {
+      const data = payload[0].payload;
+      return (
+        <div className="rounded-xl border border-border/50 bg-card px-3 py-2 shadow-lg">
+          <p className="font-medium text-card-foreground">{data.name}</p>
+          <p className="text-sm text-muted-foreground">
+            {data.value} tarefas ({data.percentage}%)
+          </p>
+        </div>
+      );
+    }
+    return null;
+  };
+
+  const renderCustomLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percentage }: any) => {
+    if (percentage < 10) return null;
+    const RADIAN = Math.PI / 180;
+    const radius = innerRadius + (outerRadius - innerRadius) * 0.5;
+    const x = cx + radius * Math.cos(-midAngle * RADIAN);
+    const y = cy + radius * Math.sin(-midAngle * RADIAN);
+    
+    return (
+      <text
+        x={x}
+        y={y}
+        fill="white"
+        textAnchor="middle"
+        dominantBaseline="central"
+        className="text-xs font-bold drop-shadow-md"
+      >
+        {`${percentage}%`}
+      </text>
+    );
+  };
+
   return (
     <div className="space-y-4">
       <div className="grid gap-3 grid-cols-2 lg:grid-cols-4">
@@ -94,6 +168,121 @@ const MetricasDoDia = () => {
           </motion.div>
         ))}
       </div>
+
+      {/* Pie Chart Section */}
+      <motion.div
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.35, duration: 0.3, ease: "easeOut" }}
+        className="rounded-2xl border border-border/60 bg-card p-5 shadow-sm"
+      >
+        <div className="mb-4 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10">
+              <PieChartIcon className="h-5 w-5 text-primary" />
+            </div>
+            <div>
+              <h3 className="font-heading font-semibold text-card-foreground">Por Categoria</h3>
+              <p className="text-xs text-muted-foreground">Distribuição de tarefas</p>
+            </div>
+          </div>
+          
+          {/* Filter Toggle */}
+          <div className="flex rounded-xl bg-muted p-1">
+            <button
+              onClick={() => setFilter("concluida")}
+              className={`rounded-lg px-3 py-1.5 text-xs font-medium transition-all duration-200 ${
+                filter === "concluida"
+                  ? "bg-success text-success-foreground shadow-sm"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              Concluídas
+            </button>
+            <button
+              onClick={() => setFilter("pendente")}
+              className={`rounded-lg px-3 py-1.5 text-xs font-medium transition-all duration-200 ${
+                filter === "pendente"
+                  ? "bg-accent text-accent-foreground shadow-sm"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              Pendentes
+            </button>
+          </div>
+        </div>
+
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={filter}
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.95 }}
+            transition={{ duration: 0.2 }}
+            className="h-64"
+          >
+            {chartData.length > 0 ? (
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <defs>
+                    {chartData.map((entry, index) => (
+                      <linearGradient
+                        key={`gradient-${index}`}
+                        id={`gradient-${index}`}
+                        x1="0"
+                        y1="0"
+                        x2="1"
+                        y2="1"
+                      >
+                        <stop offset="0%" stopColor={entry.color} stopOpacity={1} />
+                        <stop offset="100%" stopColor={entry.color} stopOpacity={0.7} />
+                      </linearGradient>
+                    ))}
+                  </defs>
+                  <Pie
+                    data={chartData}
+                    cx="50%"
+                    cy="50%"
+                    labelLine={false}
+                    label={renderCustomLabel}
+                    innerRadius={50}
+                    outerRadius={90}
+                    paddingAngle={3}
+                    dataKey="value"
+                    animationBegin={0}
+                    animationDuration={800}
+                    animationEasing="ease-out"
+                  >
+                    {chartData.map((entry, index) => (
+                      <Cell
+                        key={`cell-${index}`}
+                        fill={`url(#gradient-${index})`}
+                        stroke={entry.color}
+                        strokeWidth={2}
+                        className="drop-shadow-md transition-all duration-200 hover:opacity-80"
+                      />
+                    ))}
+                  </Pie>
+                  <Tooltip content={<CustomTooltip />} />
+                  <Legend
+                    formatter={(value) => (
+                      <span className="text-xs text-card-foreground">{value}</span>
+                    )}
+                    wrapperStyle={{ paddingTop: 10 }}
+                    iconType="circle"
+                    iconSize={8}
+                  />
+                </PieChart>
+              </ResponsiveContainer>
+            ) : (
+              <div className="flex h-full flex-col items-center justify-center text-muted-foreground">
+                <PieChartIcon className="mb-2 h-12 w-12 opacity-30" />
+                <p className="text-sm">Nenhuma tarefa {filter === "concluida" ? "concluída" : "pendente"}</p>
+              </div>
+            )}
+          </motion.div>
+        </AnimatePresence>
+      </motion.div>
 
       {/* WhatsApp Agent Button */}
       <motion.a
