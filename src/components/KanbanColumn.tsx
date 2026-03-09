@@ -23,6 +23,7 @@ interface KanbanColumnProps {
 const columnColors: Record<string, { badge: string; dropzone: string }> = {
   anotacoes: { badge: "bg-accent/15 text-accent", dropzone: "bg-accent/5" },
   tarefas: { badge: "bg-primary/15 text-primary", dropzone: "bg-primary/5" },
+  pendentes: { badge: "bg-destructive/15 text-destructive", dropzone: "bg-destructive/5" },
   concluidas: { badge: "bg-success/15 text-success", dropzone: "bg-success/5" },
 };
 
