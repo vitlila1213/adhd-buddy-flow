@@ -1,9 +1,37 @@
-import { Brain, Check, Crown, Sparkles, Zap, Shield, MessageSquare, ArrowRight, Calendar, Gift, Tag, Mic, BarChart3, Bell, Star, ChevronDown, X, Camera, FileText, CreditCard } from "lucide-react";
+import { Brain, Check, Crown, Sparkles, Zap, Shield, MessageSquare, ArrowRight, Calendar, Gift, Tag, Mic, BarChart3, Bell, Star, ChevronDown, X, Camera, FileText, CreditCard, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import logoImg from "@/assets/logo.png";
+
+// Hook para countdown até fim do dia
+const useCountdown = () => {
+  const getTimeLeft = () => {
+    const now = new Date();
+    const endOfDay = new Date(now);
+    endOfDay.setHours(23, 59, 59, 999);
+    const diff = endOfDay.getTime() - now.getTime();
+    
+    const hours = Math.floor(diff / (1000 * 60 * 60));
+    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+    const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+    
+    return { hours, minutes, seconds };
+  };
+  
+  const [timeLeft, setTimeLeft] = useState(getTimeLeft());
+  
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setTimeLeft(getTimeLeft());
+    }, 1000);
+    
+    return () => clearInterval(timer);
+  }, []);
+  
+  return timeLeft;
+};
 
 const features = [
   { icon: MessageSquare, title: "Registre Tudo no WhatsApp", desc: "Envie texto ou áudio. A IA entende, classifica e registra automaticamente. Sem cadastros, sem apps extras." },
