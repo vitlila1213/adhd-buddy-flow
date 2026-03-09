@@ -5,7 +5,7 @@ import { useCategorias } from "@/hooks/useCategorias";
 import { useMemo, useState } from "react";
 import { Loader2, CalendarIcon } from "lucide-react";
 import type { ItemCerebro } from "@/hooks/useItens";
-import { format, isSameDay, isSameMonth, isSameYear, parseISO } from "date-fns";
+import { format, isSameDay, startOfDay, isBefore, parseISO } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
 import { Calendar } from "./ui/calendar";
@@ -13,7 +13,7 @@ import { Button } from "./ui/button";
 import { cn } from "@/lib/utils";
 
 interface KanbanBoardProps {
-  activeTab?: "anotacoes" | "tarefas" | "concluidas";
+  activeTab?: "anotacoes" | "tarefas" | "pendentes" | "concluidas";
   limitReached?: boolean;
   onUpgrade?: () => void;
 }
@@ -63,6 +63,12 @@ function groupByCategory(
   return groups;
 }
 
+function getItemDate(item: ItemCerebro): Date | null {
+  if (item.data_hora_agendada) return new Date(item.data_hora_agendada);
+  if (item.created_at) return new Date(item.created_at);
+  return null;
+}
+
 const KanbanBoard = ({ activeTab, limitReached, onUpgrade }: KanbanBoardProps) => {
   const { data: items, isLoading, updateStatus, updateTipo } = useItens();
   const { data: categorias, isLoading: catLoading } = useCategorias();
@@ -73,38 +79,58 @@ const KanbanBoard = ({ activeTab, limitReached, onUpgrade }: KanbanBoardProps) =
     [categorias]
   );
 
-  const filterItems = (list: ItemCerebro[]) => {
-    if (!filterDate) return list;
-    return list.filter((item) => {
-      const itemDate = item.created_at ? new Date(item.created_at) : null;
-      if (!itemDate) return false;
-      return isSameDay(itemDate, filterDate);
-    });
-  };
+  const today = useMemo(() => startOfDay(new Date()), []);
 
   const columns = useMemo(() => {
     const all = items || [];
-    return {
-      anotacoes: all.filter((i) => i.tipo === "ideia" && i.status !== "concluida"),
-      tarefas: all.filter((i) => i.tipo === "tarefa" && i.status === "pendente"),
-      concluidas: all.filter((i) => i.status === "concluida"),
-    };
-  }, [items]);
+    const viewDate = filterDate || today;
 
-  const filteredColumns = useMemo(() => ({
-    anotacoes: filterItems(columns.anotacoes),
-    tarefas: filterItems(columns.tarefas),
-    concluidas: filterItems(columns.concluidas),
-  }), [columns, filterDate]);
+    // Anotações: always show all non-completed ideas
+    const anotacoes = all.filter((i) => i.tipo === "ideia" && i.status !== "concluida");
+
+    // Tarefas do dia: tasks scheduled for viewDate (or created on viewDate if no schedule), not completed
+    const tarefas = all.filter((i) => {
+      if (i.tipo !== "tarefa" || i.status === "concluida") return false;
+      const itemDate = getItemDate(i);
+      if (!itemDate) return false;
+      return isSameDay(itemDate, viewDate);
+    });
+
+    // Pendentes (overdue): tasks scheduled BEFORE today that are still pending (only when viewing today or no filter)
+    const pendentes = !filterDate
+      ? all.filter((i) => {
+          if (i.tipo !== "tarefa" || i.status === "concluida") return false;
+          const itemDate = getItemDate(i);
+          if (!itemDate) return false;
+          return isBefore(startOfDay(itemDate), today);
+        })
+      : [];
+
+    // Concluídas: filter by viewDate based on completed_at
+    const concluidas = all.filter((i) => {
+      if (i.status !== "concluida") return false;
+      if (filterDate && i.completed_at) {
+        return isSameDay(new Date(i.completed_at), viewDate);
+      }
+      return true;
+    });
+
+    return { anotacoes, tarefas, pendentes, concluidas };
+  }, [items, filterDate, today]);
 
   const tarefasGroups = useMemo(
-    () => groupByCategory(filteredColumns.tarefas, tarefaCats),
-    [filteredColumns.tarefas, tarefaCats]
+    () => groupByCategory(columns.tarefas, tarefaCats),
+    [columns.tarefas, tarefaCats]
+  );
+
+  const pendentesGroups = useMemo(
+    () => groupByCategory(columns.pendentes, tarefaCats),
+    [columns.pendentes, tarefaCats]
   );
 
   const concluidasGroups = useMemo(
-    () => groupByCategory(filteredColumns.concluidas, tarefaCats),
-    [filteredColumns.concluidas, tarefaCats]
+    () => groupByCategory(columns.concluidas, tarefaCats),
+    [columns.concluidas, tarefaCats]
   );
 
   const handleDragEnd = (result: DropResult) => {
@@ -114,7 +140,7 @@ const KanbanBoard = ({ activeTab, limitReached, onUpgrade }: KanbanBoardProps) =
     if (destination.droppableId === "anotacoes") {
       updateTipo.mutate({ id: draggableId, tipo: "ideia" });
       updateStatus.mutate({ id: draggableId, status: "pendente" });
-    } else if (destination.droppableId === "tarefas") {
+    } else if (destination.droppableId === "tarefas" || destination.droppableId === "pendentes") {
       updateTipo.mutate({ id: draggableId, tipo: "tarefa" });
       updateStatus.mutate({ id: draggableId, status: "pendente" });
     } else if (destination.droppableId === "concluidas") {
@@ -172,20 +198,34 @@ const KanbanBoard = ({ activeTab, limitReached, onUpgrade }: KanbanBoardProps) =
             Limpar filtro
           </Button>
         )}
+        {!filterDate && (
+          <span className="text-xs text-muted-foreground">
+            Mostrando: Hoje ({format(today, "dd/MM/yyyy", { locale: ptBR })})
+          </span>
+        )}
       </div>
 
       {/* Mobile: show only active tab column */}
       <div className="block sm:hidden">
         {activeTab === "anotacoes" && (
-          <KanbanColumn id="anotacoes" title="Anotações" emoji="📝" items={filteredColumns.anotacoes} />
+          <KanbanColumn id="anotacoes" title="Anotações" emoji="📝" items={columns.anotacoes} />
         )}
         {activeTab === "tarefas" && (
           <KanbanColumn
             id="tarefas"
-            title="Tarefas do Dia"
+            title={filterDate ? `Tarefas ${format(filterDate, "dd/MM", { locale: ptBR })}` : "Tarefas de Hoje"}
             emoji="📋"
-            items={filteredColumns.tarefas}
+            items={columns.tarefas}
             groups={tarefasGroups}
+          />
+        )}
+        {activeTab === "pendentes" && !filterDate && (
+          <KanbanColumn
+            id="pendentes"
+            title="Pendentes (Atrasadas)"
+            emoji="⏰"
+            items={columns.pendentes}
+            groups={pendentesGroups}
           />
         )}
         {activeTab === "concluidas" && (
@@ -193,7 +233,7 @@ const KanbanBoard = ({ activeTab, limitReached, onUpgrade }: KanbanBoardProps) =
             id="concluidas"
             title="Concluídas"
             emoji="✅"
-            items={filteredColumns.concluidas}
+            items={columns.concluidas}
             groups={concluidasGroups}
           />
         )}
@@ -201,19 +241,28 @@ const KanbanBoard = ({ activeTab, limitReached, onUpgrade }: KanbanBoardProps) =
 
       {/* Desktop: horizontal kanban */}
       <div className="hidden gap-4 sm:flex">
-        <KanbanColumn id="anotacoes" title="Anotações" emoji="📝" items={filteredColumns.anotacoes} />
+        <KanbanColumn id="anotacoes" title="Anotações" emoji="📝" items={columns.anotacoes} />
         <KanbanColumn
           id="tarefas"
-          title="Tarefas do Dia"
+          title={filterDate ? `Tarefas ${format(filterDate, "dd/MM", { locale: ptBR })}` : "Tarefas de Hoje"}
           emoji="📋"
-          items={filteredColumns.tarefas}
+          items={columns.tarefas}
           groups={tarefasGroups}
         />
+        {!filterDate && columns.pendentes.length > 0 && (
+          <KanbanColumn
+            id="pendentes"
+            title="Pendentes (Atrasadas)"
+            emoji="⏰"
+            items={columns.pendentes}
+            groups={pendentesGroups}
+          />
+        )}
         <KanbanColumn
           id="concluidas"
           title="Concluídas"
           emoji="✅"
-          items={filteredColumns.concluidas}
+          items={columns.concluidas}
           groups={concluidasGroups}
         />
       </div>

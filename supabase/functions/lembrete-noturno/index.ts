@@ -69,11 +69,19 @@ serve(async (req) => {
       .gte("data_vencimento", tomorrowStart)
       .lte("data_vencimento", tomorrowEnd);
 
+    // Fetch tasks scheduled for TOMORROW (day-before reminder)
+    const { data: tomorrowTasks } = await supabase
+      .from("itens_cerebro")
+      .select("id, titulo, tipo, status, user_id, data_hora_agendada")
+      .eq("status", "pendente")
+      .gte("data_hora_agendada", tomorrowStart)
+      .lte("data_hora_agendada", tomorrowEnd);
+
     // Group by user
-    const userPendencies: Record<string, { tasks: any[]; bills: any[]; tomorrowBills: any[] }> = {};
+    const userPendencies: Record<string, { tasks: any[]; bills: any[]; tomorrowBills: any[]; tomorrowTasks: any[] }> = {};
 
     const ensure = (uid: string) => {
-      if (!userPendencies[uid]) userPendencies[uid] = { tasks: [], bills: [], tomorrowBills: [] };
+      if (!userPendencies[uid]) userPendencies[uid] = { tasks: [], bills: [], tomorrowBills: [], tomorrowTasks: [] };
     };
 
     for (const task of (pendingTasks || [])) {
@@ -92,6 +100,12 @@ serve(async (req) => {
       if (!bill.user_id) continue;
       ensure(bill.user_id);
       userPendencies[bill.user_id].tomorrowBills.push(bill);
+    }
+
+    for (const task of (tomorrowTasks || [])) {
+      if (!task.user_id) continue;
+      ensure(task.user_id);
+      userPendencies[task.user_id].tomorrowTasks.push(task);
     }
 
     const userIds = Object.keys(userPendencies);
@@ -115,8 +129,8 @@ serve(async (req) => {
       const pending = userPendencies[profile.id];
       if (!pending) continue;
 
-      const { tasks, bills, tomorrowBills: tmrwBills } = pending;
-      if (tasks.length === 0 && bills.length === 0 && tmrwBills.length === 0) continue;
+      const { tasks, bills, tomorrowBills: tmrwBills, tomorrowTasks: tmrwTasks } = pending;
+      if (tasks.length === 0 && bills.length === 0 && tmrwBills.length === 0 && tmrwTasks.length === 0) continue;
 
       let message = "Boa tarde! ☀️ Passando para te lembrar das suas pendências:\n";
 
@@ -143,6 +157,13 @@ serve(async (req) => {
           const desc = bill.descricao || "Conta";
           const valor = Number(bill.valor).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
           message += `  📅 ${desc} (${valor}) — vence amanhã!\n`;
+        }
+      }
+
+      if (tmrwTasks.length > 0) {
+        message += "\n📌 *Tarefas agendadas para AMANHÃ:*\n";
+        for (const task of tmrwTasks) {
+          message += `  🗓️ ${task.titulo}\n`;
         }
       }
 
