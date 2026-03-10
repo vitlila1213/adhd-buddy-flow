@@ -212,11 +212,20 @@ serve(async (req) => {
       userText = body?.message?.caption || body?.message?.text || body?.message?.content?.caption || "Analise esta imagem.";
     } else {
       // === TEXT PROCESSING ===
-      userText = body?.message?.text || body?.message?.content || body?.text || body?.textMessage?.text || "";
-      if (typeof userText !== "string") {
-        return new Response(JSON.stringify({ error: "Text is not a string" }), {
-          status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
+      const rawText = body?.message?.text || body?.text || body?.textMessage?.text || "";
+      const rawContent = body?.message?.content;
+      
+      if (typeof rawText === "string" && rawText.length > 0) {
+        userText = rawText;
+      } else if (typeof rawContent === "string" && rawContent.length > 0) {
+        userText = rawContent;
+      } else if (typeof rawContent === "object" && rawContent?.text) {
+        userText = String(rawContent.text);
+      } else if (body?.message?.conversation) {
+        userText = String(body.message.conversation);
+      } else {
+        console.log("=== TEXT EXTRACTION FAILED ===", JSON.stringify({ rawText, rawContent, messageType }));
+        userText = "";
       }
     }
 
