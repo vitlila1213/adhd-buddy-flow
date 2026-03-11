@@ -194,10 +194,10 @@ const VendasPage = () => {
             transition={{ delay: 0.1, duration: 0.5 }}
             className="font-heading text-4xl font-extrabold leading-tight tracking-tight text-white sm:text-6xl">
             
-            Tenha um assistente pessoal
+            Um cérebro extra que nunca esquece
             <br />
             <span className="bg-gradient-to-r from-primary via-primary to-success bg-clip-text text-transparent">
-              trabalhando 24h por dia pra você
+              — 24h guardando o que importa
             </span>
           </motion.h1>
           <motion.p
