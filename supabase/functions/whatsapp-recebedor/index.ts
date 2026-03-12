@@ -628,6 +628,15 @@ Retorne APENAS o JSON, sem markdown, sem backticks.`;
         const { id, ...updateData } = action.dados;
         if (!id) continue;
 
+        // Auto-set completed_at when marking a task as completed
+        if (action.tabela === "itens_cerebro" && updateData.status === "concluida") {
+          updateData.completed_at = new Date().toISOString();
+        }
+        // Clear completed_at if reverting from completed
+        if (action.tabela === "itens_cerebro" && updateData.status && updateData.status !== "concluida") {
+          updateData.completed_at = null;
+        }
+
         const { error } = await supabase
           .from(action.tabela)
           .update(updateData)
@@ -635,7 +644,7 @@ Retorne APENAS o JSON, sem markdown, sem backticks.`;
           .eq("user_id", userId);
         if (error) {
           console.error(`Update error on ${action.tabela}:`, error);
-          throw error;
+          // Don't throw - continue processing so WhatsApp response is still sent
         }
       }
     }
