@@ -43,6 +43,7 @@ async function refreshGoogleToken(supabase: any, gcalIntegration: any, userId: s
   return gcalIntegration.access_token;
 }
 
+serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
