@@ -683,6 +683,7 @@ const VendasPage = () => {
           </p>
         </div>
       </footer>
+      <WhatsAppSupportButton />
     </div>);
 
 };
