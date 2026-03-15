@@ -114,7 +114,7 @@ serve(async (req) => {
     if (!isPremium && !isUnlimited && credits <= 0) {
       if (UAZAPI_URL && UAZAPI_TOKEN) {
         await sendWhatsApp(UAZAPI_URL, UAZAPI_TOKEN, userPhone,
-          `⚠️ Seus créditos gratuitos acabaram!\nAssine o Premium:\n${APP_URL}/vendas`
+          `⚠️ Seus créditos gratuitos acabaram!\n\nVocê usou todos os 10 créditos do plano gratuito. Para continuar usando o Cérebro de Bolso sem limites, assine o plano Premium por apenas R$27,97/mês.\n\n✅ Uso ilimitado 24h\n✅ Áudio, texto e foto\n✅ Leitura de boletos\n✅ Lembretes automáticos\n✅ Google Agenda integrado\n\n👉 Assine agora: https://pay.kiwify.com.br/4IdnrMP`
         );
       }
       return new Response(JSON.stringify({ blocked: "no_credits" }), {
