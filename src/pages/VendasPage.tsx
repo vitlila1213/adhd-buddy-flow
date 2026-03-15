@@ -5,6 +5,8 @@ import { Link } from "react-router-dom";
 import { useState, useEffect } from "react";
 import logoImg from "@/assets/logo.png";
 import InstallPWAButton from "@/components/InstallPWAButton";
+import PulsingBrain from "@/components/PulsingBrain";
+import WhatsAppSupportButton from "@/components/WhatsAppSupportButton";
 
 // Hook para countdown até fim do dia
 const useCountdown = () => {
@@ -175,6 +177,8 @@ const VendasPage = () => {
 
       {/* Hero - Navy background */}
       <section className="relative overflow-hidden bg-navy px-5 pb-20 pt-32 sm:pb-28 sm:pt-40">
+        {/* Pulsing brain background */}
+        <PulsingBrain />
         {/* Gradient orbs */}
         <div className="pointer-events-none absolute -left-32 top-20 h-72 w-72 rounded-full bg-primary/20 blur-[100px]" />
         <div className="pointer-events-none absolute -right-20 bottom-10 h-56 w-56 rounded-full bg-success/15 blur-[80px]" />
@@ -679,6 +683,7 @@ const VendasPage = () => {
           </p>
         </div>
       </footer>
+      <WhatsAppSupportButton />
     </div>);
 
 };
