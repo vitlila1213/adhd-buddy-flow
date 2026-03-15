@@ -16,7 +16,33 @@ async function sendWhatsApp(url: string, token: string, phone: string, text: str
   });
 }
 
-serve(async (req) => {
+async function refreshGoogleToken(supabase: any, gcalIntegration: any, userId: string): Promise<string> {
+  const GOOGLE_CLIENT_ID = Deno.env.get("GOOGLE_CLIENT_ID");
+  const GOOGLE_CLIENT_SECRET = Deno.env.get("GOOGLE_CLIENT_SECRET");
+  if (!GOOGLE_CLIENT_ID || !GOOGLE_CLIENT_SECRET) return gcalIntegration.access_token;
+
+  const refreshRes = await fetch("https://oauth2.googleapis.com/token", {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: new URLSearchParams({
+      client_id: GOOGLE_CLIENT_ID,
+      client_secret: GOOGLE_CLIENT_SECRET,
+      refresh_token: gcalIntegration.refresh_token,
+      grant_type: "refresh_token",
+    }),
+  });
+  const refreshData = await refreshRes.json();
+  if (refreshData.access_token) {
+    const newExpiry = new Date(Date.now() + (refreshData.expires_in || 3600) * 1000).toISOString();
+    await supabase.from("user_integrations")
+      .update({ access_token: refreshData.access_token, token_expires_at: newExpiry })
+      .eq("user_id", userId)
+      .eq("provider", "google_calendar");
+    return refreshData.access_token;
+  }
+  return gcalIntegration.access_token;
+}
+
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
