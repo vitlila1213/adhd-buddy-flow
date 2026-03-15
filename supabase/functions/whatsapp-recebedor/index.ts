@@ -16,6 +16,33 @@ async function sendWhatsApp(url: string, token: string, phone: string, text: str
   });
 }
 
+async function refreshGoogleToken(supabase: any, gcalIntegration: any, userId: string): Promise<string> {
+  const GOOGLE_CLIENT_ID = Deno.env.get("GOOGLE_CLIENT_ID");
+  const GOOGLE_CLIENT_SECRET = Deno.env.get("GOOGLE_CLIENT_SECRET");
+  if (!GOOGLE_CLIENT_ID || !GOOGLE_CLIENT_SECRET) return gcalIntegration.access_token;
+
+  const refreshRes = await fetch("https://oauth2.googleapis.com/token", {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: new URLSearchParams({
+      client_id: GOOGLE_CLIENT_ID,
+      client_secret: GOOGLE_CLIENT_SECRET,
+      refresh_token: gcalIntegration.refresh_token,
+      grant_type: "refresh_token",
+    }),
+  });
+  const refreshData = await refreshRes.json();
+  if (refreshData.access_token) {
+    const newExpiry = new Date(Date.now() + (refreshData.expires_in || 3600) * 1000).toISOString();
+    await supabase.from("user_integrations")
+      .update({ access_token: refreshData.access_token, token_expires_at: newExpiry })
+      .eq("user_id", userId)
+      .eq("provider", "google_calendar");
+    return refreshData.access_token;
+  }
+  return gcalIntegration.access_token;
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
@@ -444,6 +471,16 @@ REGRAS GERAIS:
    ✅ Para concluir uma tarefa, gere db_action: {tabela: "itens_cerebro", operacao: "update", dados: {id: "<ID da tarefa>", status: "concluida"}}
    Responda celebrando: "✅ Tarefa concluída! Boa! 🎉💪"
    Se houver mais de uma tarefa que pode corresponder, PERGUNTE qual delas o usuário completou.
+
+=== REAGENDAMENTO DE TAREFAS/COMPROMISSOS (CRÍTICO) ===
+Quando o usuário pedir para REAGENDAR uma tarefa ou compromisso (ex: "reagenda a reunião pra sexta", "muda o horário do dentista pra 15h", "adia a tarefa X pra amanhã", "remarca", "empurra", "transfere pra outro dia", "muda a data"):
+- Identifique qual tarefa pendente corresponde ao pedido (use os IDs das TAREFAS PENDENTES acima).
+- Gere db_action: {tabela: "itens_cerebro", operacao: "update", dados: {id: "<ID>", data_hora_agendada: "<nova data ISO com -03:00>"}}
+- Na resposta, confirme a mudança: "📅 Reagendei *<nome da tarefa>* para <nova data formatada>! ✅"
+- Se houver mais de uma tarefa que pode corresponder, PERGUNTE qual delas o usuário quer reagendar.
+- Se o usuário não especificar horário no reagendamento, mantenha o horário original (só mude o dia). Se não havia horário, use 09:00.
+- Palavras-chave: "reagendar", "reagenda", "remarcar", "remarca", "adiar", "adia", "empurrar", "empurra", "mudar data", "muda a data", "transferir", "mover pra", "joga pra", "passa pra"
+
 - Se for marcar finança como PAGA: use "update" com {id, status: "pago"}
 - NUNCA insira categorias na tabela itens_cerebro.
 - Ao criar tarefa, SEMPRE associe à categoria mais relevante do usuário. Se não houver correspondência, use categoria_id: null.
@@ -549,7 +586,7 @@ Retorne APENAS o JSON, sem markdown, sem backticks.`;
         }
         delete insertData.id;
 
-        const { error } = await supabase.from(action.tabela).insert(insertData);
+        const { data: insertedRow, error } = await supabase.from(action.tabela).insert(insertData).select("id").single();
         if (error) {
           console.error(`Insert error on ${action.tabela}:`, error);
           throw error;
@@ -563,29 +600,7 @@ Retorne APENAS o JSON, sem markdown, sem backticks.`;
 
             const expiresAt = gcalIntegration.token_expires_at ? new Date(gcalIntegration.token_expires_at) : null;
             if (expiresAt && expiresAt < new Date() && gcalIntegration.refresh_token) {
-              const GOOGLE_CLIENT_ID = Deno.env.get("GOOGLE_CLIENT_ID");
-              const GOOGLE_CLIENT_SECRET = Deno.env.get("GOOGLE_CLIENT_SECRET");
-              if (GOOGLE_CLIENT_ID && GOOGLE_CLIENT_SECRET) {
-                const refreshRes = await fetch("https://oauth2.googleapis.com/token", {
-                  method: "POST",
-                  headers: { "Content-Type": "application/x-www-form-urlencoded" },
-                  body: new URLSearchParams({
-                    client_id: GOOGLE_CLIENT_ID,
-                    client_secret: GOOGLE_CLIENT_SECRET,
-                    refresh_token: gcalIntegration.refresh_token,
-                    grant_type: "refresh_token",
-                  }),
-                });
-                const refreshData = await refreshRes.json();
-                if (refreshData.access_token) {
-                  accessToken = refreshData.access_token;
-                  const newExpiry = new Date(Date.now() + (refreshData.expires_in || 3600) * 1000).toISOString();
-                  await supabase.from("user_integrations")
-                    .update({ access_token: accessToken, token_expires_at: newExpiry })
-                    .eq("user_id", userId)
-                    .eq("provider", "google_calendar");
-                }
-              }
+              accessToken = await refreshGoogleToken(supabase, gcalIntegration, userId);
             }
 
             const startDate = new Date(scheduledDate);
@@ -615,7 +630,14 @@ Retorne APENAS o JSON, sem markdown, sem backticks.`;
             });
 
             if (calRes.ok) {
-              console.log("✅ Google Calendar event created");
+              const calData = await calRes.json();
+              console.log("✅ Google Calendar event created:", calData.id);
+              // Store the calendar event ID for future updates (rescheduling)
+              if (calData.id && insertedRow?.id) {
+                await supabase.from(action.tabela)
+                  .update({ google_calendar_event_id: calData.id })
+                  .eq("id", insertedRow.id);
+              }
             } else {
               const calErr = await calRes.text();
               console.error("Google Calendar error:", calErr);
@@ -644,7 +666,73 @@ Retorne APENAS o JSON, sem markdown, sem backticks.`;
           .eq("user_id", userId);
         if (error) {
           console.error(`Update error on ${action.tabela}:`, error);
-          // Don't throw - continue processing so WhatsApp response is still sent
+        }
+
+        // === Google Calendar reschedule ===
+        const newScheduledDate = updateData.data_hora_agendada || updateData.data_vencimento;
+        if (gcalIntegration?.access_token && newScheduledDate) {
+          try {
+            // Fetch the stored google_calendar_event_id
+            const { data: itemRow } = await supabase
+              .from(action.tabela)
+              .select("google_calendar_event_id, titulo, descricao")
+              .eq("id", id)
+              .maybeSingle();
+
+            let accessToken = gcalIntegration.access_token;
+            const expiresAt = gcalIntegration.token_expires_at ? new Date(gcalIntegration.token_expires_at) : null;
+            if (expiresAt && expiresAt < new Date() && gcalIntegration.refresh_token) {
+              accessToken = await refreshGoogleToken(supabase, gcalIntegration, userId);
+            }
+
+            const startDate = new Date(newScheduledDate);
+            const endDate = new Date(startDate.getTime() + 60 * 60 * 1000);
+
+            const eventBody = {
+              start: { dateTime: startDate.toISOString(), timeZone: "America/Sao_Paulo" },
+              end: { dateTime: endDate.toISOString(), timeZone: "America/Sao_Paulo" },
+            };
+
+            if (itemRow?.google_calendar_event_id) {
+              // UPDATE existing calendar event
+              const calRes = await fetch(`https://www.googleapis.com/calendar/v3/calendars/primary/events/${itemRow.google_calendar_event_id}`, {
+                method: "PATCH",
+                headers: { Authorization: `Bearer ${accessToken}`, "Content-Type": "application/json" },
+                body: JSON.stringify(eventBody),
+              });
+              if (calRes.ok) {
+                console.log("✅ Google Calendar event rescheduled:", itemRow.google_calendar_event_id);
+              } else {
+                const calErr = await calRes.text();
+                console.error("Google Calendar reschedule error:", calErr);
+              }
+            } else {
+              // No existing event — create a new one
+              const summary = itemRow?.titulo || itemRow?.descricao || "Compromisso - Cérebro de Bolso";
+              const calRes = await fetch("https://www.googleapis.com/calendar/v3/calendars/primary/events", {
+                method: "POST",
+                headers: { Authorization: `Bearer ${accessToken}`, "Content-Type": "application/json" },
+                body: JSON.stringify({
+                  ...eventBody,
+                  summary: `🧠 ${summary}`,
+                  description: `${itemRow?.descricao || ""}\n\n— Reagendado pelo Cérebro de Bolso`,
+                  reminders: { useDefault: false, overrides: [{ method: "popup", minutes: 30 }] },
+                }),
+              });
+              if (calRes.ok) {
+                const calData = await calRes.json();
+                console.log("✅ Google Calendar event created (reschedule):", calData.id);
+                await supabase.from(action.tabela)
+                  .update({ google_calendar_event_id: calData.id })
+                  .eq("id", id);
+              } else {
+                const calErr = await calRes.text();
+                console.error("Google Calendar create error:", calErr);
+              }
+            }
+          } catch (calError) {
+            console.error("Google Calendar reschedule sync error:", calError);
+          }
         }
       }
     }
@@ -659,13 +747,13 @@ Retorne APENAS o JSON, sem markdown, sem backticks.`;
       let finalMessage = parsed.mensagem_whatsapp;
 
       const hadCalendarSync = actions.some((action: any) => {
-        if (!action.tabela || action.operacao !== "insert" || !action.dados) return false;
+        if (!action.tabela || !action.dados) return false;
         const scheduledDate = action.dados.data_hora_agendada || action.dados.data_vencimento;
         return gcalIntegration?.access_token && scheduledDate;
       });
 
       if (hadCalendarSync) {
-        finalMessage += "\n\n📅 _Evento adicionado automaticamente ao seu Google Agenda!_";
+        finalMessage += "\n\n📅 _Google Agenda atualizado automaticamente!_";
       }
 
       await sendWhatsApp(UAZAPI_URL, UAZAPI_TOKEN, userPhone, finalMessage);

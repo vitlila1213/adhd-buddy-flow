@@ -96,6 +96,7 @@ export type Database = {
           created_at: string
           data_vencimento: string | null
           descricao: string | null
+          google_calendar_event_id: string | null
           id: string
           is_recorrente: boolean
           status: string
@@ -108,6 +109,7 @@ export type Database = {
           created_at?: string
           data_vencimento?: string | null
           descricao?: string | null
+          google_calendar_event_id?: string | null
           id?: string
           is_recorrente?: boolean
           status?: string
@@ -120,6 +122,7 @@ export type Database = {
           created_at?: string
           data_vencimento?: string | null
           descricao?: string | null
+          google_calendar_event_id?: string | null
           id?: string
           is_recorrente?: boolean
           status?: string
@@ -151,6 +154,7 @@ export type Database = {
           created_at: string
           data_hora_agendada: string | null
           descricao: string | null
+          google_calendar_event_id: string | null
           id: string
           status: string
           tipo: string
@@ -165,6 +169,7 @@ export type Database = {
           created_at?: string
           data_hora_agendada?: string | null
           descricao?: string | null
+          google_calendar_event_id?: string | null
           id?: string
           status?: string
           tipo: string
@@ -179,6 +184,7 @@ export type Database = {
           created_at?: string
           data_hora_agendada?: string | null
           descricao?: string | null
+          google_calendar_event_id?: string | null
           id?: string
           status?: string
           tipo?: string
