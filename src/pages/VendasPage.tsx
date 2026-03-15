@@ -5,6 +5,8 @@ import { Link } from "react-router-dom";
 import { useState, useEffect } from "react";
 import logoImg from "@/assets/logo.png";
 import InstallPWAButton from "@/components/InstallPWAButton";
+import PulsingBrain from "@/components/PulsingBrain";
+import WhatsAppSupportButton from "@/components/WhatsAppSupportButton";
 
 // Hook para countdown até fim do dia
 const useCountdown = () => {
