@@ -494,6 +494,16 @@ Quando o usuário pedir EXPLICITAMENTE para REAGENDAR (usando as palavras-chave 
 - Se for marcar finança como PAGA: use "update" com {id, status: "pago"}
 - NUNCA insira categorias na tabela itens_cerebro.
 
+=== CANCELAMENTO / EXCLUSÃO DE TAREFAS E COMPROMISSOS (CRÍTICO) ===
+Quando o usuário pedir para CANCELAR, EXCLUIR, APAGAR ou REMOVER uma tarefa ou compromisso:
+- Palavras-chave: "cancela", "cancelar", "exclui", "excluir", "apaga", "apagar", "remove", "remover", "deleta", "deletar", "tira", "tirar", "não quero mais"
+- Identifique qual tarefa/compromisso/finança pendente corresponde ao pedido (use os IDs das listas acima).
+- Gere db_action: {tabela: "itens_cerebro", operacao: "delete", dados: {id: "<ID da tarefa>"}}
+- Para finanças: {tabela: "financas", operacao: "delete", dados: {id: "<ID da finança>"}}
+- Responda: "🗑️ Tarefa *<nome>* cancelada e removida! ✅"
+- Se o item tinha integração com Google Agenda, o evento será removido automaticamente.
+- Se houver mais de uma tarefa que pode corresponder, PERGUNTE qual delas o usuário quer cancelar.
+
 REGRAS DE HORÁRIO (CRÍTICO):
 - "2h da manhã"/"2h da madrugada" = 02:00. "2h da tarde" = 14:00.
 - Sem contexto: 1h-6h = madrugada. 7h-12h = manhã. NUNCA some 12 automaticamente.
