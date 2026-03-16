@@ -753,6 +753,50 @@ Retorne APENAS o JSON, sem markdown, sem backticks.`;
             console.error("Google Calendar reschedule sync error:", calError);
           }
         }
+      } else if (action.operacao === "delete") {
+        const id = action.dados?.id;
+        if (!id) continue;
+
+        // Check if the item has a Google Calendar event to delete
+        if (gcalIntegration?.access_token && (action.tabela === "itens_cerebro" || action.tabela === "financas")) {
+          try {
+            const { data: itemRow } = await supabase
+              .from(action.tabela)
+              .select("google_calendar_event_id")
+              .eq("id", id)
+              .maybeSingle();
+
+            if (itemRow?.google_calendar_event_id) {
+              let accessToken = gcalIntegration.access_token;
+              const expiresAt = gcalIntegration.token_expires_at ? new Date(gcalIntegration.token_expires_at) : null;
+              if (expiresAt && expiresAt < new Date() && gcalIntegration.refresh_token) {
+                accessToken = await refreshGoogleToken(supabase, gcalIntegration, userId);
+              }
+
+              const calRes = await fetch(`https://www.googleapis.com/calendar/v3/calendars/primary/events/${itemRow.google_calendar_event_id}`, {
+                method: "DELETE",
+                headers: { Authorization: `Bearer ${accessToken}` },
+              });
+              if (calRes.ok || calRes.status === 204) {
+                console.log("✅ Google Calendar event deleted:", itemRow.google_calendar_event_id);
+              } else {
+                const calErr = await calRes.text();
+                console.error("Google Calendar delete error:", calErr);
+              }
+            }
+          } catch (calError) {
+            console.error("Google Calendar delete sync error:", calError);
+          }
+        }
+
+        const { error } = await supabase
+          .from(action.tabela)
+          .delete()
+          .eq("id", id)
+          .eq("user_id", userId);
+        if (error) {
+          console.error(`Delete error on ${action.tabela}:`, error);
+        }
       }
     }
 
