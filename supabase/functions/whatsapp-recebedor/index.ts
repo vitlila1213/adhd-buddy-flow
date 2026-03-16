@@ -369,7 +369,7 @@ Se precisar de mais detalhes, estou por aqui! 💙"
 
 2. "db_actions": Array de ações no banco. Cada ação tem:
    - "tabela": "financas", "itens_cerebro", "categorias" ou "aniversariantes"
-   - "operacao": "insert", "update" ou "nenhuma"
+   - "operacao": "insert", "update", "delete" ou "nenhuma"
    - "dados": JSON com os campos exatos
 
 === LEMBRETES E "ME LEMBRA" (CRÍTICO) ===
