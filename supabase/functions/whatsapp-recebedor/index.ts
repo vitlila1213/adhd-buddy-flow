@@ -472,18 +472,27 @@ REGRAS GERAIS:
    Responda celebrando: "✅ Tarefa concluída! Boa! 🎉💪"
    Se houver mais de uma tarefa que pode corresponder, PERGUNTE qual delas o usuário completou.
 
-=== REAGENDAMENTO DE TAREFAS/COMPROMISSOS (CRÍTICO) ===
-Quando o usuário pedir para REAGENDAR uma tarefa ou compromisso (ex: "reagenda a reunião pra sexta", "muda o horário do dentista pra 15h", "adia a tarefa X pra amanhã", "remarca", "empurra", "transfere pra outro dia", "muda a data"):
+=== NOVA TAREFA vs REAGENDAMENTO — REGRA MAIS IMPORTANTE ===
+⚠️ POR PADRÃO, toda mensagem que descreve uma ATIVIDADE com DATA é uma NOVA TAREFA (operacao: "insert").
+⚠️ SOMENTE use "update" para reagendar quando o usuário usar EXPLICITAMENTE uma dessas palavras-chave: "reagenda", "reagendar", "remarca", "remarcar", "adia", "adiar", "empurra", "empurrar", "muda a data", "mudar data", "transfere", "mover pra", "joga pra", "passa pra".
+⚠️ Se o usuário diz "amanhã vou fazer X" ou "dia 18 fazer Y" ou "nova tarefa dia 20 Z" → isso é SEMPRE uma NOVA TAREFA com insert, NUNCA um reagendamento!
+⚠️ Mesmo que exista uma tarefa com título parecido, se o usuário NÃO usou palavra-chave de reagendamento, CRIE UMA NOVA TAREFA.
+
+=== REAGENDAMENTO DE TAREFAS/COMPROMISSOS ===
+Quando o usuário pedir EXPLICITAMENTE para REAGENDAR (usando as palavras-chave acima):
 - Identifique qual tarefa pendente corresponde ao pedido (use os IDs das TAREFAS PENDENTES acima).
 - Gere db_action: {tabela: "itens_cerebro", operacao: "update", dados: {id: "<ID>", data_hora_agendada: "<nova data ISO com -03:00>"}}
 - Na resposta, confirme a mudança: "📅 Reagendei *<nome da tarefa>* para <nova data formatada>! ✅"
 - Se houver mais de uma tarefa que pode corresponder, PERGUNTE qual delas o usuário quer reagendar.
 - Se o usuário não especificar horário no reagendamento, mantenha o horário original (só mude o dia). Se não havia horário, use 09:00.
-- Palavras-chave: "reagendar", "reagenda", "remarcar", "remarca", "adiar", "adia", "empurrar", "empurra", "mudar data", "muda a data", "transferir", "mover pra", "joga pra", "passa pra"
+
+=== CATEGORIA_ID — REGRA CRÍTICA ===
+⚠️ O campo categoria_id DEVE ser um ID da lista de CATEGORIAS DO USUÁRIO acima. NUNCA use um ID de tarefa como categoria_id!
+⚠️ Os IDs das TAREFAS PENDENTES são IDs de tarefas, NÃO de categorias. São coisas diferentes!
+⚠️ Se nenhuma categoria se aplica, use categoria_id: null.
 
 - Se for marcar finança como PAGA: use "update" com {id, status: "pago"}
 - NUNCA insira categorias na tabela itens_cerebro.
-- Ao criar tarefa, SEMPRE associe à categoria mais relevante do usuário. Se não houver correspondência, use categoria_id: null.
 
 REGRAS DE HORÁRIO (CRÍTICO):
 - "2h da manhã"/"2h da madrugada" = 02:00. "2h da tarde" = 14:00.
