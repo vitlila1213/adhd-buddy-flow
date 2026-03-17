@@ -200,7 +200,7 @@ const VendasPage = () => {
             
             Um cérebro extra que nunca esquece
             <br />
-            <span className="bg-gradient-to-r from-primary via-primary to-success bg-clip-text text-transparent">
+            <span className="bg-gradient-to-r from-primary via-primary/80 to-accent bg-clip-text text-transparent">
               — 24h guardando o que importa
             </span>
           </motion.h1>
