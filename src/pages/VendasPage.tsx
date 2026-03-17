@@ -444,7 +444,7 @@ const VendasPage = () => {
             viewport={{ once: true }}
             className="mb-4 text-center"
           >
-            <span className="inline-flex items-center gap-2 rounded-full bg-success/15 px-4 py-1.5 text-sm font-semibold text-success mb-4">
+            <span className="inline-flex items-center gap-2 rounded-full bg-primary/15 px-4 py-1.5 text-sm font-semibold text-primary mb-4">
               <Camera className="h-4 w-4" /> Visão Computacional
             </span>
             <h2 className="font-heading text-2xl font-bold text-white sm:text-3xl mt-3">
