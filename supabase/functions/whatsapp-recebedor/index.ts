@@ -296,7 +296,10 @@ serve(async (req) => {
     ).join("\n");
 
     const catList = (userCategories || []).map(c => `- ID: ${c.id} | "${c.nome}" (${c.tipo}) | Cor: ${c.cor}`).join("\n");
-    const taskList = (pendingTasks || []).map(t => `- ID: ${t.id} | ${t.tipo}: "${t.titulo}"`).join("\n");
+    const taskList = (pendingTasks || []).map(t => {
+      const dateStr = t.data_hora_agendada ? new Date(t.data_hora_agendada).toLocaleDateString("pt-BR") : "sem data";
+      return `- ID: ${t.id} | ${t.tipo}: "${t.titulo}" (${dateStr})`;
+    }).join("\n");
     const finList = (monthFinances || []).map(f => {
       const cat = (userCategories || []).find(c => c.id === f.categoria_id);
       return `- ID: ${f.id} | ${f.tipo}: R$${f.valor} "${f.descricao || "sem desc"}" [${f.status}] ${cat ? `(${cat.nome})` : ""} ${f.is_recorrente ? "(recorrente)" : ""} ${f.data_vencimento ? `venc: ${f.data_vencimento}` : ""}`;
