@@ -725,7 +725,7 @@ const VendasPage = () => {
           </div>
           <div className="mt-10 text-center">
             <Link to="/">
-              <Button size="lg" className="h-14 rounded-2xl bg-success px-10 text-base font-bold text-white shadow-xl shadow-success/30 hover:bg-success/90">
+              <Button size="lg" className="h-14 rounded-2xl bg-primary px-10 text-base font-bold text-white shadow-xl shadow-primary/30 hover:bg-primary/90">
                 <Rocket className="mr-2 h-5 w-5" />
                 Começar Agora — É Grátis
               </Button>
