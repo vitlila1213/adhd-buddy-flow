@@ -812,7 +812,7 @@ const VendasPage = () => {
             
             <div className="relative overflow-hidden rounded-3xl border-2 border-primary bg-navy-light p-8 shadow-2xl shadow-primary/20 ring-2 ring-primary/30">
               <div className="absolute -right-10 -top-10 h-40 w-40 rounded-full bg-primary/10 blur-[60px]" />
-              <div className="absolute -left-10 bottom-0 h-32 w-32 rounded-full bg-success/10 blur-[50px]" />
+              <div className="absolute -left-10 bottom-0 h-32 w-32 rounded-full bg-primary/10 blur-[50px]" />
 
               <div className="relative">
                 {/* Urgency Countdown */}
