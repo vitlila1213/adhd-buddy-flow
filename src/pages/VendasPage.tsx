@@ -222,7 +222,7 @@ const VendasPage = () => {
             className="mx-auto mt-8 flex flex-wrap items-center justify-center gap-3">
             
             <div className="flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm text-white/80 backdrop-blur-sm">
-              <Shield className="h-4 w-4 text-success" />
+              <Shield className="h-4 w-4 text-primary" />
               Dados Protegidos
             </div>
             <div className="flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm text-white/80 backdrop-blur-sm">
