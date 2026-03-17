@@ -529,6 +529,108 @@ const VendasPage = () => {
         </div>
       </section>
 
+      {/* Google Agenda Integration Showcase */}
+      <section className="bg-gradient-to-b from-background to-navy px-5 py-16 sm:py-24 overflow-hidden">
+        <div className="mx-auto max-w-6xl">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="mb-4 text-center"
+          >
+            <span className="inline-flex items-center gap-2 rounded-full bg-primary/15 px-4 py-1.5 text-sm font-semibold text-primary mb-4">
+              <Calendar className="h-4 w-4" /> Integração Exclusiva
+            </span>
+            <h2 className="font-heading text-2xl font-bold text-foreground sm:text-3xl mt-3">
+              Google Agenda direto no WhatsApp 📅
+            </h2>
+            <p className="mx-auto mt-3 max-w-2xl text-muted-foreground">
+              A <span className="font-bold text-primary">única ferramenta no Brasil</span> que <span className="font-medium text-foreground">marca, desmarca e cancela</span> compromissos no Google Agenda — tudo pelo WhatsApp, usando apenas texto ou áudio.
+            </p>
+          </motion.div>
+
+          <div className="mt-12 flex flex-col items-center gap-8 lg:flex-row lg:justify-center lg:gap-12">
+            {/* Texto explicativo */}
+            <motion.div
+              initial={{ opacity: 0, x: -30 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6 }}
+              className="max-w-md text-center lg:text-left"
+            >
+              <div className="space-y-5">
+                {[
+                  { icon: Calendar, title: "Agendar Compromissos", desc: "Diga \"marca dentista sexta às 14h\" e pronto — aparece na sua Google Agenda automaticamente." },
+                  { icon: Bell, title: "Reagendar com uma Frase", desc: "\"Muda a consulta pra segunda às 10h\" — o sistema encontra, atualiza e te confirma na hora." },
+                  { icon: X, title: "Cancelar Sem Complicação", desc: "\"Cancela a reunião de amanhã\" — removido da agenda e do sistema em segundos." },
+                ].map((item, i) => (
+                  <div key={i} className="flex items-start gap-4">
+                    <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-primary/20">
+                      <item.icon className="h-5 w-5 text-primary" />
+                    </div>
+                    <div>
+                      <h4 className="font-heading text-base font-bold text-foreground">{item.title}</h4>
+                      <p className="mt-1 text-sm leading-relaxed text-muted-foreground">{item.desc}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <div className="mt-6 rounded-xl border border-primary/20 bg-primary/5 p-4">
+                <p className="text-sm font-semibold text-primary">🏆 Exclusivo no Brasil</p>
+                <p className="mt-1 text-xs text-muted-foreground">Nenhuma outra ferramenta por WhatsApp marca, desmarca e cancela compromissos no Google Agenda. Somos os únicos.</p>
+              </div>
+            </motion.div>
+
+            {/* iPhone com vídeo demo */}
+            <motion.div
+              initial={{ opacity: 0, x: 30 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6, delay: 0.15 }}
+              className="relative flex-shrink-0"
+            >
+              <div className="relative mx-auto w-[280px] sm:w-[300px]">
+                <div className="relative rounded-[3rem] border-[6px] border-foreground/80 bg-foreground/90 p-2 shadow-2xl shadow-black/40">
+                  <div className="absolute left-1/2 top-0 z-10 h-7 w-28 -translate-x-1/2 rounded-b-2xl bg-foreground/80" />
+                  <div className="overflow-hidden rounded-[2.4rem] bg-black">
+                    <video
+                      src="/videos/google-agenda-demo.mp4"
+                      autoPlay
+                      loop
+                      muted
+                      playsInline
+                      className="h-auto w-full object-cover"
+                    />
+                  </div>
+                </div>
+                <div className="pointer-events-none absolute -inset-4 rounded-[3.5rem] bg-gradient-to-br from-primary/20 via-transparent to-accent/10 blur-xl" />
+              </div>
+            </motion.div>
+          </div>
+
+          {/* Feature pills */}
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.3 }}
+            className="mt-12 flex flex-wrap items-center justify-center gap-4"
+          >
+            {[
+              { icon: Calendar, text: "Sincronização automática" },
+              { icon: Zap, text: "Comando por voz ou texto" },
+              { icon: Shield, text: "Única no Brasil" },
+            ].map((item, i) => (
+              <div key={i} className="flex items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-4 py-2 text-sm text-foreground/80 shadow-sm">
+                <item.icon className="h-4 w-4 text-primary" />
+                {item.text}
+              </div>
+            ))}
+          </motion.div>
+        </div>
+      </section>
+
       {/* Comparativo */}
       <section className="bg-background px-5 py-16 sm:py-24">
         <div className="mx-auto max-w-4xl">
