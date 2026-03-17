@@ -873,7 +873,7 @@ const VendasPage = () => {
                 <ul className="space-y-2.5">
                   {planFeatures.map((f) =>
                   <li key={f} className="flex items-center gap-2.5 text-sm text-white/70">
-                      <Check className="h-4 w-4 shrink-0 text-success" />
+                      <Check className="h-4 w-4 shrink-0 text-primary" />
                       {f}
                     </li>
                   )}
