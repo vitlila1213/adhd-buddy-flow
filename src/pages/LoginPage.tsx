@@ -110,7 +110,7 @@ const LoginPage = () => {
             "Digite seu e-mail para recuperar a senha" :
             mode === "reset" ?
             "Defina sua nova senha" :
-            "Seu assistente para TDAH via WhatsApp"}
+            "Seu assistente pessoal via WhatsApp"}
           </p>
         </div>
 
