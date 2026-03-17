@@ -521,7 +521,7 @@ const VendasPage = () => {
               { icon: BarChart3, text: "Direto no seu controle financeiro" },
             ].map((item, i) => (
               <div key={i} className="flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm text-white/80 shadow-sm">
-                <item.icon className="h-4 w-4 text-success" />
+                <item.icon className="h-4 w-4 text-primary" />
                 {item.text}
               </div>
             ))}
