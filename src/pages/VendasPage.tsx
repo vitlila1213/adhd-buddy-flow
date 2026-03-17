@@ -944,7 +944,7 @@ const VendasPage = () => {
           <h2 className="font-heading text-2xl font-extrabold text-white sm:text-4xl">
             Pare de tentar lembrar de tudo.
             <br />
-            <span className="bg-gradient-to-r from-primary to-success bg-clip-text text-transparent">
+            <span className="bg-gradient-to-r from-primary via-primary/80 to-accent bg-clip-text text-transparent">
               Deixe o Cérebro de Bolso fazer isso por você.
             </span>
           </h2>
