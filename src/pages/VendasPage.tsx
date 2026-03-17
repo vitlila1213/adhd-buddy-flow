@@ -435,6 +435,100 @@ const VendasPage = () => {
         </div>
       </section>
 
+      {/* Visão Computacional / Finanças por Foto Showcase */}
+      <section className="bg-navy px-5 py-16 sm:py-24 overflow-hidden">
+        <div className="mx-auto max-w-6xl">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="mb-4 text-center"
+          >
+            <span className="inline-flex items-center gap-2 rounded-full bg-success/15 px-4 py-1.5 text-sm font-semibold text-success mb-4">
+              <Camera className="h-4 w-4" /> Visão Computacional
+            </span>
+            <h2 className="font-heading text-2xl font-bold text-white sm:text-3xl mt-3">
+              Tire uma foto e pronto — tá registrado! 📸
+            </h2>
+            <p className="mx-auto mt-3 max-w-2xl text-white/60">
+              Envie a foto de uma <span className="font-medium text-white">nota fiscal, recibo ou boleto</span> pelo WhatsApp. A IA lê automaticamente o valor, a empresa e a data de vencimento — e registra tudo nas suas finanças.
+            </p>
+          </motion.div>
+
+          <div className="mt-12 flex flex-col items-center gap-8 lg:flex-row lg:justify-center lg:gap-12">
+            {/* iPhone com screenshot do WhatsApp */}
+            <motion.div
+              initial={{ opacity: 0, x: -30 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6 }}
+              className="relative flex-shrink-0"
+            >
+              <div className="relative mx-auto w-[280px] sm:w-[300px]">
+                <div className="relative rounded-[3rem] border-[6px] border-white/20 bg-white/10 p-2 shadow-2xl shadow-black/30">
+                  <div className="absolute left-1/2 top-0 z-10 h-7 w-28 -translate-x-1/2 rounded-b-2xl bg-white/15" />
+                  <div className="overflow-hidden rounded-[2.4rem] bg-black">
+                    <img
+                      src="/images/financas-whatsapp.png"
+                      alt="Foto de nota fiscal registrada automaticamente pelo WhatsApp"
+                      className="h-auto w-full object-cover"
+                    />
+                  </div>
+                </div>
+                <div className="pointer-events-none absolute -inset-4 rounded-[3.5rem] bg-gradient-to-br from-success/15 via-transparent to-primary/10 blur-xl" />
+              </div>
+            </motion.div>
+
+            {/* Texto explicativo ao lado */}
+            <motion.div
+              initial={{ opacity: 0, x: 30 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6, delay: 0.15 }}
+              className="max-w-md text-center lg:text-left"
+            >
+              <div className="space-y-5">
+                {[
+                  { icon: FileText, title: "Notas Fiscais e Recibos", desc: "Envie a foto e a IA identifica o estabelecimento, valor total e registra como gasto pago." },
+                  { icon: CreditCard, title: "Boletos e Contas", desc: "Foto do boleto = valor + vencimento extraídos automaticamente. Registrado como pendente com lembrete." },
+                  { icon: Clock, title: "Baixa Automática", desc: "Disse \"paguei a conta de luz\"? O sistema encontra a pendência e dá baixa sozinho." },
+                ].map((item, i) => (
+                  <div key={i} className="flex items-start gap-4">
+                    <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-success/20">
+                      <item.icon className="h-5 w-5 text-success" />
+                    </div>
+                    <div>
+                      <h4 className="font-heading text-base font-bold text-white">{item.title}</h4>
+                      <p className="mt-1 text-sm leading-relaxed text-white/60">{item.desc}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </motion.div>
+          </div>
+
+          {/* Feature pills */}
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.3 }}
+            className="mt-12 flex flex-wrap items-center justify-center gap-4"
+          >
+            {[
+              { icon: Camera, text: "Foto pelo WhatsApp" },
+              { icon: Zap, text: "Leitura instantânea por IA" },
+              { icon: BarChart3, text: "Direto no seu controle financeiro" },
+            ].map((item, i) => (
+              <div key={i} className="flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm text-white/80 shadow-sm">
+                <item.icon className="h-4 w-4 text-success" />
+                {item.text}
+              </div>
+            ))}
+          </motion.div>
+        </div>
+      </section>
+
       {/* Comparativo */}
       <section className="bg-background px-5 py-16 sm:py-24">
         <div className="mx-auto max-w-4xl">
