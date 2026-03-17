@@ -60,6 +60,7 @@ serve(async (req) => {
       .from("itens_cerebro")
       .select("*, categorias(nome, cor)")
       .eq("status", "pendente")
+      .is("completed_at", null)
       .gte("data_hora_agendada", minuteStart.toISOString())
       .lt("data_hora_agendada", minuteEnd.toISOString());
 

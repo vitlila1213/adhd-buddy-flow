@@ -270,9 +270,10 @@ serve(async (req) => {
 
     const { data: pendingTasks } = await supabase
       .from("itens_cerebro")
-      .select("id, titulo, tipo, status, categoria_id")
+      .select("id, titulo, tipo, status, categoria_id, data_hora_agendada")
       .eq("user_id", userId)
       .eq("status", "pendente")
+      .is("completed_at", null)
       .order("created_at", { ascending: false })
       .limit(30);
 

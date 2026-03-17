@@ -54,11 +54,12 @@ serve(async (req) => {
       .gte("data_vencimento", todayStart)
       .lte("data_vencimento", todayEnd);
 
-    // Fetch pending tasks scheduled for today
+    // Fetch pending tasks scheduled for today (exclude completed)
     const { data: todayTasks } = await supabase
       .from("itens_cerebro")
       .select("id, titulo, tipo, status, user_id, data_hora_agendada")
       .eq("status", "pendente")
+      .is("completed_at", null)
       .gte("data_hora_agendada", todayStart)
       .lte("data_hora_agendada", todayEnd);
 
@@ -67,6 +68,7 @@ serve(async (req) => {
       .from("itens_cerebro")
       .select("id, titulo, tipo, status, user_id, data_hora_agendada")
       .eq("status", "pendente")
+      .is("completed_at", null)
       .lt("data_hora_agendada", todayStart);
 
     // Fetch overdue bills (before today, still pending)
