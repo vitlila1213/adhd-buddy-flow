@@ -851,7 +851,7 @@ const VendasPage = () => {
                   <span className="font-heading text-5xl font-extrabold text-white">{plan.price}</span>
                   <span className="text-base text-white/50">{plan.period}</span>
                 </div>
-                <p className="mt-1 text-sm font-medium text-success">
+                <p className="mt-1 text-sm font-medium text-primary">
                   Menos de R$1 por dia para organizar sua vida inteira
                 </p>
 
