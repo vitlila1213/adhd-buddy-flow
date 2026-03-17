@@ -662,7 +662,7 @@ const VendasPage = () => {
             <div
               key={i}
               className={`grid grid-cols-3 border-b border-border/20 last:border-0 ${
-              !item.others ? "bg-success/[0.04]" : ""}`
+              !item.others ? "bg-primary/[0.04]" : ""}`
               }>
               
                 <div className="flex items-center px-4 py-3 text-xs font-medium text-foreground sm:px-6 sm:text-sm">
