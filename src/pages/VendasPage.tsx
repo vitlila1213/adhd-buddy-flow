@@ -959,7 +959,7 @@ const VendasPage = () => {
                 <ArrowRight className="ml-3 h-6 w-6" />
               </Button>
             </Link>
-            <p className="text-sm font-medium text-success">🎁 10 créditos grátis • Sem cartão de crédito</p>
+            <p className="text-sm font-medium text-primary">🎁 10 créditos grátis • Sem cartão de crédito</p>
             <a href="#planos">
               <Button variant="ghost" className="text-white/60 hover:bg-white/5 hover:text-white">
                 Ou assine o plano premium →
