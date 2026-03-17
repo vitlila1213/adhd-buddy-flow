@@ -337,6 +337,104 @@ const VendasPage = () => {
         </div>
       </section>
 
+      {/* Aniversariantes Showcase */}
+      <section className="bg-background px-5 py-16 sm:py-24 overflow-hidden">
+        <div className="mx-auto max-w-6xl">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="mb-4 text-center"
+          >
+            <span className="inline-flex items-center gap-2 rounded-full bg-accent/10 px-4 py-1.5 text-sm font-semibold text-accent mb-4">
+              <Gift className="h-4 w-4" /> Exclusivo
+            </span>
+            <h2 className="font-heading text-2xl font-bold text-foreground sm:text-3xl mt-3">
+              Nunca mais esqueça um aniversário 🎂
+            </h2>
+            <p className="mx-auto mt-3 max-w-2xl text-muted-foreground">
+              Cadastre pelo WhatsApp dizendo <span className="font-medium text-foreground">"aniversário da minha mãe dia 27 de novembro"</span> e receba lembretes automáticos na véspera e no dia, com mensagem pronta pra enviar!
+            </p>
+          </motion.div>
+
+          <div className="mt-12 flex flex-col items-center gap-8 lg:flex-row lg:justify-center lg:gap-12">
+            {/* iPhone Video Mockup */}
+            <motion.div
+              initial={{ opacity: 0, x: -30 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6 }}
+              className="relative flex-shrink-0"
+            >
+              {/* iPhone frame */}
+              <div className="relative mx-auto w-[280px] sm:w-[300px]">
+                {/* Phone body */}
+                <div className="relative rounded-[3rem] border-[6px] border-foreground/80 bg-foreground/90 p-2 shadow-2xl shadow-foreground/20">
+                  {/* Notch */}
+                  <div className="absolute left-1/2 top-0 z-10 h-7 w-28 -translate-x-1/2 rounded-b-2xl bg-foreground/80" />
+                  {/* Screen */}
+                  <div className="overflow-hidden rounded-[2.4rem] bg-black">
+                    <video
+                      src="/videos/aniversario-demo.mp4"
+                      autoPlay
+                      loop
+                      muted
+                      playsInline
+                      className="h-auto w-full object-cover"
+                    />
+                  </div>
+                </div>
+                {/* Reflection glow */}
+                <div className="pointer-events-none absolute -inset-4 rounded-[3.5rem] bg-gradient-to-br from-primary/10 via-transparent to-accent/10 blur-xl" />
+              </div>
+            </motion.div>
+
+            {/* WhatsApp Screenshot Image */}
+            <motion.div
+              initial={{ opacity: 0, x: 30 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6, delay: 0.15 }}
+              className="relative flex-shrink-0"
+            >
+              <div className="relative mx-auto w-[280px] sm:w-[300px]">
+                <div className="relative rounded-[3rem] border-[6px] border-foreground/80 bg-foreground/90 p-2 shadow-2xl shadow-foreground/20">
+                  <div className="absolute left-1/2 top-0 z-10 h-7 w-28 -translate-x-1/2 rounded-b-2xl bg-foreground/80" />
+                  <div className="overflow-hidden rounded-[2.4rem] bg-black">
+                    <img
+                      src="/images/aniversario-whatsapp.png"
+                      alt="Lembrete de aniversário no WhatsApp"
+                      className="h-auto w-full object-cover"
+                    />
+                  </div>
+                </div>
+                <div className="pointer-events-none absolute -inset-4 rounded-[3.5rem] bg-gradient-to-br from-accent/10 via-transparent to-success/10 blur-xl" />
+              </div>
+            </motion.div>
+          </div>
+
+          {/* Feature bullets */}
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.3 }}
+            className="mt-12 flex flex-wrap items-center justify-center gap-4"
+          >
+            {[
+              { icon: MessageSquare, text: "Cadastre pelo WhatsApp" },
+              { icon: Bell, text: "Lembrete na véspera e no dia" },
+              { icon: Gift, text: "Mensagem pronta pra enviar" },
+            ].map((item, i) => (
+              <div key={i} className="flex items-center gap-2 rounded-full border border-border/50 bg-card px-4 py-2 text-sm text-foreground shadow-sm">
+                <item.icon className="h-4 w-4 text-accent" />
+                {item.text}
+              </div>
+            ))}
+          </motion.div>
+        </div>
+      </section>
+
       {/* Comparativo */}
       <section className="bg-background px-5 py-16 sm:py-24">
         <div className="mx-auto max-w-4xl">
