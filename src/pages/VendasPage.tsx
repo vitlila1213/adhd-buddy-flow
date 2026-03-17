@@ -475,7 +475,7 @@ const VendasPage = () => {
                     />
                   </div>
                 </div>
-                <div className="pointer-events-none absolute -inset-4 rounded-[3.5rem] bg-gradient-to-br from-success/15 via-transparent to-primary/10 blur-xl" />
+                <div className="pointer-events-none absolute -inset-4 rounded-[3.5rem] bg-gradient-to-br from-primary/15 via-transparent to-accent/10 blur-xl" />
               </div>
             </motion.div>
 
