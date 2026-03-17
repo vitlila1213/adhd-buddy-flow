@@ -792,7 +792,7 @@ const VendasPage = () => {
             viewport={{ once: true }}
             className="mx-auto mb-10 max-w-lg rounded-2xl border-2 border-dashed border-primary/40 bg-primary/10 p-6 text-center">
             
-            <p className="text-sm font-semibold text-success">🎁 Ainda não tem certeza?</p>
+            <p className="text-sm font-semibold text-primary">🎁 Ainda não tem certeza?</p>
             <p className="mt-1 text-2xl font-extrabold text-white">Teste grátis primeiro!</p>
             <p className="mt-2 text-sm text-white/60">Receba 10 créditos gratuitos. Sem cartão de crédito.</p>
             <Link to="/" className="mt-4 block">
