@@ -790,7 +790,7 @@ const VendasPage = () => {
             initial={{ opacity: 0, y: 16 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="mx-auto mb-10 max-w-lg rounded-2xl border-2 border-dashed border-success/40 bg-success/10 p-6 text-center">
+            className="mx-auto mb-10 max-w-lg rounded-2xl border-2 border-dashed border-primary/40 bg-primary/10 p-6 text-center">
             
             <p className="text-sm font-semibold text-success">🎁 Ainda não tem certeza?</p>
             <p className="mt-1 text-2xl font-extrabold text-white">Teste grátis primeiro!</p>
