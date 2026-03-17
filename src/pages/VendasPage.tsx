@@ -181,7 +181,7 @@ const VendasPage = () => {
         <PulsingBrain />
         {/* Gradient orbs */}
         <div className="pointer-events-none absolute -left-32 top-20 h-72 w-72 rounded-full bg-primary/20 blur-[100px]" />
-        <div className="pointer-events-none absolute -right-20 bottom-10 h-56 w-56 rounded-full bg-success/15 blur-[80px]" />
+        <div className="pointer-events-none absolute -right-20 bottom-10 h-56 w-56 rounded-full bg-primary/15 blur-[80px]" />
         <div className="pointer-events-none absolute left-1/2 top-1/3 h-40 w-40 -translate-x-1/2 rounded-full bg-accent/15 blur-[60px]" />
 
         <div className="relative mx-auto max-w-4xl text-center">
