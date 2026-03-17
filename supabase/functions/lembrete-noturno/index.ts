@@ -44,11 +44,12 @@ serve(async (req) => {
     const tomorrowStr = spTomorrow.toISOString().split("T")[0];
     const tomorrowEnd = `${tomorrowStr}T23:59:59-03:00`;
 
-    // Fetch tasks still pending that were scheduled for today or earlier
+    // Fetch tasks still pending that were scheduled for today or earlier (exclude completed)
     const { data: pendingTasks } = await supabase
       .from("itens_cerebro")
       .select("id, titulo, tipo, status, user_id, data_hora_agendada")
       .eq("status", "pendente")
+      .is("completed_at", null)
       .lte("data_hora_agendada", todayEnd);
 
     // Fetch bills still pending due today or earlier
@@ -69,11 +70,12 @@ serve(async (req) => {
       .gte("data_vencimento", tomorrowStart)
       .lte("data_vencimento", tomorrowEnd);
 
-    // Fetch tasks scheduled for TOMORROW (day-before reminder)
+    // Fetch tasks scheduled for TOMORROW (day-before reminder, exclude completed)
     const { data: tomorrowTasks } = await supabase
       .from("itens_cerebro")
       .select("id, titulo, tipo, status, user_id, data_hora_agendada")
       .eq("status", "pendente")
+      .is("completed_at", null)
       .gte("data_hora_agendada", tomorrowStart)
       .lte("data_hora_agendada", tomorrowEnd);
 
