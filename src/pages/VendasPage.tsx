@@ -880,7 +880,7 @@ const VendasPage = () => {
                 </ul>
 
                 <a href={plan.link} target="_blank" rel="noopener noreferrer" className="mt-8 block">
-                  <Button size="lg" className="h-16 w-full rounded-2xl bg-success text-lg font-bold text-white shadow-xl shadow-success/30 hover:bg-success/90">
+                  <Button size="lg" className="h-16 w-full rounded-2xl bg-primary text-lg font-bold text-white shadow-xl shadow-primary/30 hover:bg-primary/90">
                     <Crown className="mr-3 h-6 w-6" />
                     Quero o Plano Premium — R${plan.price}/mês
                     <ArrowRight className="ml-3 h-6 w-6" />
