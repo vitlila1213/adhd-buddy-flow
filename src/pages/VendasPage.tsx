@@ -181,7 +181,7 @@ const VendasPage = () => {
         <PulsingBrain />
         {/* Gradient orbs */}
         <div className="pointer-events-none absolute -left-32 top-20 h-72 w-72 rounded-full bg-primary/20 blur-[100px]" />
-        <div className="pointer-events-none absolute -right-20 bottom-10 h-56 w-56 rounded-full bg-success/15 blur-[80px]" />
+        <div className="pointer-events-none absolute -right-20 bottom-10 h-56 w-56 rounded-full bg-primary/15 blur-[80px]" />
         <div className="pointer-events-none absolute left-1/2 top-1/3 h-40 w-40 -translate-x-1/2 rounded-full bg-accent/15 blur-[60px]" />
 
         <div className="relative mx-auto max-w-4xl text-center">
@@ -200,7 +200,7 @@ const VendasPage = () => {
             
             Um cérebro extra que nunca esquece
             <br />
-            <span className="bg-gradient-to-r from-primary via-primary to-success bg-clip-text text-transparent">
+            <span className="bg-gradient-to-r from-primary via-primary/80 to-accent bg-clip-text text-transparent">
               — 24h guardando o que importa
             </span>
           </motion.h1>
@@ -222,7 +222,7 @@ const VendasPage = () => {
             className="mx-auto mt-8 flex flex-wrap items-center justify-center gap-3">
             
             <div className="flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm text-white/80 backdrop-blur-sm">
-              <Shield className="h-4 w-4 text-success" />
+              <Shield className="h-4 w-4 text-primary" />
               Dados Protegidos
             </div>
             <div className="flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm text-white/80 backdrop-blur-sm">
@@ -243,13 +243,13 @@ const VendasPage = () => {
             className="mt-10 flex flex-col items-center gap-4">
             
             <Link to="/">
-              <Button size="lg" className="h-16 rounded-2xl bg-success px-12 text-lg font-bold text-white shadow-xl shadow-success/30 hover:bg-success/90">
+              <Button size="lg" className="h-16 rounded-2xl bg-primary px-12 text-lg font-bold text-white shadow-xl shadow-primary/30 hover:bg-primary/90">
                 <Rocket className="mr-3 h-6 w-6" />
                 Quero Organizar Minha Vida
                 <ArrowRight className="ml-3 h-6 w-6" />
               </Button>
             </Link>
-            <p className="text-sm font-medium text-success">
+            <p className="text-sm font-medium text-primary">
               🎁 10 créditos grátis • Sem cartão • Começa em 30 segundos
             </p>
             <a href="#planos">
@@ -326,7 +326,7 @@ const VendasPage = () => {
                   <div className={`mb-4 flex h-11 w-11 items-center justify-center rounded-xl ${
                   isExclusive ? "bg-primary/25" : "bg-white/10"}`
                   }>
-                    <f.icon className={`h-5 w-5 ${isExclusive ? "text-primary" : "text-success"}`} />
+                    <f.icon className={`h-5 w-5 ${isExclusive ? "text-primary" : "text-primary/70"}`} />
                   </div>
                   <h3 className="font-heading text-base font-bold text-white">{f.title}</h3>
                   <p className="mt-2 text-sm leading-relaxed text-white/60">{f.desc}</p>
@@ -408,7 +408,7 @@ const VendasPage = () => {
                     />
                   </div>
                 </div>
-                <div className="pointer-events-none absolute -inset-4 rounded-[3.5rem] bg-gradient-to-br from-accent/10 via-transparent to-success/10 blur-xl" />
+                <div className="pointer-events-none absolute -inset-4 rounded-[3.5rem] bg-gradient-to-br from-accent/10 via-transparent to-primary/10 blur-xl" />
               </div>
             </motion.div>
           </div>
@@ -444,7 +444,7 @@ const VendasPage = () => {
             viewport={{ once: true }}
             className="mb-4 text-center"
           >
-            <span className="inline-flex items-center gap-2 rounded-full bg-success/15 px-4 py-1.5 text-sm font-semibold text-success mb-4">
+            <span className="inline-flex items-center gap-2 rounded-full bg-primary/15 px-4 py-1.5 text-sm font-semibold text-primary mb-4">
               <Camera className="h-4 w-4" /> Visão Computacional
             </span>
             <h2 className="font-heading text-2xl font-bold text-white sm:text-3xl mt-3">
@@ -475,7 +475,7 @@ const VendasPage = () => {
                     />
                   </div>
                 </div>
-                <div className="pointer-events-none absolute -inset-4 rounded-[3.5rem] bg-gradient-to-br from-success/15 via-transparent to-primary/10 blur-xl" />
+                <div className="pointer-events-none absolute -inset-4 rounded-[3.5rem] bg-gradient-to-br from-primary/15 via-transparent to-accent/10 blur-xl" />
               </div>
             </motion.div>
 
@@ -494,8 +494,8 @@ const VendasPage = () => {
                   { icon: Clock, title: "Baixa Automática", desc: "Disse \"paguei a conta de luz\"? O sistema encontra a pendência e dá baixa sozinho." },
                 ].map((item, i) => (
                   <div key={i} className="flex items-start gap-4">
-                    <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-success/20">
-                      <item.icon className="h-5 w-5 text-success" />
+                    <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-primary/20">
+                      <item.icon className="h-5 w-5 text-primary" />
                     </div>
                     <div>
                       <h4 className="font-heading text-base font-bold text-white">{item.title}</h4>
@@ -521,7 +521,7 @@ const VendasPage = () => {
               { icon: BarChart3, text: "Direto no seu controle financeiro" },
             ].map((item, i) => (
               <div key={i} className="flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm text-white/80 shadow-sm">
-                <item.icon className="h-4 w-4 text-success" />
+                <item.icon className="h-4 w-4 text-primary" />
                 {item.text}
               </div>
             ))}
@@ -662,15 +662,15 @@ const VendasPage = () => {
             <div
               key={i}
               className={`grid grid-cols-3 border-b border-border/20 last:border-0 ${
-              !item.others ? "bg-success/[0.04]" : ""}`
+              !item.others ? "bg-primary/[0.04]" : ""}`
               }>
               
                 <div className="flex items-center px-4 py-3 text-xs font-medium text-foreground sm:px-6 sm:text-sm">
                   {item.feature}
                 </div>
                 <div className="flex items-center justify-center px-4 py-3">
-                  <div className="flex h-7 w-7 items-center justify-center rounded-full bg-success/15">
-                    <Check className="h-4 w-4 text-success" />
+                  <div className="flex h-7 w-7 items-center justify-center rounded-full bg-primary/15">
+                    <Check className="h-4 w-4 text-primary" />
                   </div>
                 </div>
                 <div className="flex items-center justify-center px-4 py-3">
@@ -689,7 +689,7 @@ const VendasPage = () => {
           </motion.div>
           <div className="mt-8 text-center">
             <Link to="/">
-              <Button size="lg" className="h-14 rounded-2xl bg-success px-10 text-base font-bold text-white shadow-xl shadow-success/30 hover:bg-success/90">
+               <Button size="lg" className="h-14 rounded-2xl bg-primary px-10 text-base font-bold text-white shadow-xl shadow-primary/30 hover:bg-primary/90">
                 <Rocket className="mr-2 h-5 w-5" />
                 Experimentar de Graça
               </Button>
@@ -725,7 +725,7 @@ const VendasPage = () => {
           </div>
           <div className="mt-10 text-center">
             <Link to="/">
-              <Button size="lg" className="h-14 rounded-2xl bg-success px-10 text-base font-bold text-white shadow-xl shadow-success/30 hover:bg-success/90">
+              <Button size="lg" className="h-14 rounded-2xl bg-primary px-10 text-base font-bold text-white shadow-xl shadow-primary/30 hover:bg-primary/90">
                 <Rocket className="mr-2 h-5 w-5" />
                 Começar Agora — É Grátis
               </Button>
@@ -790,13 +790,13 @@ const VendasPage = () => {
             initial={{ opacity: 0, y: 16 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="mx-auto mb-10 max-w-lg rounded-2xl border-2 border-dashed border-success/40 bg-success/10 p-6 text-center">
+            className="mx-auto mb-10 max-w-lg rounded-2xl border-2 border-dashed border-primary/40 bg-primary/10 p-6 text-center">
             
-            <p className="text-sm font-semibold text-success">🎁 Ainda não tem certeza?</p>
+            <p className="text-sm font-semibold text-primary">🎁 Ainda não tem certeza?</p>
             <p className="mt-1 text-2xl font-extrabold text-white">Teste grátis primeiro!</p>
             <p className="mt-2 text-sm text-white/60">Receba 10 créditos gratuitos. Sem cartão de crédito.</p>
             <Link to="/" className="mt-4 block">
-              <Button size="lg" className="h-14 w-full rounded-2xl bg-success text-base font-bold text-white shadow-xl shadow-success/30 hover:bg-success/90">
+              <Button size="lg" className="h-14 w-full rounded-2xl bg-primary text-base font-bold text-white shadow-xl shadow-primary/30 hover:bg-primary/90">
                 <Rocket className="mr-2 h-5 w-5" />
                 Criar Minha Conta Grátis
                 <ArrowRight className="ml-2 h-5 w-5" />
@@ -812,7 +812,7 @@ const VendasPage = () => {
             
             <div className="relative overflow-hidden rounded-3xl border-2 border-primary bg-navy-light p-8 shadow-2xl shadow-primary/20 ring-2 ring-primary/30">
               <div className="absolute -right-10 -top-10 h-40 w-40 rounded-full bg-primary/10 blur-[60px]" />
-              <div className="absolute -left-10 bottom-0 h-32 w-32 rounded-full bg-success/10 blur-[50px]" />
+              <div className="absolute -left-10 bottom-0 h-32 w-32 rounded-full bg-primary/10 blur-[50px]" />
 
               <div className="relative">
                 {/* Urgency Countdown */}
@@ -851,7 +851,7 @@ const VendasPage = () => {
                   <span className="font-heading text-5xl font-extrabold text-white">{plan.price}</span>
                   <span className="text-base text-white/50">{plan.period}</span>
                 </div>
-                <p className="mt-1 text-sm font-medium text-success">
+                <p className="mt-1 text-sm font-medium text-primary">
                   Menos de R$1 por dia para organizar sua vida inteira
                 </p>
 
@@ -873,14 +873,14 @@ const VendasPage = () => {
                 <ul className="space-y-2.5">
                   {planFeatures.map((f) =>
                   <li key={f} className="flex items-center gap-2.5 text-sm text-white/70">
-                      <Check className="h-4 w-4 shrink-0 text-success" />
+                      <Check className="h-4 w-4 shrink-0 text-primary" />
                       {f}
                     </li>
                   )}
                 </ul>
 
                 <a href={plan.link} target="_blank" rel="noopener noreferrer" className="mt-8 block">
-                  <Button size="lg" className="h-16 w-full rounded-2xl bg-success text-lg font-bold text-white shadow-xl shadow-success/30 hover:bg-success/90">
+                  <Button size="lg" className="h-16 w-full rounded-2xl bg-primary text-lg font-bold text-white shadow-xl shadow-primary/30 hover:bg-primary/90">
                     <Crown className="mr-3 h-6 w-6" />
                     Quero o Plano Premium — R${plan.price}/mês
                     <ArrowRight className="ml-3 h-6 w-6" />
@@ -944,7 +944,7 @@ const VendasPage = () => {
           <h2 className="font-heading text-2xl font-extrabold text-white sm:text-4xl">
             Pare de tentar lembrar de tudo.
             <br />
-            <span className="bg-gradient-to-r from-primary to-success bg-clip-text text-transparent">
+            <span className="bg-gradient-to-r from-primary via-primary/80 to-accent bg-clip-text text-transparent">
               Deixe o Cérebro de Bolso fazer isso por você.
             </span>
           </h2>
@@ -953,13 +953,13 @@ const VendasPage = () => {
           </p>
           <div className="mt-8 flex flex-col items-center gap-4">
             <Link to="/">
-              <Button size="lg" className="h-16 rounded-2xl bg-success px-12 text-lg font-bold text-white shadow-xl shadow-success/30 hover:bg-success/90">
+              <Button size="lg" className="h-16 rounded-2xl bg-primary px-12 text-lg font-bold text-white shadow-xl shadow-primary/30 hover:bg-primary/90">
                 <Rocket className="mr-3 h-6 w-6" />
                 Quero Começar Agora
                 <ArrowRight className="ml-3 h-6 w-6" />
               </Button>
             </Link>
-            <p className="text-sm font-medium text-success">🎁 10 créditos grátis • Sem cartão de crédito</p>
+            <p className="text-sm font-medium text-primary">🎁 10 créditos grátis • Sem cartão de crédito</p>
             <a href="#planos">
               <Button variant="ghost" className="text-white/60 hover:bg-white/5 hover:text-white">
                 Ou assine o plano premium →
