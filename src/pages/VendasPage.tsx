@@ -153,7 +153,7 @@ const VendasPage = () => {
       <header className="fixed left-0 right-0 top-0 z-50 border-b border-border/30 bg-background/80 backdrop-blur-xl">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-5 py-3">
           <Link to="/" className="flex items-center gap-3">
-            <img src={logoImg} alt="Cérebro de Bolso" className="h-9 w-9 rounded-xl object-contain" />
+            <img alt="Cérebro de Bolso" className="h-9 w-9 rounded-xl object-contain" src="/lovable-uploads/5970b4a2-f9e6-464d-8674-9cc49f028a12.png" />
             <span className="font-heading text-base font-bold tracking-tight text-foreground">Meu Cérebro de Bolso
 
             </span>
