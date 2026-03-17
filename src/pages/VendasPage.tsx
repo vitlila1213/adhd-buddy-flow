@@ -494,8 +494,8 @@ const VendasPage = () => {
                   { icon: Clock, title: "Baixa Automática", desc: "Disse \"paguei a conta de luz\"? O sistema encontra a pendência e dá baixa sozinho." },
                 ].map((item, i) => (
                   <div key={i} className="flex items-start gap-4">
-                    <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-success/20">
-                      <item.icon className="h-5 w-5 text-success" />
+                    <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-primary/20">
+                      <item.icon className="h-5 w-5 text-primary" />
                     </div>
                     <div>
                       <h4 className="font-heading text-base font-bold text-white">{item.title}</h4>
