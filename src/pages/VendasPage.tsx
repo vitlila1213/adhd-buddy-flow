@@ -669,8 +669,8 @@ const VendasPage = () => {
                   {item.feature}
                 </div>
                 <div className="flex items-center justify-center px-4 py-3">
-                  <div className="flex h-7 w-7 items-center justify-center rounded-full bg-success/15">
-                    <Check className="h-4 w-4 text-success" />
+                  <div className="flex h-7 w-7 items-center justify-center rounded-full bg-primary/15">
+                    <Check className="h-4 w-4 text-primary" />
                   </div>
                 </div>
                 <div className="flex items-center justify-center px-4 py-3">
