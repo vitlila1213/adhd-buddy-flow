@@ -100,7 +100,7 @@ const LoginPage = () => {
             transition={{ delay: 0.15, duration: 0.4, ease: "easeOut" }}
             className="mx-auto mb-5">
             
-            <img alt="Cérebro de Bolso" className="mx-auto h-20 w-20 object-contain" src="/lovable-uploads/84eac5e1-a936-48ec-acaa-9d512b94f40e.png" />
+            <img alt="Cérebro de Bolso" className="mx-auto h-20 w-20 object-contain" src="/lovable-uploads/a22f2c7d-63b0-47e6-ae34-48fa9b00b748.png" />
           </motion.div>
           <h1 className="font-heading text-2xl font-bold tracking-tight text-foreground">
             Cérebro de Bolso
