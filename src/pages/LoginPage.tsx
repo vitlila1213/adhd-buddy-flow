@@ -8,7 +8,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 
-type Mode = "login" | "signup" | "forgot" | "reset";
+type Mode = "login" | "signup" | "forgot";
 
 const LoginPage = () => {
   const [email, setEmail] = useState("");
