@@ -41,13 +41,13 @@ const Dashboard = () => {
       {/* Header */}
       <header className="glass fixed left-0 right-0 top-0 z-50">
         <div className="mx-auto flex max-w-2xl items-center justify-between px-5 py-3">
-          <div className="flex items-center gap-3">
-            <img alt="Cérebro de Bolso" className="h-12 w-12 rounded-xl object-contain" src="/lovable-uploads/38c5cf7c-f0df-413d-a93a-8b7229fd8845.png" />
-            <div>
-              <h1 className="font-heading text-base font-bold tracking-tight text-foreground">
+          <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+            <img alt="Cérebro de Bolso" className="h-10 w-10 sm:h-12 sm:w-12 rounded-xl object-contain shrink-0" src="/lovable-uploads/38c5cf7c-f0df-413d-a93a-8b7229fd8845.png" />
+            <div className="min-w-0">
+              <h1 className="font-heading text-sm sm:text-base font-bold tracking-tight text-foreground truncate">
                 Cérebro de Bolso
               </h1>
-              <p className="text-[11px] text-muted-foreground">{profile?.email}</p>
+              <p className="text-[11px] text-muted-foreground truncate">{profile?.email}</p>
             </div>
           </div>
           <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
