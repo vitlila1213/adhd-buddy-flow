@@ -295,7 +295,19 @@ serve(async (req) => {
       `- ${a.nome} | ${a.parentesco} | ${a.data_aniversario}`
     ).join("\n");
 
-    const catList = (userCategories || []).map(c => `- ID: ${c.id} | "${c.nome}" (${c.tipo}) | Cor: ${c.cor}`).join("\n");
+    const cats = userCategories || [];
+    const parentCats = cats.filter(c => !c.parent_id);
+    const catList = parentCats.map(p => {
+      const subs = cats.filter(c => c.parent_id === p.id);
+      if (subs.length > 0) {
+        const subList = subs.map(s => `  - SubID: ${s.id} | "${s.nome}" | Cor: ${s.cor}`).join("\n");
+        return `- ID: ${p.id} | "${p.nome}" (${p.tipo}) | Cor: ${p.cor}\n${subList}`;
+      }
+      return `- ID: ${p.id} | "${p.nome}" (${p.tipo}) | Cor: ${p.cor}`;
+    }).join("\n");
+    // Also list orphan categories (no parent, not a parent)
+    const orphanCats = cats.filter(c => !c.parent_id && !cats.some(s => s.parent_id === c.id));
+    // Already included in parentCats above
     const taskList = (pendingTasks || []).map(t => {
       const dateStr = t.data_hora_agendada ? new Date(t.data_hora_agendada).toLocaleDateString("pt-BR") : "sem data";
       return `- ID: ${t.id} | ${t.tipo}: "${t.titulo}" (${dateStr})`;
