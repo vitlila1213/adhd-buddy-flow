@@ -75,7 +75,7 @@ const MetricasDoDia = () => {
     const all = items || [];
     const cats = categorias || [];
     
-    const filteredItems = all.filter((i) => i.status === filter);
+    const filteredItems = all.filter((i) => i.status === filter && isInRange(filter === "concluida" ? i.updated_at : i.created_at));
     
     // Group by category
     const categoryMap = new Map<string, { name: string; count: number; color: string }>();
