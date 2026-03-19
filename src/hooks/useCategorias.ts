@@ -9,6 +9,7 @@ export interface Categoria {
   nome: string;
   tipo: "financa" | "tarefa";
   cor: string;
+  parent_id: string | null;
   created_at: string;
 }
 
