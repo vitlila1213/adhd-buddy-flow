@@ -1,0 +1,1 @@
+ALTER TABLE public.categorias ADD COLUMN parent_id uuid REFERENCES public.categorias(id) ON DELETE CASCADE DEFAULT NULL;

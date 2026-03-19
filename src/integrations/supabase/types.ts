@@ -61,6 +61,7 @@ export type Database = {
           created_at: string
           id: string
           nome: string
+          parent_id: string | null
           tipo: string
           user_id: string
         }
@@ -69,6 +70,7 @@ export type Database = {
           created_at?: string
           id?: string
           nome: string
+          parent_id?: string | null
           tipo?: string
           user_id: string
         }
@@ -77,10 +79,18 @@ export type Database = {
           created_at?: string
           id?: string
           nome?: string
+          parent_id?: string | null
           tipo?: string
           user_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "categorias_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "categorias"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "categorias_user_id_fkey"
             columns: ["user_id"]
