@@ -474,8 +474,8 @@ Se o usuário não mencionar crédito nem débito, siga as regras normais de cla
 
 REGRAS GERAIS:
 - Se for RELATÓRIO: analise os dados e responda com detalhes por categoria. db_actions = [{"tabela":"","operacao":"nenhuma","dados":{}}]
-- Se for CRIAR CATEGORIA: use tabela "categorias". Campos: nome, tipo ("financa" ou "tarefa")
-- Se for NOVA DESPESA/RECEITA: classifique na categoria correta. Campos: tipo, valor, descricao, categoria_id, status, is_recorrente
+- Se for CRIAR CATEGORIA: use tabela "categorias". Campos: nome, tipo ("financa" ou "tarefa"), parent_id (uuid da categoria pai, ou null se for categoria raiz)
+- Se for NOVA DESPESA/RECEITA: classifique na SUBCATEGORIA correta quando existir hierarquia. Ex: "conta de luz na loja de calçados" → use o SubID da subcategoria "Luz" dentro da categoria "Loja de Calçados". Campos: tipo, valor, descricao, categoria_id (use SubID da subcategoria, NÃO o ID da categoria pai), status, is_recorrente
 - Se for NOVA TAREFA: tipo="tarefa". Campos: tipo, titulo, descricao, data_hora_agendada (ISO com -03:00 ou null), status ("pendente"), categoria_id
 - Se for ANOTAÇÃO/IDEIA/NOTA/RECADO ou qualquer mensagem que NÃO seja tarefa, finança, categoria ou aniversário: tipo="ideia". Campos: tipo="ideia", titulo, descricao, status="pendente", categoria_id: null
   Exemplos de anotações: "preciso otimizar a ferramenta", "lembrar de comprar presente", "ideia para projeto novo", "anotar que fulano ligou"
