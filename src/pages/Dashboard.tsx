@@ -51,6 +51,7 @@ const Dashboard = () => {
             </div>
           </div>
           <div className="flex items-center gap-2">
+            <XpBadge />
             <FreemiumBar />
             <button
               onClick={logout}

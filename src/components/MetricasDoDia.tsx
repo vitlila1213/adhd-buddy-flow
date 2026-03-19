@@ -180,6 +180,37 @@ const MetricasDoDia = () => {
 
   return (
     <div className="space-y-4">
+      {/* Daily Goal Card */}
+      <DailyGoalCard />
+
+      {/* Date Period Filter */}
+      <div className="rounded-2xl border border-border/60 bg-card p-3 shadow-sm">
+        <div className="flex items-center gap-1 mb-2">
+          {(["dia", "semana", "mes", "tudo"] as DatePeriod[]).map((p) => (
+            <button
+              key={p}
+              onClick={() => { setDatePeriod(p); setDateOffset(0); }}
+              className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition-all ${
+                datePeriod === p ? "bg-primary/15 text-primary" : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              {p === "dia" ? "Dia" : p === "semana" ? "Semana" : p === "mes" ? "Mês" : "Tudo"}
+            </button>
+          ))}
+        </div>
+        {datePeriod !== "tudo" && (
+          <div className="flex items-center justify-between">
+            <button onClick={() => setDateOffset(o => o - 1)} className="rounded-lg p-1.5 text-muted-foreground hover:bg-muted hover:text-foreground">
+              <ChevronLeft className="h-4 w-4" />
+            </button>
+            <span className="text-sm font-semibold text-foreground capitalize">{dateLabel}</span>
+            <button onClick={() => setDateOffset(o => o + 1)} className="rounded-lg p-1.5 text-muted-foreground hover:bg-muted hover:text-foreground">
+              <ChevronRight className="h-4 w-4" />
+            </button>
+          </div>
+        )}
+      </div>
+
       <div className="grid gap-3 grid-cols-2 lg:grid-cols-4">
         {cards.map((card, i) => (
           <motion.div
