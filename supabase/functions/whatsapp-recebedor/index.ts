@@ -265,7 +265,7 @@ serve(async (req) => {
     // === Context Injection (RAG) ===
     const { data: userCategories } = await supabase
       .from("categorias")
-      .select("id, nome, tipo, cor")
+      .select("id, nome, tipo, cor, parent_id")
       .eq("user_id", userId);
 
     const { data: pendingTasks } = await supabase
@@ -295,7 +295,19 @@ serve(async (req) => {
       `- ${a.nome} | ${a.parentesco} | ${a.data_aniversario}`
     ).join("\n");
 
-    const catList = (userCategories || []).map(c => `- ID: ${c.id} | "${c.nome}" (${c.tipo}) | Cor: ${c.cor}`).join("\n");
+    const cats = userCategories || [];
+    const parentCats = cats.filter(c => !c.parent_id);
+    const catList = parentCats.map(p => {
+      const subs = cats.filter(c => c.parent_id === p.id);
+      if (subs.length > 0) {
+        const subList = subs.map(s => `  - SubID: ${s.id} | "${s.nome}" | Cor: ${s.cor}`).join("\n");
+        return `- ID: ${p.id} | "${p.nome}" (${p.tipo}) | Cor: ${p.cor}\n${subList}`;
+      }
+      return `- ID: ${p.id} | "${p.nome}" (${p.tipo}) | Cor: ${p.cor}`;
+    }).join("\n");
+    // Also list orphan categories (no parent, not a parent)
+    const orphanCats = cats.filter(c => !c.parent_id && !cats.some(s => s.parent_id === c.id));
+    // Already included in parentCats above
     const taskList = (pendingTasks || []).map(t => {
       const dateStr = t.data_hora_agendada ? new Date(t.data_hora_agendada).toLocaleDateString("pt-BR") : "sem data";
       return `- ID: ${t.id} | ${t.tipo}: "${t.titulo}" (${dateStr})`;
@@ -339,7 +351,10 @@ Para outras cores, use o emoji mais próximo.
 
 DATA ATUAL: ${spDate} | HORA: ${spHour} (Brasília, UTC-3)
 
-=== CATEGORIAS DO USUÁRIO ===
+=== CATEGORIAS DO USUÁRIO (com hierarquia) ===
+As categorias podem ter SUBCATEGORIAS. Quando o usuário mencionar um gasto com contexto de local/empresa + tipo de conta, use o SubID da subcategoria correta.
+Exemplo: "conta de luz da loja de calçados" → encontre a subcategoria "Luz" (ou similar) dentro de "Loja de Calçados" e use o SubID dela como categoria_id.
+Se não houver subcategoria específica, use o ID da categoria pai.
 ${catList || "(nenhuma categoria criada ainda)"}
 
 === TAREFAS PENDENTES ===
@@ -462,8 +477,8 @@ Se o usuário não mencionar crédito nem débito, siga as regras normais de cla
 
 REGRAS GERAIS:
 - Se for RELATÓRIO: analise os dados e responda com detalhes por categoria. db_actions = [{"tabela":"","operacao":"nenhuma","dados":{}}]
-- Se for CRIAR CATEGORIA: use tabela "categorias". Campos: nome, tipo ("financa" ou "tarefa")
-- Se for NOVA DESPESA/RECEITA: classifique na categoria correta. Campos: tipo, valor, descricao, categoria_id, status, is_recorrente
+- Se for CRIAR CATEGORIA: use tabela "categorias". Campos: nome, tipo ("financa" ou "tarefa"), parent_id (uuid da categoria pai, ou null se for categoria raiz)
+- Se for NOVA DESPESA/RECEITA: classifique na SUBCATEGORIA correta quando existir hierarquia. Ex: "conta de luz na loja de calçados" → use o SubID da subcategoria "Luz" dentro da categoria "Loja de Calçados". Campos: tipo, valor, descricao, categoria_id (use SubID da subcategoria, NÃO o ID da categoria pai), status, is_recorrente
 - Se for NOVA TAREFA: tipo="tarefa". Campos: tipo, titulo, descricao, data_hora_agendada (ISO com -03:00 ou null), status ("pendente"), categoria_id
 - Se for ANOTAÇÃO/IDEIA/NOTA/RECADO ou qualquer mensagem que NÃO seja tarefa, finança, categoria ou aniversário: tipo="ideia". Campos: tipo="ideia", titulo, descricao, status="pendente", categoria_id: null
   Exemplos de anotações: "preciso otimizar a ferramenta", "lembrar de comprar presente", "ideia para projeto novo", "anotar que fulano ligou"

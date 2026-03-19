@@ -9,6 +9,7 @@ export interface Categoria {
   nome: string;
   tipo: "financa" | "tarefa";
   cor: string;
+  parent_id: string | null;
   created_at: string;
 }
 
@@ -32,7 +33,7 @@ export const useCategorias = () => {
   });
 
   const create = useMutation({
-    mutationFn: async ({ nome, tipo, cor }: { nome: string; tipo: "financa" | "tarefa"; cor?: string }) => {
+    mutationFn: async ({ nome, tipo, cor, parent_id }: { nome: string; tipo: "financa" | "tarefa"; cor?: string; parent_id?: string }) => {
       if (!user) throw new Error("Not authenticated");
       const { data, error } = await supabase
         .from("categorias")
@@ -41,6 +42,7 @@ export const useCategorias = () => {
           nome,
           tipo,
           ...(cor ? { cor } : {}),
+          ...(parent_id ? { parent_id } : {}),
         } as any)
         .select("id")
         .single();
