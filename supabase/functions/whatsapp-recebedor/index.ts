@@ -265,7 +265,7 @@ serve(async (req) => {
     // === Context Injection (RAG) ===
     const { data: userCategories } = await supabase
       .from("categorias")
-      .select("id, nome, tipo, cor")
+      .select("id, nome, tipo, cor, parent_id")
       .eq("user_id", userId);
 
     const { data: pendingTasks } = await supabase
