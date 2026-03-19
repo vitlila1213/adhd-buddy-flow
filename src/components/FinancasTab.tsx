@@ -1,7 +1,7 @@
 import { useState, useMemo } from "react";
 import { useFinancas } from "@/hooks/useFinancas";
 import { useCategorias } from "@/hooks/useCategorias";
-import { Loader2, Plus, TrendingUp, TrendingDown, Trash2, Repeat, DollarSign, ChevronLeft, ChevronRight, Pencil } from "lucide-react";
+import { Loader2, Plus, TrendingUp, TrendingDown, Trash2, Repeat, DollarSign, ChevronLeft, ChevronRight, ChevronDown, ChevronUp, FolderPlus } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { format, startOfDay, endOfDay, startOfWeek, endOfWeek, startOfMonth, endOfMonth, startOfYear, endOfYear, subDays, subWeeks, subMonths, subYears, addDays, addWeeks, addMonths, addYears } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -26,6 +26,10 @@ const FinancasTab = () => {
   const [showCatForm, setShowCatForm] = useState(false);
   const [newCatName, setNewCatName] = useState("");
   const [newCatCor, setNewCatCor] = useState("#6366f1");
+  const [newCatParentId, setNewCatParentId] = useState("");
+  const [showSubCatForm, setShowSubCatForm] = useState<string | null>(null);
+  const [newSubCatName, setNewSubCatName] = useState("");
+  const [expandedCats, setExpandedCats] = useState<Set<string>>(new Set());
   const [form, setForm] = useState({
     tipo: "despesa" as "receita" | "despesa",
     valor: "",
@@ -35,7 +39,17 @@ const FinancasTab = () => {
     is_recorrente: false,
   });
 
-  const financaCats = (categorias || []).filter(c => c.tipo === "financa");
+  const allFinancaCats = (categorias || []).filter(c => c.tipo === "financa");
+  const parentCats = allFinancaCats.filter(c => !c.parent_id);
+  const getSubcats = (parentId: string) => allFinancaCats.filter(c => c.parent_id === parentId);
+
+  const toggleExpand = (id: string) => {
+    setExpandedCats(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      return next;
+    });
+  };
 
   // Period range calculation
   const periodRange = useMemo(() => {
@@ -98,22 +112,25 @@ const FinancasTab = () => {
     return { gastos, recebido, saldo: recebido - gastos };
   }, [financas, periodRange]);
 
-  // Chart data grouped by category
+  // Chart data grouped by category (parent-level grouping)
   const chartData = useMemo(() => {
     const categoryMap = new Map<string, { name: string; total: number; color: string; count: number }>();
 
     filteredFinancas.forEach((item) => {
       const catId = item.categoria_id || "sem-categoria";
-      const cat = financaCats.find((c) => c.id === catId);
-      const catName = cat?.nome || "Sem categoria";
-      const catColor = cat?.cor || "#94a3b8";
+      const cat = allFinancaCats.find((c) => c.id === catId);
+      // Group by parent category if subcategory
+      const parentCat = cat?.parent_id ? allFinancaCats.find(c => c.id === cat.parent_id) : null;
+      const groupId = parentCat ? parentCat.id : catId;
+      const groupName = parentCat ? parentCat.nome : (cat?.nome || "Sem categoria");
+      const groupColor = parentCat ? parentCat.cor : (cat?.cor || "#94a3b8");
 
-      if (categoryMap.has(catId)) {
-        const existing = categoryMap.get(catId)!;
+      if (categoryMap.has(groupId)) {
+        const existing = categoryMap.get(groupId)!;
         existing.count++;
         existing.total += Number(item.valor);
       } else {
-        categoryMap.set(catId, { name: catName, count: 1, total: Number(item.valor), color: catColor });
+        categoryMap.set(groupId, { name: groupName, count: 1, total: Number(item.valor), color: groupColor });
       }
     });
 
@@ -126,13 +143,26 @@ const FinancasTab = () => {
         percentage: totalFiltered > 0 ? Math.round((cat.total / totalFiltered) * 100) : 0,
         color: cat.color,
       }));
-  }, [filteredFinancas, financaCats, totalFiltered]);
+  }, [filteredFinancas, allFinancaCats, totalFiltered]);
 
   // Auto-categorize
   const findBestCategory = (descricao: string): string | undefined => {
     if (!descricao) return undefined;
     const desc = descricao.toLowerCase();
-    for (const cat of financaCats) {
+    // Try subcategories first (more specific), then parents
+    const subcats = allFinancaCats.filter(c => c.parent_id);
+    for (const sub of subcats) {
+      const parent = allFinancaCats.find(c => c.id === sub.parent_id);
+      if (!parent) continue;
+      const subName = sub.nome.toLowerCase();
+      const parentName = parent.nome.toLowerCase();
+      // Match if description contains both parent and subcategory context
+      if (desc.includes(subName) && desc.includes(parentName)) {
+        return sub.id;
+      }
+    }
+    // Fallback: match any category name
+    for (const cat of allFinancaCats) {
       const catName = cat.nome.toLowerCase();
       if (desc.includes(catName) || catName.includes(desc.split(" ")[0])) {
         return cat.id;
@@ -148,8 +178,10 @@ const FinancasTab = () => {
     if (!categoryId && form.descricao) {
       categoryId = findBestCategory(form.descricao);
       if (categoryId) {
-        const cat = financaCats.find(c => c.id === categoryId);
-        toast.info(`Categorizado automaticamente como "${cat?.nome}"`);
+        const cat = allFinancaCats.find(c => c.id === categoryId);
+        const parent = cat?.parent_id ? allFinancaCats.find(c => c.id === cat.parent_id) : null;
+        const label = parent ? `${parent.nome} > ${cat?.nome}` : cat?.nome;
+        toast.info(`Categorizado automaticamente como "${label}"`);
       }
     }
 
@@ -172,10 +204,25 @@ const FinancasTab = () => {
 
   const handleCreateCat = () => {
     if (!newCatName.trim()) return;
-    createCat.mutate({ nome: newCatName.trim(), tipo: "financa", cor: newCatCor }, {
-      onSuccess: () => { setNewCatName(""); setShowCatForm(false); toast.success("Categoria criada!"); },
-      onError: () => toast.error("Erro ao criar categoria"),
-    });
+    createCat.mutate(
+      { nome: newCatName.trim(), tipo: "financa", cor: newCatCor, parent_id: newCatParentId || undefined },
+      {
+        onSuccess: () => { setNewCatName(""); setNewCatParentId(""); setShowCatForm(false); toast.success("Categoria criada!"); },
+        onError: () => toast.error("Erro ao criar categoria"),
+      }
+    );
+  };
+
+  const handleCreateSubCat = (parentId: string) => {
+    if (!newSubCatName.trim()) return;
+    const parent = parentCats.find(c => c.id === parentId);
+    createCat.mutate(
+      { nome: newSubCatName.trim(), tipo: "financa", cor: parent?.cor || "#6366f1", parent_id: parentId },
+      {
+        onSuccess: () => { setNewSubCatName(""); setShowSubCatForm(null); toast.success("Subcategoria criada!"); },
+        onError: () => toast.error("Erro ao criar subcategoria"),
+      }
+    );
   };
 
   if (isLoading) {
@@ -363,7 +410,7 @@ const FinancasTab = () => {
                 className="w-full rounded-xl border border-input bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
               />
               <p className="text-[10px] text-muted-foreground">
-                💡 Se a descrição conter o nome de uma categoria, será categorizado automaticamente!
+                💡 Se a descrição conter o nome de uma categoria/subcategoria, será categorizado automaticamente!
               </p>
               <select
                 value={form.categoria_id}
@@ -371,9 +418,21 @@ const FinancasTab = () => {
                 className="w-full rounded-xl border border-input bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
               >
                 <option value="">Sem categoria (auto-detectar)</option>
-                {financaCats.map(c => (
-                  <option key={c.id} value={c.id}>{c.nome}</option>
-                ))}
+                {parentCats.map(parent => {
+                  const subs = getSubcats(parent.id);
+                  return (
+                    <optgroup key={parent.id} label={parent.nome}>
+                      {subs.length === 0 && (
+                        <option value={parent.id}>{parent.nome}</option>
+                      )}
+                      {subs.map(sub => (
+                        <option key={sub.id} value={sub.id}>{sub.nome}</option>
+                      ))}
+                    </optgroup>
+                  );
+                })}
+                {/* Categories without parent that also have no subcategories - show directly */}
+                {allFinancaCats.filter(c => !c.parent_id && getSubcats(c.id).length === 0).length > 0 && null}
               </select>
               <div className="flex items-center gap-4">
                 <select
@@ -407,7 +466,7 @@ const FinancasTab = () => {
         )}
       </AnimatePresence>
 
-      {/* Category Breakdown List */}
+      {/* Category Breakdown List with Subcategories */}
       <div className="space-y-2">
         {chartData.map((cat, i) => (
           <motion.div
@@ -436,7 +495,7 @@ const FinancasTab = () => {
         ))}
       </div>
 
-      {/* Create Category Section */}
+      {/* Create Category / Subcategory Section */}
       <div className="space-y-2">
         <button
           onClick={() => setShowCatForm(!showCatForm)}
@@ -458,7 +517,7 @@ const FinancasTab = () => {
                 <input
                   value={newCatName}
                   onChange={e => setNewCatName(e.target.value)}
-                  placeholder="Nome da categoria..."
+                  placeholder="Nome da categoria (ex: Loja de Roupas, Casa 1...)"
                   className="w-full rounded-xl border border-input bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
                   onKeyDown={e => e.key === "Enter" && handleCreateCat()}
                 />
@@ -498,6 +557,89 @@ const FinancasTab = () => {
         </AnimatePresence>
       </div>
 
+      {/* Hierarchical Category Tree */}
+      {parentCats.length > 0 && (
+        <div className="space-y-2">
+          <h3 className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+            Categorias ({parentCats.length})
+          </h3>
+          {parentCats.map(parent => {
+            const subs = getSubcats(parent.id);
+            const isExpanded = expandedCats.has(parent.id);
+            return (
+              <div key={parent.id} className="space-y-1">
+                <div
+                  className="flex items-center gap-3 rounded-2xl border border-border/60 bg-card px-4 py-3 shadow-sm cursor-pointer"
+                  onClick={() => subs.length > 0 && toggleExpand(parent.id)}
+                >
+                  <div className="h-8 w-8 shrink-0 rounded-xl" style={{ backgroundColor: parent.cor || "#6366f1" }} />
+                  <span className="flex-1 text-sm font-semibold text-card-foreground">{parent.nome}</span>
+                  {subs.length > 0 && (
+                    <span className="text-[10px] text-muted-foreground mr-1">{subs.length} sub</span>
+                  )}
+                  <button
+                    onClick={e => { e.stopPropagation(); setShowSubCatForm(showSubCatForm === parent.id ? null : parent.id); setNewSubCatName(""); }}
+                    className="rounded-lg p-1.5 text-muted-foreground hover:bg-primary/10 hover:text-primary"
+                    title="Adicionar subcategoria"
+                  >
+                    <FolderPlus className="h-3.5 w-3.5" />
+                  </button>
+                  {subs.length > 0 && (
+                    isExpanded ? <ChevronUp className="h-4 w-4 text-muted-foreground" /> : <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                  )}
+                </div>
+
+                {/* Add subcategory form */}
+                <AnimatePresence>
+                  {showSubCatForm === parent.id && (
+                    <motion.div
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: "auto" }}
+                      exit={{ opacity: 0, height: 0 }}
+                      className="overflow-hidden ml-6"
+                    >
+                      <div className="flex gap-2 py-1">
+                        <input
+                          autoFocus
+                          value={newSubCatName}
+                          onChange={e => setNewSubCatName(e.target.value)}
+                          placeholder="Nome da subcategoria (ex: Luz, Água...)"
+                          className="flex-1 rounded-xl border border-input bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                          onKeyDown={e => e.key === "Enter" && handleCreateSubCat(parent.id)}
+                        />
+                        <button
+                          onClick={() => handleCreateSubCat(parent.id)}
+                          disabled={!newSubCatName.trim() || createCat.isPending}
+                          className="rounded-xl bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-50"
+                        >
+                          {createCat.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : "Criar"}
+                        </button>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+
+                {/* Subcategories */}
+                <AnimatePresence>
+                  {isExpanded && subs.map(sub => (
+                    <motion.div
+                      key={sub.id}
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: "auto" }}
+                      exit={{ opacity: 0, height: 0 }}
+                      className="ml-6 flex items-center gap-3 rounded-xl border border-border/40 bg-muted/30 px-3 py-2"
+                    >
+                      <div className="h-5 w-5 shrink-0 rounded-lg" style={{ backgroundColor: sub.cor || parent.cor || "#6366f1" }} />
+                      <span className="flex-1 text-xs font-medium text-card-foreground">{sub.nome}</span>
+                    </motion.div>
+                  ))}
+                </AnimatePresence>
+              </div>
+            );
+          })}
+        </div>
+      )}
+
       {/* Transaction List */}
       {filteredFinancas.length > 0 && (
         <div className="space-y-2">
@@ -505,14 +647,16 @@ const FinancasTab = () => {
             Transações ({filteredFinancas.length})
           </h3>
           {filteredFinancas.map(f => {
-            const cat = financaCats.find(c => c.id === f.categoria_id);
+            const cat = allFinancaCats.find(c => c.id === f.categoria_id);
+            const parentCat = cat?.parent_id ? allFinancaCats.find(c => c.id === cat.parent_id) : null;
+            const catLabel = parentCat ? `${parentCat.nome} > ${cat?.nome}` : cat?.nome;
             return (
               <motion.div
                 key={f.id}
                 initial={{ opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
                 className="flex items-center gap-3 rounded-2xl border border-border/60 border-l-4 bg-card p-3 shadow-sm"
-                style={{ borderLeftColor: cat?.cor || "#94a3b8" }}
+                style={{ borderLeftColor: cat?.cor || parentCat?.cor || "#94a3b8" }}
               >
                 <div className={`flex h-9 w-9 items-center justify-center rounded-xl ${
                   f.tipo === "receita" ? "bg-emerald-500/10" : "bg-destructive/10"
@@ -525,10 +669,10 @@ const FinancasTab = () => {
                   <p className="truncate text-sm font-medium text-card-foreground">
                     {f.descricao || (f.tipo === "receita" ? "Receita" : "Despesa")}
                   </p>
-                  <div className="flex items-center gap-2">
-                    {cat && (
-                      <span className="text-[10px] px-1.5 py-0.5 rounded" style={{ backgroundColor: cat.cor + "20", color: cat.cor }}>
-                        {cat.nome}
+                  <div className="flex items-center gap-2 flex-wrap">
+                    {catLabel && (
+                      <span className="text-[10px] px-1.5 py-0.5 rounded" style={{ backgroundColor: (cat?.cor || "#94a3b8") + "20", color: cat?.cor || "#94a3b8" }}>
+                        {catLabel}
                       </span>
                     )}
                     <span className={`text-[10px] px-1.5 py-0.5 rounded ${
