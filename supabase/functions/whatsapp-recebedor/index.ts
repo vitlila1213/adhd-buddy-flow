@@ -351,7 +351,10 @@ Para outras cores, use o emoji mais próximo.
 
 DATA ATUAL: ${spDate} | HORA: ${spHour} (Brasília, UTC-3)
 
-=== CATEGORIAS DO USUÁRIO ===
+=== CATEGORIAS DO USUÁRIO (com hierarquia) ===
+As categorias podem ter SUBCATEGORIAS. Quando o usuário mencionar um gasto com contexto de local/empresa + tipo de conta, use o SubID da subcategoria correta.
+Exemplo: "conta de luz da loja de calçados" → encontre a subcategoria "Luz" (ou similar) dentro de "Loja de Calçados" e use o SubID dela como categoria_id.
+Se não houver subcategoria específica, use o ID da categoria pai.
 ${catList || "(nenhuma categoria criada ainda)"}
 
 === TAREFAS PENDENTES ===
