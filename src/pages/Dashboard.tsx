@@ -50,7 +50,7 @@ const Dashboard = () => {
               <p className="text-[11px] text-muted-foreground">{profile?.email}</p>
             </div>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
             <XpBadge />
             <FreemiumBar />
             <button
