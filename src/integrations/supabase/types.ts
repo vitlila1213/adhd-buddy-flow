@@ -279,6 +279,44 @@ export type Database = {
         }
         Relationships: []
       }
+      user_goals: {
+        Row: {
+          created_at: string
+          daily_goal: number
+          id: string
+          last_goal_completed_date: string | null
+          updated_at: string
+          user_id: string
+          xp: number
+        }
+        Insert: {
+          created_at?: string
+          daily_goal?: number
+          id?: string
+          last_goal_completed_date?: string | null
+          updated_at?: string
+          user_id: string
+          xp?: number
+        }
+        Update: {
+          created_at?: string
+          daily_goal?: number
+          id?: string
+          last_goal_completed_date?: string | null
+          updated_at?: string
+          user_id?: string
+          xp?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_goals_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_integrations: {
         Row: {
           access_token: string | null

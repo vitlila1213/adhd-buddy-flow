@@ -1,50 +1,81 @@
 import { useItens } from "@/hooks/useItens";
 import { useCategorias } from "@/hooks/useCategorias";
 import { useMemo, useState } from "react";
-import { CheckCircle2, Lightbulb, Loader2, ListTodo, Brain, MessageCircle, PieChart as PieChartIcon } from "lucide-react";
+import { CheckCircle2, Lightbulb, Loader2, ListTodo, Brain, MessageCircle, PieChart as PieChartIcon, ChevronLeft, ChevronRight } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from "recharts";
+import { format, startOfDay, endOfDay, startOfWeek, endOfWeek, startOfMonth, endOfMonth, subDays, subWeeks, subMonths, addDays, addWeeks, addMonths } from "date-fns";
+import { ptBR } from "date-fns/locale";
+import DailyGoalCard from "@/components/DailyGoalCard";
 
 const WHATSAPP_AGENT = "5511934396102";
 
 type FilterType = "concluida" | "pendente";
+type DatePeriod = "dia" | "semana" | "mes" | "tudo";
 
 const MetricasDoDia = () => {
   const { data: items, isLoading } = useItens();
   const { data: categorias } = useCategorias();
   const [filter, setFilter] = useState<FilterType>("concluida");
+  const [datePeriod, setDatePeriod] = useState<DatePeriod>("dia");
+  const [dateOffset, setDateOffset] = useState(0);
+
+  const dateRange = useMemo(() => {
+    if (datePeriod === "tudo") return null;
+    const now = new Date();
+    let base = now;
+    const fns = {
+      dia: { sub: subDays, add: addDays, start: startOfDay, end: endOfDay },
+      semana: { sub: subWeeks, add: addWeeks, start: (d: Date) => startOfWeek(d, { weekStartsOn: 1 }), end: (d: Date) => endOfWeek(d, { weekStartsOn: 1 }) },
+      mes: { sub: subMonths, add: addMonths, start: startOfMonth, end: endOfMonth },
+    };
+    const f = fns[datePeriod];
+    if (dateOffset < 0) base = f.sub(now, Math.abs(dateOffset));
+    else if (dateOffset > 0) base = f.add(now, dateOffset);
+    return { start: f.start(base), end: f.end(base), base };
+  }, [datePeriod, dateOffset]);
+
+  const dateLabel = useMemo(() => {
+    if (!dateRange) return "Todo o período";
+    switch (datePeriod) {
+      case "dia": return format(dateRange.base, "dd 'de' MMMM", { locale: ptBR });
+      case "semana": return `${format(dateRange.start, "dd/MM")} a ${format(dateRange.end, "dd/MM")}`;
+      case "mes": return format(dateRange.base, "MMMM yyyy", { locale: ptBR });
+      default: return "";
+    }
+  }, [dateRange, datePeriod]);
+
+  const isInRange = (dateStr: string) => {
+    if (!dateRange) return true;
+    const d = new Date(dateStr);
+    return d >= dateRange.start && d <= dateRange.end;
+  };
 
   const metrics = useMemo(() => {
     const all = items || [];
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
 
-    const concluidasHoje = all.filter((i) => {
+    const concluidasFiltered = all.filter((i) => {
       if (i.status !== "concluida") return false;
-      const updated = new Date(i.updated_at);
-      updated.setHours(0, 0, 0, 0);
-      return updated.getTime() === today.getTime();
+      return isInRange(i.updated_at);
     });
 
-    const ideiasCapturadas = all.filter((i) => {
-      const created = new Date(i.created_at);
-      created.setHours(0, 0, 0, 0);
-      return created.getTime() === today.getTime() && i.tipo === "ideia";
+    const ideiasFiltered = all.filter((i) => {
+      return i.tipo === "ideia" && isInRange(i.created_at);
     });
 
     return {
-      concluidas: concluidasHoje.length,
-      ideias: ideiasCapturadas.length,
+      concluidas: concluidasFiltered.length,
+      ideias: ideiasFiltered.length,
       total: all.length,
       pendentes: all.filter((i) => i.status === "pendente").length,
     };
-  }, [items]);
+  }, [items, dateRange]);
 
   const chartData = useMemo(() => {
     const all = items || [];
     const cats = categorias || [];
     
-    const filteredItems = all.filter((i) => i.status === filter);
+    const filteredItems = all.filter((i) => i.status === filter && isInRange(filter === "concluida" ? i.updated_at : i.created_at));
     
     // Group by category
     const categoryMap = new Map<string, { name: string; count: number; color: string }>();
@@ -149,6 +180,37 @@ const MetricasDoDia = () => {
 
   return (
     <div className="space-y-4">
+      {/* Daily Goal Card */}
+      <DailyGoalCard />
+
+      {/* Date Period Filter */}
+      <div className="rounded-2xl border border-border/60 bg-card p-3 shadow-sm">
+        <div className="flex items-center gap-1 mb-2">
+          {(["dia", "semana", "mes", "tudo"] as DatePeriod[]).map((p) => (
+            <button
+              key={p}
+              onClick={() => { setDatePeriod(p); setDateOffset(0); }}
+              className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition-all ${
+                datePeriod === p ? "bg-primary/15 text-primary" : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              {p === "dia" ? "Dia" : p === "semana" ? "Semana" : p === "mes" ? "Mês" : "Tudo"}
+            </button>
+          ))}
+        </div>
+        {datePeriod !== "tudo" && (
+          <div className="flex items-center justify-between">
+            <button onClick={() => setDateOffset(o => o - 1)} className="rounded-lg p-1.5 text-muted-foreground hover:bg-muted hover:text-foreground">
+              <ChevronLeft className="h-4 w-4" />
+            </button>
+            <span className="text-sm font-semibold text-foreground capitalize">{dateLabel}</span>
+            <button onClick={() => setDateOffset(o => o + 1)} className="rounded-lg p-1.5 text-muted-foreground hover:bg-muted hover:text-foreground">
+              <ChevronRight className="h-4 w-4" />
+            </button>
+          </div>
+        )}
+      </div>
+
       <div className="grid gap-3 grid-cols-2 lg:grid-cols-4">
         {cards.map((card, i) => (
           <motion.div
