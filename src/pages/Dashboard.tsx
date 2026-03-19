@@ -13,6 +13,7 @@ import AniversariantesTab from "@/components/AniversariantesTab";
 import IntegracoesTab from "@/components/IntegracoesTab";
 import { motion, AnimatePresence } from "framer-motion";
 import logoImg from "@/assets/logo.png";
+import XpBadge from "@/components/XpBadge";
 
 type Tab = "tarefas" | "financas" | "categorias" | "aniversariantes" | "metricas" | "integracoes" | "anotacoes";
 
