@@ -1,4 +1,4 @@
-import { Brain, Check, Crown, Sparkles, Zap, Shield, MessageSquare, ArrowRight, Calendar, Gift, Tag, Mic, BarChart3, Bell, Star, ChevronDown, X, Camera, FileText, CreditCard, Clock, Rocket } from "lucide-react";
+import { Brain, Check, Crown, Sparkles, Zap, Shield, MessageSquare, ArrowRight, Calendar, Gift, Tag, Mic, BarChart3, Bell, Star, ChevronDown, X, Camera, FileText, CreditCard, Clock, Rocket, Lock, Headphones } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
