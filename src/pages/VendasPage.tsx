@@ -1,4 +1,4 @@
-import { Brain, Check, Crown, Sparkles, Zap, Shield, MessageSquare, ArrowRight, Calendar, Gift, Tag, Mic, BarChart3, Bell, Star, ChevronDown, X, Camera, FileText, CreditCard, Clock, Rocket } from "lucide-react";
+import { Brain, Check, Crown, Sparkles, Zap, Shield, MessageSquare, ArrowRight, Calendar, Gift, Tag, Mic, BarChart3, Bell, Star, ChevronDown, X, Camera, FileText, CreditCard, Clock, Rocket, Lock, Headphones } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
@@ -261,6 +261,310 @@ const VendasPage = () => {
         </div>
       </section>
 
+      {/* Trust Banner - Criptografia + Suporte */}
+      <section className="bg-primary/5 border-y border-primary/10 px-5 py-6">
+        <div className="mx-auto flex max-w-4xl flex-wrap items-center justify-center gap-6 sm:gap-10">
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/15">
+              <Lock className="h-5 w-5 text-primary" />
+            </div>
+            <div>
+              <p className="text-sm font-bold text-foreground">Criptografia de ponta a ponta</p>
+              <p className="text-xs text-muted-foreground">Seus dados 100% protegidos</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/15">
+              <Headphones className="h-5 w-5 text-primary" />
+            </div>
+            <div>
+              <p className="text-sm font-bold text-foreground">Suporte humanizado 24h</p>
+              <p className="text-xs text-muted-foreground">Sempre alguém pronto pra te ajudar</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Aniversariantes Showcase */}
+      <section className="bg-background px-5 py-16 sm:py-24 overflow-hidden">
+        <div className="mx-auto max-w-6xl">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="mb-4 text-center"
+          >
+            <span className="inline-flex items-center gap-2 rounded-full bg-accent/10 px-4 py-1.5 text-sm font-semibold text-accent mb-4">
+              <Gift className="h-4 w-4" /> Exclusivo
+            </span>
+            <h2 className="font-heading text-2xl font-bold text-foreground sm:text-3xl mt-3">
+              Nunca mais esqueça um aniversário 🎂
+            </h2>
+            <p className="mx-auto mt-3 max-w-2xl text-muted-foreground">
+              Cadastre pelo WhatsApp dizendo <span className="font-medium text-foreground">"aniversário da minha mãe dia 27 de novembro"</span> e receba lembretes automáticos na véspera e no dia, com mensagem pronta pra enviar!
+            </p>
+          </motion.div>
+
+          <div className="mt-12 flex flex-col items-center gap-8 lg:flex-row lg:justify-center lg:gap-12">
+            <motion.div
+              initial={{ opacity: 0, x: -30 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6 }}
+              className="relative flex-shrink-0"
+            >
+              <div className="relative mx-auto w-[280px] sm:w-[300px]">
+                <div className="relative rounded-[3rem] border-[6px] border-foreground/80 bg-foreground/90 p-2 shadow-2xl shadow-foreground/20">
+                  <div className="absolute left-1/2 top-0 z-10 h-7 w-28 -translate-x-1/2 rounded-b-2xl bg-foreground/80" />
+                  <div className="overflow-hidden rounded-[2.4rem] bg-black">
+                    <video
+                      src="/videos/aniversario-demo.mp4"
+                      autoPlay
+                      loop
+                      muted
+                      playsInline
+                      className="h-auto w-full object-cover"
+                    />
+                  </div>
+                </div>
+                <div className="pointer-events-none absolute -inset-4 rounded-[3.5rem] bg-gradient-to-br from-primary/10 via-transparent to-accent/10 blur-xl" />
+              </div>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, x: 30 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6, delay: 0.15 }}
+              className="relative flex-shrink-0"
+            >
+              <div className="relative mx-auto w-[280px] sm:w-[300px]">
+                <div className="relative rounded-[3rem] border-[6px] border-foreground/80 bg-foreground/90 p-2 shadow-2xl shadow-foreground/20">
+                  <div className="absolute left-1/2 top-0 z-10 h-7 w-28 -translate-x-1/2 rounded-b-2xl bg-foreground/80" />
+                  <div className="overflow-hidden rounded-[2.4rem] bg-black">
+                    <img
+                      src="/images/aniversario-whatsapp.png"
+                      alt="Lembrete de aniversário no WhatsApp"
+                      className="h-auto w-full object-cover"
+                    />
+                  </div>
+                </div>
+                <div className="pointer-events-none absolute -inset-4 rounded-[3.5rem] bg-gradient-to-br from-accent/10 via-transparent to-primary/10 blur-xl" />
+              </div>
+            </motion.div>
+          </div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.3 }}
+            className="mt-12 flex flex-wrap items-center justify-center gap-4"
+          >
+            {[
+              { icon: MessageSquare, text: "Cadastre pelo WhatsApp" },
+              { icon: Bell, text: "Lembrete na véspera e no dia" },
+              { icon: Gift, text: "Mensagem pronta pra enviar" },
+            ].map((item, i) => (
+              <div key={i} className="flex items-center gap-2 rounded-full border border-border/50 bg-card px-4 py-2 text-sm text-foreground shadow-sm">
+                <item.icon className="h-4 w-4 text-accent" />
+                {item.text}
+              </div>
+            ))}
+          </motion.div>
+        </div>
+      </section>
+
+      {/* Visão Computacional / Finanças por Foto Showcase */}
+      <section className="bg-navy px-5 py-16 sm:py-24 overflow-hidden">
+        <div className="mx-auto max-w-6xl">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="mb-4 text-center"
+          >
+            <span className="inline-flex items-center gap-2 rounded-full bg-primary/15 px-4 py-1.5 text-sm font-semibold text-primary mb-4">
+              <Camera className="h-4 w-4" /> Visão Computacional
+            </span>
+            <h2 className="font-heading text-2xl font-bold text-white sm:text-3xl mt-3">
+              Tire uma foto e pronto — tá registrado! 📸
+            </h2>
+            <p className="mx-auto mt-3 max-w-2xl text-white/60">
+              Envie a foto de uma <span className="font-medium text-white">nota fiscal, recibo ou boleto</span> pelo WhatsApp. A IA lê automaticamente o valor, a empresa e a data de vencimento — e registra tudo nas suas finanças.
+            </p>
+          </motion.div>
+
+          <div className="mt-12 flex flex-col items-center gap-8 lg:flex-row lg:justify-center lg:gap-12">
+            <motion.div
+              initial={{ opacity: 0, x: -30 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6 }}
+              className="relative flex-shrink-0"
+            >
+              <div className="relative mx-auto w-[280px] sm:w-[300px]">
+                <div className="relative rounded-[3rem] border-[6px] border-white/20 bg-white/10 p-2 shadow-2xl shadow-black/30">
+                  <div className="absolute left-1/2 top-0 z-10 h-7 w-28 -translate-x-1/2 rounded-b-2xl bg-white/15" />
+                  <div className="overflow-hidden rounded-[2.4rem] bg-black">
+                    <img
+                      src="/images/financas-whatsapp.png"
+                      alt="Foto de nota fiscal registrada automaticamente pelo WhatsApp"
+                      className="h-auto w-full object-cover"
+                    />
+                  </div>
+                </div>
+                <div className="pointer-events-none absolute -inset-4 rounded-[3.5rem] bg-gradient-to-br from-primary/15 via-transparent to-accent/10 blur-xl" />
+              </div>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, x: 30 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6, delay: 0.15 }}
+              className="max-w-md text-center lg:text-left"
+            >
+              <div className="space-y-5">
+                {[
+                  { icon: FileText, title: "Notas Fiscais e Recibos", desc: "Envie a foto e a IA identifica o estabelecimento, valor total e registra como gasto pago." },
+                  { icon: CreditCard, title: "Boletos e Contas", desc: "Foto do boleto = valor + vencimento extraídos automaticamente. Registrado como pendente com lembrete." },
+                  { icon: Clock, title: "Baixa Automática", desc: "Disse \"paguei a conta de luz\"? O sistema encontra a pendência e dá baixa sozinho." },
+                ].map((item, i) => (
+                  <div key={i} className="flex items-start gap-4">
+                    <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-primary/20">
+                      <item.icon className="h-5 w-5 text-primary" />
+                    </div>
+                    <div>
+                      <h4 className="font-heading text-base font-bold text-white">{item.title}</h4>
+                      <p className="mt-1 text-sm leading-relaxed text-white/60">{item.desc}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </motion.div>
+          </div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.3 }}
+            className="mt-12 flex flex-wrap items-center justify-center gap-4"
+          >
+            {[
+              { icon: Camera, text: "Foto pelo WhatsApp" },
+              { icon: Zap, text: "Leitura instantânea por IA" },
+              { icon: BarChart3, text: "Direto no seu controle financeiro" },
+            ].map((item, i) => (
+              <div key={i} className="flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm text-white/80 shadow-sm">
+                <item.icon className="h-4 w-4 text-primary" />
+                {item.text}
+              </div>
+            ))}
+          </motion.div>
+        </div>
+      </section>
+
+      {/* Google Agenda Integration Showcase */}
+      <section className="bg-gradient-to-b from-background to-navy px-5 py-16 sm:py-24 overflow-hidden">
+        <div className="mx-auto max-w-6xl">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="mb-4 text-center"
+          >
+            <span className="inline-flex items-center gap-2 rounded-full bg-primary/15 px-4 py-1.5 text-sm font-semibold text-primary mb-4">
+              <Calendar className="h-4 w-4" /> Integração Exclusiva
+            </span>
+            <h2 className="font-heading text-2xl font-bold text-foreground sm:text-3xl mt-3">
+              Google Agenda direto no WhatsApp 📅
+            </h2>
+            <p className="mx-auto mt-3 max-w-2xl text-muted-foreground">
+              A <span className="font-bold text-primary">única ferramenta no Brasil</span> que <span className="font-medium text-foreground">marca, desmarca e cancela</span> compromissos no Google Agenda — tudo pelo WhatsApp, usando apenas texto ou áudio.
+            </p>
+          </motion.div>
+
+          <div className="mt-12 flex flex-col items-center gap-8 lg:flex-row lg:justify-center lg:gap-12">
+            <motion.div
+              initial={{ opacity: 0, x: -30 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6 }}
+              className="max-w-md text-center lg:text-left"
+            >
+              <div className="space-y-5">
+                {[
+                  { icon: Calendar, title: "Agendar Compromissos", desc: "Diga \"marca dentista sexta às 14h\" e pronto — aparece na sua Google Agenda automaticamente." },
+                  { icon: Bell, title: "Reagendar com uma Frase", desc: "\"Muda a consulta pra segunda às 10h\" — o sistema encontra, atualiza e te confirma na hora." },
+                  { icon: X, title: "Cancelar Sem Complicação", desc: "\"Cancela a reunião de amanhã\" — removido da agenda e do sistema em segundos." },
+                ].map((item, i) => (
+                  <div key={i} className="flex items-start gap-4">
+                    <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-primary/20">
+                      <item.icon className="h-5 w-5 text-primary" />
+                    </div>
+                    <div>
+                      <h4 className="font-heading text-base font-bold text-foreground">{item.title}</h4>
+                      <p className="mt-1 text-sm leading-relaxed text-muted-foreground">{item.desc}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <div className="mt-6 rounded-xl border border-primary/20 bg-primary/5 p-4">
+                <p className="text-sm font-semibold text-primary">🏆 Exclusivo no Brasil</p>
+                <p className="mt-1 text-xs text-muted-foreground">Nenhuma outra ferramenta por WhatsApp marca, desmarca e cancela compromissos no Google Agenda. Somos os únicos.</p>
+              </div>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, x: 30 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6, delay: 0.15 }}
+              className="relative flex-shrink-0"
+            >
+              <div className="relative mx-auto w-[280px] sm:w-[300px]">
+                <div className="relative rounded-[3rem] border-[6px] border-foreground/80 bg-foreground/90 p-2 shadow-2xl shadow-black/40">
+                  <div className="absolute left-1/2 top-0 z-10 h-7 w-28 -translate-x-1/2 rounded-b-2xl bg-foreground/80" />
+                  <div className="overflow-hidden rounded-[2.4rem] bg-black">
+                    <video
+                      src="/videos/google-agenda-demo.mp4"
+                      autoPlay
+                      loop
+                      muted
+                      playsInline
+                      className="h-auto w-full object-cover"
+                    />
+                  </div>
+                </div>
+                <div className="pointer-events-none absolute -inset-4 rounded-[3.5rem] bg-gradient-to-br from-primary/20 via-transparent to-accent/10 blur-xl" />
+              </div>
+            </motion.div>
+          </div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.3 }}
+            className="mt-12 flex flex-wrap items-center justify-center gap-4"
+          >
+            {[
+              { icon: Calendar, text: "Sincronização automática" },
+              { icon: Zap, text: "Comando por voz ou texto" },
+              { icon: Shield, text: "Única no Brasil" },
+            ].map((item, i) => (
+              <div key={i} className="flex items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-4 py-2 text-sm text-foreground/80 shadow-sm">
+                <item.icon className="h-4 w-4 text-primary" />
+                {item.text}
+              </div>
+            ))}
+          </motion.div>
+        </div>
+      </section>
+
       {/* How it works */}
       <section id="como-funciona" className="bg-background px-5 py-16 sm:py-24">
         <div className="mx-auto max-w-5xl">
@@ -334,300 +638,6 @@ const VendasPage = () => {
 
             })}
           </div>
-        </div>
-      </section>
-
-      {/* Aniversariantes Showcase */}
-      <section className="bg-background px-5 py-16 sm:py-24 overflow-hidden">
-        <div className="mx-auto max-w-6xl">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="mb-4 text-center"
-          >
-            <span className="inline-flex items-center gap-2 rounded-full bg-accent/10 px-4 py-1.5 text-sm font-semibold text-accent mb-4">
-              <Gift className="h-4 w-4" /> Exclusivo
-            </span>
-            <h2 className="font-heading text-2xl font-bold text-foreground sm:text-3xl mt-3">
-              Nunca mais esqueça um aniversário 🎂
-            </h2>
-            <p className="mx-auto mt-3 max-w-2xl text-muted-foreground">
-              Cadastre pelo WhatsApp dizendo <span className="font-medium text-foreground">"aniversário da minha mãe dia 27 de novembro"</span> e receba lembretes automáticos na véspera e no dia, com mensagem pronta pra enviar!
-            </p>
-          </motion.div>
-
-          <div className="mt-12 flex flex-col items-center gap-8 lg:flex-row lg:justify-center lg:gap-12">
-            {/* iPhone Video Mockup */}
-            <motion.div
-              initial={{ opacity: 0, x: -30 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6 }}
-              className="relative flex-shrink-0"
-            >
-              {/* iPhone frame */}
-              <div className="relative mx-auto w-[280px] sm:w-[300px]">
-                {/* Phone body */}
-                <div className="relative rounded-[3rem] border-[6px] border-foreground/80 bg-foreground/90 p-2 shadow-2xl shadow-foreground/20">
-                  {/* Notch */}
-                  <div className="absolute left-1/2 top-0 z-10 h-7 w-28 -translate-x-1/2 rounded-b-2xl bg-foreground/80" />
-                  {/* Screen */}
-                  <div className="overflow-hidden rounded-[2.4rem] bg-black">
-                    <video
-                      src="/videos/aniversario-demo.mp4"
-                      autoPlay
-                      loop
-                      muted
-                      playsInline
-                      className="h-auto w-full object-cover"
-                    />
-                  </div>
-                </div>
-                {/* Reflection glow */}
-                <div className="pointer-events-none absolute -inset-4 rounded-[3.5rem] bg-gradient-to-br from-primary/10 via-transparent to-accent/10 blur-xl" />
-              </div>
-            </motion.div>
-
-            {/* WhatsApp Screenshot Image */}
-            <motion.div
-              initial={{ opacity: 0, x: 30 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6, delay: 0.15 }}
-              className="relative flex-shrink-0"
-            >
-              <div className="relative mx-auto w-[280px] sm:w-[300px]">
-                <div className="relative rounded-[3rem] border-[6px] border-foreground/80 bg-foreground/90 p-2 shadow-2xl shadow-foreground/20">
-                  <div className="absolute left-1/2 top-0 z-10 h-7 w-28 -translate-x-1/2 rounded-b-2xl bg-foreground/80" />
-                  <div className="overflow-hidden rounded-[2.4rem] bg-black">
-                    <img
-                      src="/images/aniversario-whatsapp.png"
-                      alt="Lembrete de aniversário no WhatsApp"
-                      className="h-auto w-full object-cover"
-                    />
-                  </div>
-                </div>
-                <div className="pointer-events-none absolute -inset-4 rounded-[3.5rem] bg-gradient-to-br from-accent/10 via-transparent to-primary/10 blur-xl" />
-              </div>
-            </motion.div>
-          </div>
-
-          {/* Feature bullets */}
-          <motion.div
-            initial={{ opacity: 0, y: 16 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ delay: 0.3 }}
-            className="mt-12 flex flex-wrap items-center justify-center gap-4"
-          >
-            {[
-              { icon: MessageSquare, text: "Cadastre pelo WhatsApp" },
-              { icon: Bell, text: "Lembrete na véspera e no dia" },
-              { icon: Gift, text: "Mensagem pronta pra enviar" },
-            ].map((item, i) => (
-              <div key={i} className="flex items-center gap-2 rounded-full border border-border/50 bg-card px-4 py-2 text-sm text-foreground shadow-sm">
-                <item.icon className="h-4 w-4 text-accent" />
-                {item.text}
-              </div>
-            ))}
-          </motion.div>
-        </div>
-      </section>
-
-      {/* Visão Computacional / Finanças por Foto Showcase */}
-      <section className="bg-navy px-5 py-16 sm:py-24 overflow-hidden">
-        <div className="mx-auto max-w-6xl">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="mb-4 text-center"
-          >
-            <span className="inline-flex items-center gap-2 rounded-full bg-primary/15 px-4 py-1.5 text-sm font-semibold text-primary mb-4">
-              <Camera className="h-4 w-4" /> Visão Computacional
-            </span>
-            <h2 className="font-heading text-2xl font-bold text-white sm:text-3xl mt-3">
-              Tire uma foto e pronto — tá registrado! 📸
-            </h2>
-            <p className="mx-auto mt-3 max-w-2xl text-white/60">
-              Envie a foto de uma <span className="font-medium text-white">nota fiscal, recibo ou boleto</span> pelo WhatsApp. A IA lê automaticamente o valor, a empresa e a data de vencimento — e registra tudo nas suas finanças.
-            </p>
-          </motion.div>
-
-          <div className="mt-12 flex flex-col items-center gap-8 lg:flex-row lg:justify-center lg:gap-12">
-            {/* iPhone com screenshot do WhatsApp */}
-            <motion.div
-              initial={{ opacity: 0, x: -30 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6 }}
-              className="relative flex-shrink-0"
-            >
-              <div className="relative mx-auto w-[280px] sm:w-[300px]">
-                <div className="relative rounded-[3rem] border-[6px] border-white/20 bg-white/10 p-2 shadow-2xl shadow-black/30">
-                  <div className="absolute left-1/2 top-0 z-10 h-7 w-28 -translate-x-1/2 rounded-b-2xl bg-white/15" />
-                  <div className="overflow-hidden rounded-[2.4rem] bg-black">
-                    <img
-                      src="/images/financas-whatsapp.png"
-                      alt="Foto de nota fiscal registrada automaticamente pelo WhatsApp"
-                      className="h-auto w-full object-cover"
-                    />
-                  </div>
-                </div>
-                <div className="pointer-events-none absolute -inset-4 rounded-[3.5rem] bg-gradient-to-br from-primary/15 via-transparent to-accent/10 blur-xl" />
-              </div>
-            </motion.div>
-
-            {/* Texto explicativo ao lado */}
-            <motion.div
-              initial={{ opacity: 0, x: 30 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6, delay: 0.15 }}
-              className="max-w-md text-center lg:text-left"
-            >
-              <div className="space-y-5">
-                {[
-                  { icon: FileText, title: "Notas Fiscais e Recibos", desc: "Envie a foto e a IA identifica o estabelecimento, valor total e registra como gasto pago." },
-                  { icon: CreditCard, title: "Boletos e Contas", desc: "Foto do boleto = valor + vencimento extraídos automaticamente. Registrado como pendente com lembrete." },
-                  { icon: Clock, title: "Baixa Automática", desc: "Disse \"paguei a conta de luz\"? O sistema encontra a pendência e dá baixa sozinho." },
-                ].map((item, i) => (
-                  <div key={i} className="flex items-start gap-4">
-                    <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-primary/20">
-                      <item.icon className="h-5 w-5 text-primary" />
-                    </div>
-                    <div>
-                      <h4 className="font-heading text-base font-bold text-white">{item.title}</h4>
-                      <p className="mt-1 text-sm leading-relaxed text-white/60">{item.desc}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </motion.div>
-          </div>
-
-          {/* Feature pills */}
-          <motion.div
-            initial={{ opacity: 0, y: 16 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ delay: 0.3 }}
-            className="mt-12 flex flex-wrap items-center justify-center gap-4"
-          >
-            {[
-              { icon: Camera, text: "Foto pelo WhatsApp" },
-              { icon: Zap, text: "Leitura instantânea por IA" },
-              { icon: BarChart3, text: "Direto no seu controle financeiro" },
-            ].map((item, i) => (
-              <div key={i} className="flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm text-white/80 shadow-sm">
-                <item.icon className="h-4 w-4 text-primary" />
-                {item.text}
-              </div>
-            ))}
-          </motion.div>
-        </div>
-      </section>
-
-      {/* Google Agenda Integration Showcase */}
-      <section className="bg-gradient-to-b from-background to-navy px-5 py-16 sm:py-24 overflow-hidden">
-        <div className="mx-auto max-w-6xl">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="mb-4 text-center"
-          >
-            <span className="inline-flex items-center gap-2 rounded-full bg-primary/15 px-4 py-1.5 text-sm font-semibold text-primary mb-4">
-              <Calendar className="h-4 w-4" /> Integração Exclusiva
-            </span>
-            <h2 className="font-heading text-2xl font-bold text-foreground sm:text-3xl mt-3">
-              Google Agenda direto no WhatsApp 📅
-            </h2>
-            <p className="mx-auto mt-3 max-w-2xl text-muted-foreground">
-              A <span className="font-bold text-primary">única ferramenta no Brasil</span> que <span className="font-medium text-foreground">marca, desmarca e cancela</span> compromissos no Google Agenda — tudo pelo WhatsApp, usando apenas texto ou áudio.
-            </p>
-          </motion.div>
-
-          <div className="mt-12 flex flex-col items-center gap-8 lg:flex-row lg:justify-center lg:gap-12">
-            {/* Texto explicativo */}
-            <motion.div
-              initial={{ opacity: 0, x: -30 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6 }}
-              className="max-w-md text-center lg:text-left"
-            >
-              <div className="space-y-5">
-                {[
-                  { icon: Calendar, title: "Agendar Compromissos", desc: "Diga \"marca dentista sexta às 14h\" e pronto — aparece na sua Google Agenda automaticamente." },
-                  { icon: Bell, title: "Reagendar com uma Frase", desc: "\"Muda a consulta pra segunda às 10h\" — o sistema encontra, atualiza e te confirma na hora." },
-                  { icon: X, title: "Cancelar Sem Complicação", desc: "\"Cancela a reunião de amanhã\" — removido da agenda e do sistema em segundos." },
-                ].map((item, i) => (
-                  <div key={i} className="flex items-start gap-4">
-                    <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-primary/20">
-                      <item.icon className="h-5 w-5 text-primary" />
-                    </div>
-                    <div>
-                      <h4 className="font-heading text-base font-bold text-foreground">{item.title}</h4>
-                      <p className="mt-1 text-sm leading-relaxed text-muted-foreground">{item.desc}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              <div className="mt-6 rounded-xl border border-primary/20 bg-primary/5 p-4">
-                <p className="text-sm font-semibold text-primary">🏆 Exclusivo no Brasil</p>
-                <p className="mt-1 text-xs text-muted-foreground">Nenhuma outra ferramenta por WhatsApp marca, desmarca e cancela compromissos no Google Agenda. Somos os únicos.</p>
-              </div>
-            </motion.div>
-
-            {/* iPhone com vídeo demo */}
-            <motion.div
-              initial={{ opacity: 0, x: 30 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6, delay: 0.15 }}
-              className="relative flex-shrink-0"
-            >
-              <div className="relative mx-auto w-[280px] sm:w-[300px]">
-                <div className="relative rounded-[3rem] border-[6px] border-foreground/80 bg-foreground/90 p-2 shadow-2xl shadow-black/40">
-                  <div className="absolute left-1/2 top-0 z-10 h-7 w-28 -translate-x-1/2 rounded-b-2xl bg-foreground/80" />
-                  <div className="overflow-hidden rounded-[2.4rem] bg-black">
-                    <video
-                      src="/videos/google-agenda-demo.mp4"
-                      autoPlay
-                      loop
-                      muted
-                      playsInline
-                      className="h-auto w-full object-cover"
-                    />
-                  </div>
-                </div>
-                <div className="pointer-events-none absolute -inset-4 rounded-[3.5rem] bg-gradient-to-br from-primary/20 via-transparent to-accent/10 blur-xl" />
-              </div>
-            </motion.div>
-          </div>
-
-          {/* Feature pills */}
-          <motion.div
-            initial={{ opacity: 0, y: 16 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ delay: 0.3 }}
-            className="mt-12 flex flex-wrap items-center justify-center gap-4"
-          >
-            {[
-              { icon: Calendar, text: "Sincronização automática" },
-              { icon: Zap, text: "Comando por voz ou texto" },
-              { icon: Shield, text: "Única no Brasil" },
-            ].map((item, i) => (
-              <div key={i} className="flex items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-4 py-2 text-sm text-foreground/80 shadow-sm">
-                <item.icon className="h-4 w-4 text-primary" />
-                {item.text}
-              </div>
-            ))}
-          </motion.div>
         </div>
       </section>
 
