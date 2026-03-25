@@ -8,7 +8,7 @@ serve(async (req) => {
     const userId = url.searchParams.get("state");
     const error = url.searchParams.get("error");
 
-    const APP_URL = "https://adhd-buddy-flow.lovable.app";
+    const APP_URL = "https://www.meucerebrodebolso.site";
 
     if (error) {
       console.error("Google OAuth error:", error);
@@ -71,6 +71,6 @@ serve(async (req) => {
     return Response.redirect(`${APP_URL}/?gcal_status=success`, 302);
   } catch (e) {
     console.error("google-calendar-callback error:", e);
-    return Response.redirect(`https://adhd-buddy-flow.lovable.app/?gcal_status=error&reason=unknown`, 302);
+    return Response.redirect(`https://www.meucerebrodebolso.site/?gcal_status=error&reason=unknown`, 302);
   }
 });

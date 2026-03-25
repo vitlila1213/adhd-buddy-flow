@@ -6,7 +6,7 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
-const APP_URL = "https://adhd-buddy-flow.lovable.app";
+const APP_URL = "https://www.meucerebrodebolso.site";
 
 async function sendWhatsApp(url: string, token: string, phone: string, text: string) {
   await fetch(`${url}/send/text`, {
@@ -114,7 +114,7 @@ serve(async (req) => {
     if (!isPremium && !isUnlimited && credits <= 0) {
       if (UAZAPI_URL && UAZAPI_TOKEN) {
         await sendWhatsApp(UAZAPI_URL, UAZAPI_TOKEN, userPhone,
-          `⚠️ Seus créditos gratuitos acabaram!\n\nVocê usou todos os 10 créditos do plano gratuito. Para continuar usando o Cérebro de Bolso sem limites, assine o plano Premium por apenas R$27,97/mês.\n\n✅ Uso ilimitado 24h\n✅ Áudio, texto e foto\n✅ Leitura de boletos\n✅ Lembretes automáticos\n✅ Google Agenda integrado\n\n👉 Assine agora: https://pay.kiwify.com.br/4IdnrMP`
+          `⚠️ Seus créditos gratuitos acabaram!\n\nVocê usou todos os 10 créditos do plano gratuito. Para continuar usando o Cérebro de Bolso sem limites, assine o plano Premium por apenas R$27,97/mês.\n\n✅ Uso ilimitado 24h\n✅ Áudio, texto e foto\n✅ Leitura de boletos\n✅ Lembretes automáticos\n✅ Google Agenda integrado\n\n👉 Assine agora: https://www.meucerebrodebolso.site/vendas`
         );
       }
       return new Response(JSON.stringify({ blocked: "no_credits" }), {
