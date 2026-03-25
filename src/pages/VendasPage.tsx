@@ -250,7 +250,7 @@ const VendasPage = () => {
               </Button>
             </Link>
             <p className="text-sm font-medium text-primary">
-              🎁 10 créditos grátis • Sem cartão • Começa em 30 segundos
+              🎁 Teste Gratuito • Sem cartão • Começa em 30 segundos
             </p>
             <a href="#planos">
               <Button variant="ghost" size="lg" className="h-12 rounded-2xl px-8 text-base text-white/60 hover:text-white hover:bg-white/5">
