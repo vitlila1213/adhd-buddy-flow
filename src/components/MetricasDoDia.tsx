@@ -365,6 +365,25 @@ const MetricasDoDia = () => {
         </div>
         <span className="text-xs font-medium text-success">Abrir →</span>
       </motion.a>
+
+      <motion.a
+        href="https://wa.me/5531981096698"
+        target="_blank"
+        rel="noopener noreferrer"
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.5, duration: 0.3, ease: "easeOut" }}
+        className="flex items-center gap-3 rounded-2xl border border-primary/30 bg-primary/5 p-4 shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md"
+      >
+        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/15">
+          <Headphones className="h-5 w-5 text-primary" />
+        </div>
+        <div className="flex-1">
+          <p className="text-sm font-semibold text-card-foreground">Falar com Suporte</p>
+          <p className="text-xs text-muted-foreground">Atendimento humanizado 24h</p>
+        </div>
+        <span className="text-xs font-medium text-primary">Abrir →</span>
+      </motion.a>
     </div>
   );
 };
