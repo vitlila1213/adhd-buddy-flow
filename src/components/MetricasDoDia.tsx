@@ -1,7 +1,7 @@
 import { useItens } from "@/hooks/useItens";
 import { useCategorias } from "@/hooks/useCategorias";
 import { useMemo, useState } from "react";
-import { CheckCircle2, Lightbulb, Loader2, ListTodo, Brain, MessageCircle, PieChart as PieChartIcon, ChevronLeft, ChevronRight } from "lucide-react";
+import { CheckCircle2, Lightbulb, Loader2, ListTodo, Brain, MessageCircle, PieChart as PieChartIcon, ChevronLeft, ChevronRight, Headphones } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from "recharts";
 import { format, startOfDay, endOfDay, startOfWeek, endOfWeek, startOfMonth, endOfMonth, subDays, subWeeks, subMonths, addDays, addWeeks, addMonths } from "date-fns";
