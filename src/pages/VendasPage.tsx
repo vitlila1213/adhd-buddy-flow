@@ -262,9 +262,21 @@ const VendasPage = () => {
       </section>
 
       {/* Trust Banner - Criptografia + Suporte */}
-      <section className="bg-primary/5 border-y border-primary/10 px-5 py-6">
-        <div className="mx-auto flex max-w-4xl flex-wrap items-center justify-center gap-6 sm:gap-10">
-          <div className="flex items-center gap-3">
+      <section className="bg-primary/5 border-y border-primary/10 px-5 py-6 overflow-hidden">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.5 }}
+          className="mx-auto flex max-w-4xl flex-wrap items-center justify-center gap-6 sm:gap-10"
+        >
+          <motion.div
+            initial={{ opacity: 0, x: -20 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5, delay: 0.2 }}
+            className="flex items-center gap-3"
+          >
             <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/15">
               <Lock className="h-5 w-5 text-primary" />
             </div>
@@ -272,8 +284,14 @@ const VendasPage = () => {
               <p className="text-sm font-bold text-foreground">Criptografia de ponta a ponta</p>
               <p className="text-xs text-muted-foreground">Seus dados 100% protegidos</p>
             </div>
-          </div>
-          <div className="flex items-center gap-3">
+          </motion.div>
+          <motion.div
+            initial={{ opacity: 0, x: 20 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5, delay: 0.4 }}
+            className="flex items-center gap-3"
+          >
             <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/15">
               <Headphones className="h-5 w-5 text-primary" />
             </div>
@@ -281,8 +299,8 @@ const VendasPage = () => {
               <p className="text-sm font-bold text-foreground">Suporte humanizado 24h</p>
               <p className="text-xs text-muted-foreground">Sempre alguém pronto pra te ajudar</p>
             </div>
-          </div>
-        </div>
+          </motion.div>
+        </motion.div>
       </section>
 
       {/* Aniversariantes Showcase */}
