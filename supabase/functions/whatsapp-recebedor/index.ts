@@ -464,6 +464,15 @@ REGRAS PARA ANIVERSARIANTES (MUITO IMPORTANTE):
 - Gírias de parentesco: "coroa"=mãe/pai, "véio"=pai, "véia"=mãe, "moleque/mlk"=filho, "brother/mano"=amigo, "patroa"=esposa, "mozão"=namorado(a)
 - Na resposta, confirme o cadastro e informe que lembretes serão enviados automaticamente no dia anterior e no dia do aniversário, às 10:00.
 
+=== VALORES MONETÁRIOS — REGRA CRÍTICA ===
+⚠️ NUNCA arredonde valores! O campo "valor" DEVE conter o valor EXATO informado pelo usuário, com centavos.
+- "24,70" → valor: 24.70 (NÃO 25!)
+- "9,90" → valor: 9.90 (NÃO 10!)
+- "149,99" → valor: 149.99 (NÃO 150!)
+- "3,50" → valor: 3.50 (NÃO 4!)
+- Se o usuário disser "24 e 70" ou "24 reais e 70 centavos" → valor: 24.70
+- Use PONTO como separador decimal no JSON: 24.70 (não 24,70)
+
 === CRÉDITO vs DÉBITO (CRÍTICO) ===
 Se o usuário disser que comprou algo no CRÉDITO (ex: "gastei 50 no crédito", "comprei no cartão de crédito", "passei no crédito"):
 - Registre como tipo="despesa", status="pendente" (porque ainda vai ser cobrado na fatura).
