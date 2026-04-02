@@ -87,7 +87,15 @@ serve(async (req) => {
         `\nEstou aqui para te ajudar a não esquecer de nada! 💙`;
       
       await sendWhatsApp(UAZAPI_URL, UAZAPI_TOKEN, task.user_phone, message);
+      
+      // Mark as reminded to prevent duplicate sends
+      await supabase
+        .from("itens_cerebro")
+        .update({ reminder_sent: true })
+        .eq("id", task.id);
+      
       sent++;
+      console.log(`✅ Reminder sent for task "${task.titulo}" to ${task.user_phone}`);
     }
 
     // === BIRTHDAY REMINDERS (check at 10:00 BRT = 13:00 UTC) ===
