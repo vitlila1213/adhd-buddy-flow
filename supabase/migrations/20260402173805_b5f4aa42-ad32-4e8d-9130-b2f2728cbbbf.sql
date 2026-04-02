@@ -1,0 +1,1 @@
+ALTER TABLE public.itens_cerebro ADD COLUMN reminder_sent boolean NOT NULL DEFAULT false;

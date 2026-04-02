@@ -50,19 +50,20 @@ serve(async (req) => {
     const supabase = createClient(supabaseUrl, supabaseKey);
 
     const now = new Date();
-    const minuteStart = new Date(now.getFullYear(), now.getMonth(), now.getDate(), now.getHours(), now.getMinutes(), 0);
-    const minuteEnd = new Date(minuteStart.getTime() + 60000);
+    // Use a 10-minute lookback window to catch reminders even if cron skips a minute
+    const lookbackStart = new Date(now.getTime() - 10 * 60 * 1000);
 
-    console.log("Checking reminders between", minuteStart.toISOString(), "and", minuteEnd.toISOString());
+    console.log("Checking reminders from", lookbackStart.toISOString(), "to", now.toISOString());
 
-    // === TASK REMINDERS ===
+    // === TASK REMINDERS: tasks scheduled in the past 10 min that haven't been reminded yet ===
     const { data: tasks, error } = await supabase
       .from("itens_cerebro")
       .select("*, categorias(nome, cor)")
       .eq("status", "pendente")
       .is("completed_at", null)
-      .gte("data_hora_agendada", minuteStart.toISOString())
-      .lt("data_hora_agendada", minuteEnd.toISOString());
+      .eq("reminder_sent", false)
+      .gte("data_hora_agendada", lookbackStart.toISOString())
+      .lte("data_hora_agendada", now.toISOString());
 
     if (error) throw error;
 
@@ -86,7 +87,15 @@ serve(async (req) => {
         `\nEstou aqui para te ajudar a não esquecer de nada! 💙`;
       
       await sendWhatsApp(UAZAPI_URL, UAZAPI_TOKEN, task.user_phone, message);
+      
+      // Mark as reminded to prevent duplicate sends
+      await supabase
+        .from("itens_cerebro")
+        .update({ reminder_sent: true })
+        .eq("id", task.id);
+      
       sent++;
+      console.log(`✅ Reminder sent for task "${task.titulo}" to ${task.user_phone}`);
     }
 
     // === BIRTHDAY REMINDERS (check at 10:00 BRT = 13:00 UTC) ===

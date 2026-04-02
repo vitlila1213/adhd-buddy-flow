@@ -166,6 +166,7 @@ export type Database = {
           descricao: string | null
           google_calendar_event_id: string | null
           id: string
+          reminder_sent: boolean
           status: string
           tipo: string
           titulo: string
@@ -181,6 +182,7 @@ export type Database = {
           descricao?: string | null
           google_calendar_event_id?: string | null
           id?: string
+          reminder_sent?: boolean
           status?: string
           tipo: string
           titulo: string
@@ -196,6 +198,7 @@ export type Database = {
           descricao?: string | null
           google_calendar_event_id?: string | null
           id?: string
+          reminder_sent?: boolean
           status?: string
           tipo?: string
           titulo?: string
